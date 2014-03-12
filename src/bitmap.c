@@ -20,14 +20,14 @@
 int bitmap_compare(bitmap *a, bitmap *b)
 {
   uint16_t row = 0;
-  uint16_t bit = 0;
+  uint16_t diff = 0;
   size_t  cnt = 0;
 
   for (row = 0; row < 16; row++) {
-    bit = 1 << 15;
-    while (bit) {
-      cnt += !!(((*a)[row] & bit) ^ ((*b)[row] & bit));
-      bit >>= 1;
+    diff = (*a)[row] ^ (*b)[row];
+    while (diff) {
+      cnt += (diff & 1);
+      diff >>= 1;
     }
   }
 

@@ -1,5 +1,5 @@
-#include "main.h"
-#include "bitmap.h"
+#include "../src/main.h"
+#include "../src/bitmap.h"
 
 int
 main(int argc, char **argv)
