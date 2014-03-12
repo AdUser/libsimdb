@@ -15,11 +15,21 @@
  */
 
 #include "main.h"
-#include "image.h"
+#include "bitmap.h"
 
-#include <gd.h>
-
-int image_load(void)
+int bitmap_compare(bitmap *a, bitmap *b)
 {
-  return 1;
+  uint16_t row = 0;
+  uint16_t bit = 0;
+  size_t  cnt = 0;
+
+  for (row = 0; row < 16; row++) {
+    bit = 1 << 15;
+    while (bit) {
+      cnt += !!(((*a)[row] & bit) ^ ((*b)[row] & bit));
+      bit >>= 1;
+    }
+  }
+
+  return cnt;
 }
