@@ -85,5 +85,60 @@ image_from_file(const char *path, const char **errstr)
   img->data = cb(in);
   fclose(in);
 
+  img->res_x = gdImageSX(img->data);
+  img->res_y = gdImageSY(img->data);
+
   return img;
+}
+
+int
+image_bitmap(bitmap_t *bitmap, image_t *image, char **errstr)
+{
+  gdImagePtr src, dst = (NULL, NULL);
+  int16_t res_x, res_y = (160, 160);
+  int16_t i, j;
+  int oldcolor, newcolor, index;
+
+  assert((dst = gdImageCreateTrueColor(res_x, res_y)) != NULL);
+
+  /* resample to 160x160 */
+  gdImageCopyResampled(dst, image->data,
+    0,            0,             /* dstX, dstY */
+    0,            0,             /* srcX, srcY */
+    res_x,        res_y,         /* dstW, dstH */
+    image->res_x, image->res_y); /* srcW, srcH */
+
+  /* grayscale */
+  gdFree(src);
+  src = dst;
+  assert((dst = gdImageCreateTrueColor(res_x, res_y)) != NULL);
+  for (i = 0; i < res_x; i++) {
+    for (j = 0; j < res_x; j++) {
+      /* WTF: begin */
+      oldcolor = gdImageGetPixel(src, i, j);
+      newcolor = 0;
+      newcolor += 2 * gdImageGreen (src, oldcolor);
+      newcolor += 3 * gdImageRed   (src, oldcolor);
+      newcolor += 4 * gdImageBlue  (src, oldcolor);
+      newcolor /= 9;
+      /* WTF: end */
+      if ((index = gdImageColorExact(dst,newcolor,newcolor,newcolor)) == -1) {
+        index = gdImageColorAllocate(dst,newcolor,newcolor,newcolor);
+      }
+      gdImageSetPixel(dst, i, j, index);
+    }
+  }
+
+  /* blur */
+  gdFree(src);
+  src = dst;
+  assert((dst = gdImageCreateTrueColor(res_x, res_y)) != NULL);
+
+  /* normalize (intensity) */
+  /* equalize (contrast) (sharpen?) */
+  /* resample to 16x16 */
+  /* convert to b&w (treshold?) */
+  /* make bitmap */
+
+  return 0;
 }
