@@ -20,7 +20,7 @@
 #include "main.h"
 #include "image.h"
 
-gdImagePtr
+image_t *
 image_from_file(const char *path, char **errstr)
 {
   const char *mimetype;
@@ -29,17 +29,21 @@ image_from_file(const char *path, char **errstr)
 
   FILE *in;
   gdImagePtr (*cb)(FILE *fd);
-  gdImagePtr img;
+  image_t *img = NULL;
+
+  CALLOC(img, 1, sizeof(image_t));
 
   if ((magic = magic_open(MAGIC_MIME_TYPE)) == NULL) {
     snprintf(err, 256, "%s", magic_error(magic));
     *errstr = err;
+    FREE(img);
     return NULL;
   }
 
   if (magic_load(magic, NULL) < 0) {
     *errstr = magic_error(magic);
     magic_close(magic);
+    FREE(img);
     return NULL;
   }
 
@@ -48,6 +52,7 @@ image_from_file(const char *path, char **errstr)
     snprintf(err, 256, "%s", magic_error(magic));
     *errstr = err;
     magic_close(magic);
+    FREE(img);
     return NULL;
   }
 
@@ -62,18 +67,21 @@ image_from_file(const char *path, char **errstr)
   } else {
     snprintf(err, 256, "Can't handle image type '%s'", mimetype);
     *errstr = err;
+    FREE(img);
     return NULL;
   }
+  STRNDUP(img->mime, mimetype, 16);
   magic_close(magic);
 
   in = fopen(path, "rb");
   if (in == NULL) {
     snprintf(err, 256, "Can't open file: %s", strerror(errno));
     *errstr = err;
+    FREE(img);
     return NULL;
   }
 
-  img = cb(in);
+  img->data = cb(in);
   fclose(in);
 
   return img;

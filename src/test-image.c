@@ -4,7 +4,7 @@
 #include "image.h"
 
 int main(int argc, char **argv) {
-  gdImagePtr img = NULL;
+  image_t *img = NULL;
   char *err;
 
   img = image_from_file("test.png", &err);
