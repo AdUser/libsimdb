@@ -18,10 +18,11 @@
 #include <magic.h>
 
 #include "main.h"
+#include "bitmap.h"
 #include "image.h"
 
 image_t *
-image_from_file(const char *path, char **errstr)
+image_from_file(const char *path, const char **errstr)
 {
   const char *mimetype;
   magic_t magic;

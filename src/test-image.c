@@ -1,11 +1,12 @@
 #include <gd.h>
 
 #include "main.h"
+#include "bitmap.h"
 #include "image.h"
 
 int main(int argc, char **argv) {
   image_t *img = NULL;
-  char *err;
+  const char *err = NULL;
 
   img = image_from_file("test.png", &err);
   if (img == NULL) {

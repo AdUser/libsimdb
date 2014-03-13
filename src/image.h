@@ -6,6 +6,6 @@ typedef struct
 } image_t;
 
 image_t *
-image_from_file(const char *path, char **errstr);
+image_from_file(const char *path, const char **errstr);
 #endif
 #define HAS_IMAGE_H
