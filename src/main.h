@@ -12,6 +12,15 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#define FREE(ptr) \
+  free((ptr)); (ptr) = NULL;
+
+#define CALLOC(ptr, nmemb, size) \
+  assert(((ptr) = calloc((nmemb), (size))) != NULL);
+
+#define STRNDUP(ptr, str, len) \
+  assert(((ptr) = strndup((str), (len))) != NULL);
+
 extern int db_open(char *samples, char *files);
 extern int db_close(void);
 
