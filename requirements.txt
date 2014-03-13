@@ -1,0 +1,3 @@
+libgd2-noxpm-dev
+libgdbm-dev
+libmagic-dev
