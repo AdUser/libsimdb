@@ -17,7 +17,7 @@
 #include "main.h"
 #include "bitmap.h"
 
-int bitmap_compare(bitmap *a, bitmap *b)
+int bitmap_compare(bitmap_t *a, bitmap_t *b)
 {
   uint16_t row = 0;
   uint16_t diff = 0;
