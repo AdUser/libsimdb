@@ -1,6 +1,9 @@
 #ifndef HAS_BITMAP_H
-typedef uint16_t bitmap_t[16];
 
-int bitmap_compare(bitmap_t *a, bitmap_t *b);
+#define BITMAP_SIZE 32
+
+typedef unsigned char bitmap_t[BITMAP_SIZE];
+
+int bitmap_compare(const unsigned char *a, const unsigned char *b);
 #endif
-#define HAS_BITMAP_H
+#define HAS_BITMAP_H 1

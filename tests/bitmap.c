@@ -4,31 +4,31 @@
 int
 main(int argc, char **argv)
 {
-  bitmap a, b;
+  bitmap_t a, b;
 
-  memset (&a, 0x00, 16 * sizeof(uint16_t));
-  memset (&b, 0x00, 16 * sizeof(uint16_t));
-  assert(bitmap_compare(&a, &b) == 0);
+  memset (a, 0x00, sizeof(bitmap_t));
+  memset (b, 0x00, sizeof(bitmap_t));
+  assert(bitmap_compare(a, b) == 0);
 
-  memset (&a, 0xFE, 16 * sizeof(uint16_t));
-  memset (&b, 0xFF, 16 * sizeof(uint16_t));
-  assert(bitmap_compare(&a, &b) == 32);
+  memset (a, 0xFE, sizeof(bitmap_t));
+  memset (b, 0xFF, sizeof(bitmap_t));
+  assert(bitmap_compare(a, b) == 32);
 
-  memset (&a, 0x00, 16 * sizeof(uint16_t));
-  memset (&b, 0x55, 16 * sizeof(uint16_t));
-  assert(bitmap_compare(&a, &b) == 128);
+  memset (a, 0x00, sizeof(bitmap_t));
+  memset (b, 0x55, sizeof(bitmap_t));
+  assert(bitmap_compare(a, b) == 128);
 
-  memset (&a, 0x00, 16 * sizeof(uint16_t));
-  memset (&b, 0xAA, 16 * sizeof(uint16_t));
-  assert(bitmap_compare(&a, &b) == 128);
+  memset (a, 0x00, sizeof(bitmap_t));
+  memset (b, 0xAA, sizeof(bitmap_t));
+  assert(bitmap_compare(a, b) == 128);
 
-  memset (&a, 0xAA, 16 * sizeof(uint16_t));
-  memset (&b, 0x55, 16 * sizeof(uint16_t));
-  assert(bitmap_compare(&a, &b) == 256);
+  memset (a, 0xAA, sizeof(bitmap_t));
+  memset (b, 0x55, sizeof(bitmap_t));
+  assert(bitmap_compare(a, b) == 256);
 
-  memset (&a, 0x00, 16 * sizeof(uint16_t));
-  memset (&b, 0xFF, 16 * sizeof(uint16_t));
-  assert(bitmap_compare(&a, &b) == 256);
+  memset (a, 0x00, sizeof(bitmap_t));
+  memset (b, 0xFF, sizeof(bitmap_t));
+  assert(bitmap_compare(a, b) == 256);
 
   return 0;
 }

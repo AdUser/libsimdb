@@ -8,3 +8,6 @@ CFLAGS=-Wall -Wextra -O0 -g -ggdb -pedantic
 SRC=../src/bitmap.c bitmap.c
 test-bitmap:
 	gcc $(CFLAGS) $(SRC) -o $@
+
+clean:
+	rm -f test-bitmap

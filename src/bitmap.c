@@ -17,14 +17,14 @@
 #include "main.h"
 #include "bitmap.h"
 
-int bitmap_compare(bitmap_t *a, bitmap_t *b)
+int bitmap_compare(const unsigned char *a, const unsigned char *b)
 {
-  uint16_t row = 0;
-  uint16_t diff = 0;
-  size_t  cnt = 0;
+  unsigned char diff = 0;
+  size_t i = 0;
+  size_t cnt = 0;
 
-  for (row = 0; row < 16; row++) {
-    diff = (*a)[row] ^ (*b)[row];
+  for (i = 0; i < BITMAP_SIZE; i++, a++, b++) {
+    diff = *a ^ *b;
     while (diff) {
       cnt += (diff & 1);
       diff >>= 1;
