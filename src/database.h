@@ -21,6 +21,11 @@ typedef struct {
   unsigned char data[REC_LEN];
 } rec_t;
 
+typedef struct {
+  uint64_t num;
+  float diff;
+} match_t;
+
 extern int db_open(db_t *db, const char *path);
 extern int db_close(db_t *db);
 
