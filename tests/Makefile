@@ -1,13 +1,14 @@
-all: test-bitmap
+TESTS=test-bitmap test-database
+
+all: $(TESTS)
 
 CFLAGS=-Wall -Wextra -O0 -g -ggdb -pedantic
 
 %.o: %.c
-	gcc $(CFLAGS) $< -o $@
+	gcc $(CFLAGS) -o $@ $<
 
-SRC=../src/bitmap.c bitmap.c
-test-bitmap:
-	gcc $(CFLAGS) $(SRC) -o $@
+test-%: ../src/%.c %.c
+	gcc $(CFLAGS) $(SRC) -o $@ $^
 
 clean:
-	rm -f test-bitmap
+	rm -f $(TESTS)

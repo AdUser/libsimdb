@@ -4,7 +4,8 @@
 #include "bitmap.h"
 #include "image.h"
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   image_t *img = NULL;
   const char *err = NULL;
 
