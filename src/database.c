@@ -121,33 +121,22 @@ int db_wr_rec(db_t *db, rec_t *rec)
   return bytes / REC_LEN;
 }
 
-int db_rd_blk(db_t *db, uint64_t start, size_t len, rec_t *list)
+int db_rd_blk(db_t *db, block_t *blk)
 { 
-  rec_t *r = NULL;
   ssize_t bytes = 0;
-  unsigned int i = 0;
-  unsigned char *buf;
-  unsigned char *p = NULL;
 
-  assert(db   != NULL);
-  assert(list != NULL);
-  assert(len > 0);
+  assert(db  != NULL);
+  assert(blk != NULL);
+  assert(blk->start > 0);
+  assert(blk->records > 0);
 
-  CALLOC(buf, len, REC_LEN);
-  DB_SEEK(db, start * REC_LEN);
-  DB_READ(db, buf, len * REC_LEN);
+  FREE(blk->data);
+  CALLOC(blk->data, blk->records, REC_LEN);
+  DB_SEEK(db, blk->start * REC_LEN);
+  DB_READ(db, blk->data, blk->records * REC_LEN);
+  blk->records = bytes / REC_LEN;
 
-  p = buf;
-  r = list;
-  len = bytes / REC_LEN;
-  for (i = 0; i < len; i++, r++, p += REC_LEN) {
-    r->num = start + i;
-    memcpy(r->data, p, REC_LEN);
-  }
-
-  FREE(buf);
-
-  return len;
+  return blk->records;
 }
 
 int db_rd_list(db_t *db, rec_t *list, size_t list_len)
