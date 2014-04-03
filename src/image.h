@@ -11,11 +11,5 @@ typedef struct
  */
 image_t *
 image_from_file(const char *path, const char **errstr);
-
-/**
- * @returns: 0 on success, -1 on error
- */
-int
-image_bitmap(bitmap_t *bitmap, image_t *image, char **errstr);
 #endif
 #define HAS_IMAGE_H 1
