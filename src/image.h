@@ -1,15 +1,12 @@
 #ifndef HAS_IMAGE_H
 typedef struct
 {
-  gdImagePtr data;
-  uint16_t res_x;
-  uint16_t res_y;
-  char *mime;
+  ImageInfo *info
+  Image *data;
+  const char *errstr;
 } image_t;
-/**
- * @returns: image_t * on success, NULL otherwise
- */
-image_t *
-image_from_file(const char *path, const char **errstr);
+
+int image_load(image_t *img, const char *path);
+
 #endif
 #define HAS_IMAGE_H 1

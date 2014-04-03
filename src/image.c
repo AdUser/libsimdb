@@ -14,79 +14,64 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
  */
 
-#include <gd.h>
-#include <magic.h>
-
 #include "common.h"
-#include "bitmap.h"
+#include <magick/api.h>
+#include "database.h"
 #include "image.h"
 
-image_t *
-image_from_file(const char *path, const char **errstr)
+int image_load(image_t *img, const char *path)
 {
-  const char *mimetype;
-  magic_t magic;
-  char err[256] = "\0";
+  ExceptionInfo ex;
 
-  FILE *in;
-  gdImagePtr (*cb)(FILE *fd);
-  image_t *img = NULL;
+  GetExceptionInfo(&ex);
 
-  CALLOC(img, 1, sizeof(image_t));
+  img.info = CloneImageInfo((ImageInfo *) NULL);
+  strcpy(img.info->filename, argv[1]);
 
-  if ((magic = magic_open(MAGIC_MIME_TYPE)) == NULL) {
-    snprintf(err, 256, "%s", magic_error(magic));
-    *errstr = err;
-    FREE(img);
-    return NULL;
-  }
+  img.data = ReadImage(img.info, &ex);
 
-  if (magic_load(magic, NULL) < 0) {
-    *errstr = magic_error(magic);
-    magic_close(magic);
-    FREE(img);
-    return NULL;
-  }
+  if (ex.severity != UndefinedException)
+    CatchException(&ex);
 
-  mimetype = magic_file(magic, path);
-  if (mimetype == NULL) {
-    snprintf(err, 256, "%s", magic_error(magic));
-    *errstr = err;
-    magic_close(magic);
-    FREE(img);
-    return NULL;
-  }
+  return 0;
+}
 
-  if (strncmp(mimetype, "image/png", 9) == 0) {
-    cb = gdImageCreateFromPng;
-  } else 
-  if (strncmp(mimetype, "image/gif", 9) == 0) {
-    cb = gdImageCreateFromGif;
-  } else
-  if (strncmp(mimetype, "image/jpeg", 10) == 0) {
-    cb = gdImageCreateFromJpeg;
-  } else {
-    snprintf(err, 256, "Can't handle image type '%s'", mimetype);
-    *errstr = err;
-    FREE(img);
-    return NULL;
-  }
-  STRNDUP(img->mime, mimetype, 16);
-  magic_close(magic);
+int image_sample(rec_t *sample, image_t *img)
+{
+  ExceptionInfo ex;
+  QuantizeInfo qi;
 
-  in = fopen(path, "rb");
-  if (in == NULL) {
-    snprintf(err, 256, "Can't open file: %s", strerror(errno));
-    *errstr = err;
-    FREE(img);
-    return NULL;
-  }
+  ImageInfo info;
+  Image *sampled;
+  Image *blurred;
 
-  img->data = cb(in);
-  fclose(in);
+  GetExceptionInfo(&ex);
 
-  img->res_x = gdImageSX(img->data);
-  img->res_y = gdImageSY(img->data);
+  memset(img, 0x0, sizeof(image_t));
 
-  return img;
+  sampled = SampleImage(img.data, 160, 160, &ex);
+
+  GetQuantizeInfo(&qi);
+  QuantizeImage(&qi, sampled)
+
+  blurred = BlurImage(sampled, 3.0, 99, &ex); /* reduce sigma? */
+  DestroyImage(sampled);
+
+  ret = GetImageStatistics(blurred, &stat, &ex);
+
+  NormalizeImage(blurred);
+  EqualizeImage(blurred);
+
+  sampled = SampleImage(img.data, 16, 16, &ex);
+  DestroyImage(blurred);
+
+  ret = ThresholdImage(sampled, /* const double threshold */ 0);
+
+  GetImageInfo(&info);
+
+  SetImageAttribute(sampled, "magick", "mono");
+  SetImageType(sampled, BilevelType);
+  (sample.data + OFF_BITMAP) = ImageToBlob(&info, sampled, BITMAP_SIZE, &ex);
+
+  return 0;
 }
