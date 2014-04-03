@@ -58,13 +58,39 @@ int db_search(db_t *db, rec_t *sample, float tresh, match_t **matches)
   return found;
 }
 
+int rec_bitmap(db_t *db, rec_t *sample)
+{
+  uint16_t row;
+  uint8_t i, j;
+  assert(db      != NULL);
+  assert(sample  != NULL);
+
+  if (db_rd_rec(db, sample) != 1)
+    return -1;
+
+  for (i = 0; i < 16; i++) {
+    row = *(((uint16_t *) sample->data) + i);
+    for (j = 0; j < 16; j++) {
+      putchar((row & 1) == 1 ? '1' : '0');
+      row >>= 1;
+    }
+    putchar('\n');
+  }
+
+  return 0;
+}
+
 int main(int argc, char **argv)
 {
   db_t db;
   rec_t sample;
 
   if (argc < 3) {
-    printf("Usage: test <path> <int>\n");
+    printf(
+"Usage:\n"
+"  util search <num>\n"
+"  util bitmap <num>\n"
+);
     exit(EXIT_FAILURE);
   }
 
@@ -74,12 +100,16 @@ int main(int argc, char **argv)
 
   assert(sample.num > 0);
 
-  if (db_open(&db, argv[1]) == -1) {
+  if (db_open(&db, "test.db") == -1) {
     printf("%s\n", db.errstr);
     exit(EXIT_FAILURE);
   }
 
-  db_search(&db, &sample, 0.15, NULL);
+  if (strcmp(argv[1], "search") == 0)
+    db_search(&db, &sample, 0.15, NULL);
+
+  if (strcmp(argv[1], "bitmap") == 0)
+    rec_bitmap(&db, &sample);
 
   db_close(&db);
 
