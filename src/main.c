@@ -48,7 +48,7 @@ int db_search(db_t *db, rec_t *sample, float tresh, match_t **matches)
       diff  = (float) bitmap_compare(t, sample->data + OFF_BITMAP);
       diff /= BITMAP_BITS;
       if (diff > tresh) continue;
-      printf("%ld -- %f\n", blk.start + i, diff);
+      printf("%lli -- %.2f\n", blk.start + i, diff * 100);
       found++;
     }
     FREE(blk.data);

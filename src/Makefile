@@ -1,4 +1,4 @@
-CFLAGS=-Wall -Wextra -O0 -g -ggdb -pedantic
+CFLAGS=-Wall -Wextra -O0 -g -ggdb -std=c99 -pedantic
 
 all: util
 

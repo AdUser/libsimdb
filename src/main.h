@@ -13,7 +13,6 @@
 #include <limits.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <db.h>
 
 #define FREE(ptr) \
   free((ptr)); (ptr) = NULL;
