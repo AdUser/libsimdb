@@ -1,6 +1,7 @@
 #ifndef HAS_BITMAP_H
 
 #define BITMAP_SIZE 32
+#define BITMAP_BITS 256
 
 typedef unsigned char bitmap_t[BITMAP_SIZE];
 

@@ -16,7 +16,6 @@
 
 #include "main.h"
 #include "database.h"
-#include "bitmap.h"
 
 #define DB_SEEK(db, offset) \
   errno = 0; \
@@ -180,35 +179,4 @@ int db_wr_list(db_t *db, rec_t *list, size_t list_len)
   }
 
   return processed;
-}
-
-int db_search(db_t *db, float tresh, match_t **matches)
-{
-  uint64_t found = 0;
-  block_t blk;
-  const int blk_size = 4096;
-  unsigned int i = 0;
-  unsigned char *p;
-  float diff = 0;
-
-  *matches = NULL;
-  match = *matches;
-  memset(blk, 0x0, sizeof(block_t));
-  blk.start = 1;
-  blk.records = blk_size;
-
-  /* TODO: expand matches */
-
-  while (db_rd_blk(db, &blk) > 0) {
-    p = blk.data;
-    for (i = 0; i < blk.records; i++, p += REC_LEN) {
-      if (*p == '\0') continue;
-      diff = bitmap_compare(p + 2, sample.data + 2) / BITMAP_BITS;
-      if (diff > tresh) continue;
-      match->diff_map = diff;
-    }
-    FREE(blk.data);
-  }
-
-  return found;
 }

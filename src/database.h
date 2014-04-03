@@ -16,6 +16,23 @@ typedef struct {
   unsigned char *data;
 } block_t;
 
+/**
+  pos len || description
+ - 0   1  -- record is used
+ - 1   1  -- must be zero
+ - 2  32  -- bitmap, each 2 bytes is row of monochrome image 16x16
+ - 33  1  -- level of color R__
+ - 34  1  -- level of color _G_
+ - 35  1  -- level of color __B
+ - 36  11 -- must be zero
+ */
+
+#define OFF_USED   0
+#define OFF_BITMAP 2
+#define OFF_COLORR 33
+#define OFF_COLORG 34
+#define OFF_COLORB 35
+
 typedef struct {
   uint64_t num;
   unsigned char data[REC_LEN];
