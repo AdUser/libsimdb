@@ -18,6 +18,22 @@
 #include "database.h"
 #include "bitmap.h"
 
+#include <unistd.h>
+#include <getopt.h>
+
+void usage(int exitcode) {
+    printf("Usage:\n"
+"  util <opts>\n"
+"  -b <path>   Path to database\n"
+"  -t <float>  Maximum difference percent (0.0 - 1.0, default: 0.1)\n"
+);
+    printf("\n"
+"  -S <num>    Search for images similar ot this sample\n"
+"  -B <num>    Show bitmap for this sample\n"
+);
+    exit(exitcode);
+}
+
 int db_search(db_t *db, rec_t *sample, float tresh, match_t **matches)
 {
   const int blk_size = 4096;
@@ -92,38 +108,55 @@ int rec_bitmap(db_t *db, rec_t *sample)
 
 int main(int argc, char **argv)
 {
+  enum { undef, search, bitmap } mode = undef;
+  const char *db_path = NULL;
+  float tresh = 0.10;
   db_t db;
   rec_t sample;
-  float tresh;
-
-  if (argc < 3) {
-    printf(
-"Usage:\n"
-"  util search <num>\n"
-"  util bitmap <num>\n"
-);
-    exit(EXIT_FAILURE);
-  }
+  char opt = '\0';
 
   memset(&db,     0x0, sizeof(db_t));
   memset(&sample, 0x0, sizeof(rec_t));
 
-  sample.num = atoll(argv[2]);
-  assert(sample.num > 0);
+  if (argc < 3)
+    usage(EXIT_FAILURE);
 
-  if (db_open(&db, "test.db") == -1) {
+  while ((opt = getopt(argc, argv, "b:t:S:B:")) != -1) {
+    switch (opt) {
+      case 'b' :
+        db_path = optarg;
+        break;
+      case 't' :
+        tresh = atof(optarg);
+        tresh = (tresh > 0.0 && tresh < 1.0) ? tresh : 0.10;
+        break;
+      case 'B' :
+        mode = bitmap;
+        sample.num = atoll(optarg);
+        break;
+      case 'S' :
+        mode = search;
+        sample.num = atoll(optarg);
+        break;
+      default :
+        usage(EXIT_FAILURE);
+        break;
+    }
+  }
+
+  if (sample.num <= 0)
+    usage(EXIT_FAILURE);
+
+  if (db_open(&db, db_path) == -1) {
     printf("%s\n", db.errstr);
     exit(EXIT_FAILURE);
   }
 
-  if (strcmp(argv[1], "search") == 0) {
-    tresh = (argc > 3) ? atof(argv[3]) : 0.15;
+  if (mode == search)
     db_search(&db, &sample, tresh, NULL);
-  }
 
-  if (strcmp(argv[1], "bitmap") == 0) {
+  if (mode == bitmap)
     rec_bitmap(&db, &sample);
-  }
 
   db_close(&db);
 
