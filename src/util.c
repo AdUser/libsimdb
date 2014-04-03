@@ -30,6 +30,7 @@ void usage(int exitcode) {
     printf("\n"
 "  -S <num>    Search for images similar ot this sample\n"
 "  -B <num>    Show bitmap for this sample\n"
+"  -U <num>    Show db usage map, <num> entries per column\n"
 );
     exit(exitcode);
 }
@@ -79,6 +80,43 @@ int db_search(db_t *db, rec_t *sample, float tresh, match_t **matches)
   return found;
 }
 
+int db_usage_map(db_t *db, unsigned short int cols)
+{
+  const int blk_size = 4096;
+  unsigned int i, j = 0;
+  unsigned char *p, *t;
+  char buf[256];
+  block_t blk;
+
+  assert(db   != NULL);
+  assert(cols <= 256);
+
+  memset(&blk, 0x0, sizeof(block_t));
+  memset(buf,  0x0, sizeof(char) * 256);
+
+  blk.start = 1;
+  blk.records = blk_size;
+
+  while (db_rd_blk(db, &blk) > 0) {
+    p = blk.data;
+    for (i = 0; i < blk.records; i++, p += REC_LEN) {
+      t = p + OFF_USED;
+      buf[j] = (*t == 0xFF) ? '1' : '0';
+      if (j++ < cols)
+        continue;
+      puts(buf);
+      memset(buf,  0x0, sizeof(char) * 256);
+      j = 0;
+    }
+    if (j > 0)
+      puts(buf);
+    FREE(blk.data);
+    blk.start += blk_size;
+  }
+
+  return 0;
+}
+
 int rec_bitmap(db_t *db, rec_t *sample)
 {
   uint16_t row;
@@ -108,9 +146,10 @@ int rec_bitmap(db_t *db, rec_t *sample)
 
 int main(int argc, char **argv)
 {
-  enum { undef, search, bitmap } mode = undef;
+  enum { undef, search, bitmap, usage_map } mode = undef;
   const char *db_path = NULL;
   float tresh = 0.10;
+  unsigned short int cols;
   db_t db;
   rec_t sample;
   char opt = '\0';
@@ -121,7 +160,7 @@ int main(int argc, char **argv)
   if (argc < 3)
     usage(EXIT_FAILURE);
 
-  while ((opt = getopt(argc, argv, "b:t:S:B:")) != -1) {
+  while ((opt = getopt(argc, argv, "b:t:S:B:U:")) != -1) {
     switch (opt) {
       case 'b' :
         db_path = optarg;
@@ -138,13 +177,19 @@ int main(int argc, char **argv)
         mode = search;
         sample.num = atoll(optarg);
         break;
+      case 'U' :
+        mode = usage_map;
+        cols = atoi(optarg);
+        if (cols <= 0 || cols >= 256)
+          cols = 64;
+        break;
       default :
         usage(EXIT_FAILURE);
         break;
     }
   }
 
-  if (sample.num <= 0)
+  if ((mode == search || mode == bitmap) && sample.num <= 0)
     usage(EXIT_FAILURE);
 
   if (db_open(&db, db_path) == -1) {
@@ -157,6 +202,9 @@ int main(int argc, char **argv)
 
   if (mode == bitmap)
     rec_bitmap(&db, &sample);
+
+  if (mode == usage_map)
+    db_usage_map(&db, cols);
 
   db_close(&db);
 
