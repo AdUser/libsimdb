@@ -1,4 +1,4 @@
-#include "../src/main.h"
+#include "../src/common.h"
 #include "../src/bitmap.h"
 
 int

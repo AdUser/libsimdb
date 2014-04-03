@@ -1,4 +1,4 @@
-#include "../src/main.h"
+#include "../src/common.h"
 #include "../src/database.h"
 
 int main(int argc, char **argv)

@@ -1,6 +1,6 @@
 #include <gd.h>
 
-#include "main.h"
+#include "common.h"
 #include "bitmap.h"
 #include "image.h"
 
