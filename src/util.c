@@ -149,7 +149,7 @@ int main(int argc, char **argv)
   enum { undef, search, bitmap, usage_map } mode = undef;
   const char *db_path = NULL;
   float tresh = 0.10;
-  unsigned short int cols;
+  unsigned short int cols = 64;
   db_t db;
   rec_t sample;
   char opt = '\0';
