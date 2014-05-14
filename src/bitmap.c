@@ -48,12 +48,6 @@ bitmap_compare(const unsigned char *a,
 
   for (i = 0; i < BITMAP_SIZE; i++, a++, b++) {
     diff = *a ^ *b;
-/* bruteforce:
-    while (diff) {
-      cnt += (diff & 1);
-      diff >>= 1;
-    }
-*/
     cnt += dict[diff];
   }
 
