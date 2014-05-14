@@ -1,4 +1,5 @@
 #ifndef HAS_BITMAP_H
+#define HAS_BITMAP_H 1
 
 #define BITMAP_SIZE 32
 #define BITMAP_BITS 256
@@ -9,5 +10,8 @@ int
 bitmap_compare(const unsigned char *a,
                const unsigned char *b);
 
+int
+bitmap_diffmap(const unsigned char *diff,
+               const unsigned char *a,
+               const unsigned char *b)
 #endif
-#define HAS_BITMAP_H 1

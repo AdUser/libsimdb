@@ -53,3 +53,17 @@ bitmap_compare(const unsigned char *a,
 
   return cnt;
 }
+
+int
+bitmap_diffmap(const unsigned char *diff,
+               const unsigned char *a,
+               const unsigned char *b)
+{
+  size_t i = 0;
+
+  for (i = 0; i < BITMAP_SIZE; i++, a++, b++, diff++) {
+    *diff = *a ^ *b;
+  }
+
+  return i;
+}
