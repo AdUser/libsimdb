@@ -29,6 +29,7 @@ void usage(int exitcode) {
 );
     printf("\n"
 "  -B <num>    Show bitmap for this sample\n"
+"  -C <a>,<b>  Show difference percent for this samples\n"
 "  -D <a>,<b>  Show difference bitmap for this samples\n"
 "  -S <num>    Search for images similar ot this sample\n"
 "  -U <num>    Show db usage map, <num> entries per column\n"
@@ -145,11 +146,12 @@ int rec_bitmap(db_t *db, rec_t *sample)
   return 0;
 }
 
-int rec_diffmap(db_t *db, unsigned long a, unsigned long b)
+int rec_diff(db_t *db, unsigned long a, unsigned long b, unsigned short int showmap)
 {
   rec_t src;
   rec_t dst;
-  unsigned char diff[BITMAP_SIZE];
+  float diff = 0.0;
+  unsigned char map[BITMAP_SIZE];
   uint16_t row;
   uint8_t i, j;
 
@@ -177,10 +179,17 @@ int rec_diffmap(db_t *db, unsigned long a, unsigned long b)
     return 0;
   }
 
-  bitmap_diffmap(&diff[0], src.data + OFF_BITMAP, dst.data + OFF_BITMAP);
+  if (showmap == 0) {
+    diff  = (float) bitmap_compare(&src.data[OFF_BITMAP], &dst.data[OFF_BITMAP]);
+    diff /= BITMAP_BITS;
+    printf("%.2f%%\n", diff * 100);
+    return 0;
+  }
+
+  bitmap_diffmap(&map[0], src.data + OFF_BITMAP, dst.data + OFF_BITMAP);
 
   for (i = 0; i < 16; i++) {
-    row = *(((uint16_t *) diff) + i);
+    row = *(((uint16_t *) map) + i);
     for (j = 0; j < 16; j++) {
       putchar((row & 1) == 1 ? '1' : '0');
       row >>= 1;
@@ -193,10 +202,10 @@ int rec_diffmap(db_t *db, unsigned long a, unsigned long b)
 
 int main(int argc, char **argv)
 {
-  enum { undef, search, bitmap, usage_map, diffmap } mode = undef;
+  enum { undef, search, bitmap, usage_map, diff } mode = undef;
   const char *db_path = NULL;
   float tresh = 0.10;
-  unsigned short int cols = 64;
+  unsigned short int cols = 64, map = 0;
   db_t db;
   rec_t sample;
   unsigned long a, b;
@@ -209,7 +218,7 @@ int main(int argc, char **argv)
   if (argc < 3)
     usage(EXIT_FAILURE);
 
-  while ((opt = getopt(argc, argv, "b:t:B:D:S:U:")) != -1) {
+  while ((opt = getopt(argc, argv, "b:t:B:C:D:S:U:")) != -1) {
     switch (opt) {
       case 'b' :
         db_path = optarg;
@@ -223,7 +232,9 @@ int main(int argc, char **argv)
         sample.num = atoll(optarg);
         break;
       case 'D' :
-        mode = diffmap;
+        map = 1;
+      case 'C' :
+        mode = diff;
         if ((c = strchr(optarg, ',')) == NULL)
           usage(EXIT_FAILURE);
         a = atoll(optarg);
@@ -248,7 +259,7 @@ int main(int argc, char **argv)
   if ((mode == search || mode == bitmap) && sample.num <= 0)
     usage(EXIT_FAILURE);
 
-  if (mode == diffmap && (a <= 0 || b <= 0))
+  if (mode == diff && (a <= 0 || b <= 0))
     usage(EXIT_FAILURE);
 
   if (db_open(&db, db_path) == -1) {
@@ -265,8 +276,8 @@ int main(int argc, char **argv)
   if (mode == usage_map)
     db_usage_map(&db, cols);
 
-  if (mode == diffmap)
-    rec_diffmap(&db, a, b);
+  if (mode == diff)
+    rec_diff(&db, a, b, map);
 
   db_close(&db);
 
