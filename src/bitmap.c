@@ -38,7 +38,9 @@ unsigned char dict[256] = {
 /* F_ */ 4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8,
 };
 
-int bitmap_compare(const unsigned char *a, const unsigned char *b)
+int
+bitmap_compare(const unsigned char *a,
+               const unsigned char *b)
 {
   unsigned char diff = 0;
   size_t i = 0;
