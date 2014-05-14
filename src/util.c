@@ -144,6 +144,52 @@ int rec_bitmap(db_t *db, rec_t *sample)
   return 0;
 }
 
+int rec_diffmap(db_t *db, unsigned long a, unsigned long b)
+{
+  rec_t src;
+  rec_t dst;
+  unsigned char diff[BITMAP_SIZE];
+  uint16_t row;
+  uint8_t i, j;
+
+  assert(db != NULL);
+
+  memset(&src, 1, sizeof(rec_t));
+  memset(&dst, 2, sizeof(rec_t));
+
+  src.num = a;
+  dst.num = b;
+
+  if (db_rd_rec(db, &src) < 1)
+    return -1;
+
+  if (!src.data[0]) {
+    puts("First sample not exists");
+    return 0;
+  }
+
+  if (db_rd_rec(db, &dst) < 1)
+    return -1;
+
+  if (!src.data[0]) {
+    puts("First sample not exists");
+    return 0;
+  }
+
+  bitmap_diffmap(&diff[0], src.data + OFF_BITMAP, dst.data + OFF_BITMAP);
+
+  for (i = 0; i < 16; i++) {
+    row = *(((uint16_t *) diff) + i);
+    for (j = 0; j < 16; j++) {
+      putchar((row & 1) == 1 ? '1' : '0');
+      row >>= 1;
+    }
+    putchar('\n');
+  }
+
+  return 0;
+}
+
 int main(int argc, char **argv)
 {
   enum { undef, search, bitmap, usage_map } mode = undef;
