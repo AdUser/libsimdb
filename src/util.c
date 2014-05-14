@@ -133,7 +133,7 @@ int rec_bitmap(db_t *db, rec_t *sample)
   }
 
   for (i = 0; i < 16; i++) {
-    row = *(((uint16_t *) sample->data) + i);
+    row = *(((uint16_t *) (&sample->data[OFF_BITMAP])) + i);
     for (j = 0; j < 16; j++) {
       putchar((row & 1) == 1 ? '1' : '0');
       row >>= 1;
