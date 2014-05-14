@@ -11,7 +11,7 @@ bitmap_compare(const unsigned char *a,
                const unsigned char *b);
 
 int
-bitmap_diffmap(const unsigned char *diff,
+bitmap_diffmap(unsigned char *diff,
                const unsigned char *a,
-               const unsigned char *b)
+               const unsigned char *b);
 #endif
