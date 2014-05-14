@@ -28,8 +28,9 @@ void usage(int exitcode) {
 "  -t <float>  Maximum difference percent (0.0 - 1.0, default: 0.1)\n"
 );
     printf("\n"
-"  -S <num>    Search for images similar ot this sample\n"
 "  -B <num>    Show bitmap for this sample\n"
+"  -D <a>,<b>  Show difference bitmap for this samples\n"
+"  -S <num>    Search for images similar ot this sample\n"
 "  -U <num>    Show db usage map, <num> entries per column\n"
 );
     exit(exitcode);
@@ -192,12 +193,14 @@ int rec_diffmap(db_t *db, unsigned long a, unsigned long b)
 
 int main(int argc, char **argv)
 {
-  enum { undef, search, bitmap, usage_map } mode = undef;
+  enum { undef, search, bitmap, usage_map, diffmap } mode = undef;
   const char *db_path = NULL;
   float tresh = 0.10;
   unsigned short int cols = 64;
   db_t db;
   rec_t sample;
+  unsigned long a, b;
+  char *c = NULL;
   char opt = '\0';
 
   memset(&db,     0x0, sizeof(db_t));
@@ -206,7 +209,7 @@ int main(int argc, char **argv)
   if (argc < 3)
     usage(EXIT_FAILURE);
 
-  while ((opt = getopt(argc, argv, "b:t:S:B:U:")) != -1) {
+  while ((opt = getopt(argc, argv, "b:t:B:D:S:U:")) != -1) {
     switch (opt) {
       case 'b' :
         db_path = optarg;
@@ -218,6 +221,13 @@ int main(int argc, char **argv)
       case 'B' :
         mode = bitmap;
         sample.num = atoll(optarg);
+        break;
+      case 'D' :
+        mode = diffmap;
+        if ((c = strchr(optarg, ',')) == NULL)
+          usage(EXIT_FAILURE);
+        a = atoll(optarg);
+        b = atoll(c + 1);
         break;
       case 'S' :
         mode = search;
@@ -238,6 +248,9 @@ int main(int argc, char **argv)
   if ((mode == search || mode == bitmap) && sample.num <= 0)
     usage(EXIT_FAILURE);
 
+  if (mode == diffmap && (a <= 0 || b <= 0))
+    usage(EXIT_FAILURE);
+
   if (db_open(&db, db_path) == -1) {
     printf("%s\n", db.errstr);
     exit(EXIT_FAILURE);
@@ -251,6 +264,9 @@ int main(int argc, char **argv)
 
   if (mode == usage_map)
     db_usage_map(&db, cols);
+
+  if (mode == diffmap)
+    rec_diffmap(&db, a, b);
 
   db_close(&db);
 
