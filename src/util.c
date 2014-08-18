@@ -37,49 +37,25 @@ void usage(int exitcode) {
     exit(exitcode);
 }
 
-int db_search(db_t *db, rec_t *sample, float tresh, match_t **matches)
+int search_similar(db_t *db, rec_t *sample, float tresh)
 {
-  const int blk_size = 4096;
-  uint64_t found = 0;
-  block_t blk;
-  unsigned int i = 0;
-  unsigned char *p, *t;
-  float diff;
+  int ret = 0, i = 0;
+  match_t *matches = NULL;
 
-  assert(db      != NULL);
-  assert(sample  != NULL);
-/*assert(matches != NULL);*/
+  ret = db_search(db, sample, tresh, &matches);
+  if (ret == -1) {
+    printf("%s\n", db->errstr);
+    exit(EXIT_FAILURE);
+  }
 
-  memset(&blk,    0x0, sizeof(block_t));
-  blk.start = 1;
-  blk.records = blk_size;
-
-  if (db_rd_rec(db, sample) < 1)
-    return -1;
-
-  if (!sample->data[0]) {
-    puts("Sample not exists");
+  if (ret == 0)
     return 0;
-  }
-  /* TODO: expand matches */
 
-  while (db_rd_blk(db, &blk) > 0) {
-    p = blk.data;
-    for (i = 0; i < blk.records; i++, p += REC_LEN) {
-      t = p + OFF_USED;
-      if (*t == 0x0) continue;
-      t = p + OFF_BITMAP;
-      diff  = (float) bitmap_compare(t, sample->data + OFF_BITMAP);
-      diff /= BITMAP_BITS;
-      if (diff > tresh) continue;
-      printf("%lli -- %.2f\n", blk.start + i, diff * 100);
-      found++;
-    }
-    FREE(blk.data);
-    blk.start += blk_size;
+  for (i = 0; i < ret; i++) {
+    printf("%lli -- %.2f\n", matches[i].num, matches[i].diff * 100);
   }
-
-  return found;
+  FREE(matches);
+  return 0;
 }
 
 int db_usage_map(db_t *db, unsigned short int cols)
@@ -268,7 +244,7 @@ int main(int argc, char **argv)
   }
 
   if (mode == search)
-    db_search(&db, &sample, tresh, NULL);
+    search_similar(&db, &sample, tresh);
 
   if (mode == bitmap)
     rec_bitmap(&db, &sample);
