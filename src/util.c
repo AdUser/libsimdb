@@ -184,7 +184,7 @@ int main(int argc, char **argv)
   unsigned short int cols = 64, map = 0;
   db_t db;
   rec_t sample;
-  unsigned long a, b;
+  unsigned long a = 0, b = 0;
   char *c = NULL;
   char opt = '\0';
 
