@@ -55,5 +55,13 @@ extern int db_wr_blk(db_t *db, block_t *blk);
 extern int db_rd_list(db_t *db, rec_t *list, size_t list_len);
 extern int db_wr_list(db_t *db, rec_t *list, size_t list_len);
 
+/**
+ @returns:
+  -1 on error
+   0 if nothing found
+  >0 if found some matches
+ */
+extern int db_search(db_t *db, rec_t *sample, float tresh, match_t **matches);
+
 #endif
 #define HAS_DATABASE_H 1

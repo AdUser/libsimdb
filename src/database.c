@@ -16,6 +16,7 @@
 
 #include "common.h"
 #include "database.h"
+#include "bitmap.h"
 
 #define DB_SEEK(db, offset) \
   errno = 0; \
@@ -179,4 +180,66 @@ int db_wr_list(db_t *db, rec_t *list, size_t list_len)
   }
 
   return processed;
+}
+
+int db_search(db_t *db, rec_t *sample, float tresh, match_t **matches)
+{
+  const int blk_size = 4096;
+  uint64_t found = 0;
+  block_t blk;
+  unsigned int i = 0;
+  unsigned char *p = NULL, *t = NULL;
+  float diff = 0.0;
+
+  assert(db      != NULL);
+  assert(sample  != NULL);
+  assert(matches != NULL);
+
+  memset(&blk, 0x0, sizeof(block_t));
+  blk.start = 1;
+  blk.records = blk_size;
+
+  if (db_rd_rec(db, sample) < 1) {
+    db->errstr = "Can't read source sample";
+    return -1;
+  }
+
+  if (!sample->data[0]) {
+    db->errstr = "Source sample not exists";
+    return -1;
+  }
+
+  *matches = NULL;
+  while (db_rd_blk(db, &blk) > 0) {
+    p = blk.data;
+    for (i = 0; i < blk.records; i++, p += REC_LEN) {
+      t = p + OFF_USED;
+      if (*t == 0x0) continue;
+
+      t = p + OFF_BITMAP;
+      diff  = (float) bitmap_compare(t, sample->data + OFF_BITMAP);
+      diff /= BITMAP_BITS;
+      if (diff > tresh) continue;
+
+      /* allocate more memory, if needed */
+      if (found % 10 == 0) {
+        *matches = realloc(*matches, (found + 10) * sizeof(match_t));
+        if (*matches == NULL) {
+          db->errstr = "Memory allocation error";
+          FREE(blk.data);
+          return -1;
+        }
+        memset(&(*matches)[found], 0x0, sizeof(match_t) * 10);
+      }
+
+      /* create match record */
+      (*matches)[found].num  = blk.start + i;
+      (*matches)[found].diff = diff;
+      found++;
+    }
+    FREE(blk.data);
+    blk.start += blk_size;
+  }
+
+  return found;
 }
