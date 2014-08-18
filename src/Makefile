@@ -1,6 +1,6 @@
 CFLAGS=-Wall -Wextra -O0 -g -std=c99 -pedantic -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security
 CPPFLAGS=-D_FORTIFY_SOURCE=2
-LDFLAGS=-shared -fPIC -Wl,-z,relro -L.
+LDFLAGS=-Wl,-soname,libimgdup.so.1 -fPIC
 
 all: lib util
 
@@ -8,11 +8,12 @@ all: lib util
 	gcc $(CFLAGS) $(CPPFLAGS) -c $<
 
 lib: database.o bitmap.o
-	gcc $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -Wl,-soname,libimgdup.so.1 -o libimgdup.so $^
+	gcc $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -shared -o libimgdup.so $^
+	ar rcs libimgdup.a $^
 
 util: util.c
-	gcc $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -limgdup         -o $@ $^
-	gcc $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -limgdup -static -o $@-static $^
+	gcc $(CFLAGS) $(CPPFLAGS) -L. -limgdup $^ -o $@
+	gcc $(CFLAGS) $(CPPFLAGS) -L. -limgdup $^ -o $@-static -static
 
 clean:
 	rm -f *.o
