@@ -23,9 +23,9 @@
 #define STRNDUP(ptr, str, len) \
   assert(((ptr) = strndup((str), (len))) != NULL);
 
+/*
 extern int image_add(uint64_t, char *path);
 extern int image_del(uint64_t);
 extern int image_exists(uint64_t);
-/*
 extern int image_search(uint64_t, rec_t **data, size_t limit);
 */
