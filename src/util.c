@@ -52,7 +52,7 @@ int search_similar(db_t *db, rec_t *sample, float tresh)
     return 0;
 
   for (i = 0; i < ret; i++) {
-    printf("%lli -- %.2f\n", matches[i].num, matches[i].diff * 100);
+    printf("%llu -- %.2f\n", matches[i].num, matches[i].diff * 100);
   }
   FREE(matches);
   return 0;
