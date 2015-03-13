@@ -1,4 +1,5 @@
 #ifndef HAS_DATABASE_H
+#define HAS_DATABASE_H 1
 
 #define REC_LEN 48
 #define DB_VERSION 1
@@ -64,4 +65,3 @@ extern int db_wr_list(db_t *db, rec_t *list, size_t list_len);
 extern int db_search(db_t *db, rec_t *sample, float tresh, match_t **matches);
 
 #endif
-#define HAS_DATABASE_H 1
