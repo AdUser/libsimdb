@@ -9,7 +9,7 @@ typedef struct {
   int fd;
   const char *path;
   const char *errstr;
-} db_t;
+} imdb_t;
 
 typedef struct {
   uint64_t start;
@@ -67,17 +67,17 @@ typedef struct {
   float diff;
 } match_t;
 
-extern int db_open(db_t *db, const char *path);
-extern int db_close(db_t *db);
+extern int db_open(imdb_t *db, const char *path);
+extern int db_close(imdb_t *db);
 
-extern int db_rd_rec(db_t *db, rec_t *rec);
-extern int db_wr_rec(db_t *db, rec_t *rec);
+extern int db_rd_rec(imdb_t *db, rec_t *rec);
+extern int db_wr_rec(imdb_t *db, rec_t *rec);
 
-extern int db_rd_blk(db_t *db, block_t *blk);
-extern int db_wr_blk(db_t *db, block_t *blk);
+extern int db_rd_blk(imdb_t *db, block_t *blk);
+extern int db_wr_blk(imdb_t *db, block_t *blk);
 
-extern int db_rd_list(db_t *db, rec_t *list, size_t list_len);
-extern int db_wr_list(db_t *db, rec_t *list, size_t list_len);
+extern int db_rd_list(imdb_t *db, rec_t *list, size_t list_len);
+extern int db_wr_list(imdb_t *db, rec_t *list, size_t list_len);
 
 /**
  @returns:
@@ -85,6 +85,6 @@ extern int db_wr_list(db_t *db, rec_t *list, size_t list_len);
    0 if nothing found
   >0 if found some matches
  */
-extern int db_search(db_t *db, rec_t *sample, float tresh, match_t **matches);
+extern int db_search(imdb_t *db, imdb_rec_t *sample, float tresh, match_t **matches);
 
 #endif

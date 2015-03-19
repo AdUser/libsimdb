@@ -44,7 +44,7 @@
 
 const char *imdb_hdr_fmt = "IMDB v%02u, CAPS: %s;";
 
-int db_open(db_t *db, const char *path)
+int db_open(imdb_t *db, const char *path)
 {
   int init = 0;
   ssize_t bytes = 0;
@@ -54,7 +54,7 @@ int db_open(db_t *db, const char *path)
   assert(db   != NULL);
   assert(path != NULL);
 
-  memset(db, 0x0, sizeof(db_t));
+  memset(db, 0x0, sizeof(imdb_t));
   db->fd = -1;
 
   errno = 0;
@@ -82,7 +82,7 @@ int db_open(db_t *db, const char *path)
   return 0;
 }
 
-int db_close(db_t *db)
+int db_close(imdb_t *db)
 {
   assert(db != NULL);
 
@@ -96,7 +96,7 @@ int db_close(db_t *db)
   return 0;
 }
 
-int db_rd_rec(db_t *db, rec_t *rec)
+int db_rd_rec(imdb_t *db, rec_t *rec)
 {
   ssize_t bytes = 0;
 
@@ -110,7 +110,7 @@ int db_rd_rec(db_t *db, rec_t *rec)
   return bytes / IMDB_REC_LEN;
 }
 
-int db_wr_rec(db_t *db, rec_t *rec)
+int db_wr_rec(imdb_t *db, rec_t *rec)
 {
   ssize_t bytes = 0;
 
@@ -124,7 +124,7 @@ int db_wr_rec(db_t *db, rec_t *rec)
   return bytes / IMDB_REC_LEN;
 }
 
-int db_rd_blk(db_t *db, block_t *blk)
+int db_rd_blk(imdb_t *db, block_t *blk)
 {
   ssize_t bytes = 0;
 
@@ -142,7 +142,7 @@ int db_rd_blk(db_t *db, block_t *blk)
   return blk->records;
 }
 
-int db_rd_list(db_t *db, rec_t *list, size_t list_len)
+int db_rd_list(imdb_t *db, rec_t *list, size_t list_len)
 {
   rec_t *r = NULL;
   ssize_t bytes;
@@ -163,7 +163,7 @@ int db_rd_list(db_t *db, rec_t *list, size_t list_len)
   return processed;
 }
 
-int db_wr_list(db_t *db, rec_t *list, size_t list_len)
+int db_wr_list(imdb_t *db, rec_t *list, size_t list_len)
 {
   rec_t *r = NULL;
   ssize_t bytes;
@@ -184,7 +184,7 @@ int db_wr_list(db_t *db, rec_t *list, size_t list_len)
   return processed;
 }
 
-int db_search(db_t *db, rec_t *sample, float tresh, match_t **matches)
+int db_search(imdb_t *db, rec_t *sample, float tresh, match_t **matches)
 {
   const int blk_size = 4096;
   uint64_t found = 0;

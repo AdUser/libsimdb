@@ -3,7 +3,7 @@
 
 int main(int argc, char **argv)
 {
-  db_t db;
+  imdb_t db;
   rec_t rec[2];
   block_t blk;
   char *path = "test.db";
