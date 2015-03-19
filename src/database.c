@@ -44,7 +44,7 @@
 
 const char *imdb_hdr_fmt = "IMDB v%02u, CAPS: %s;";
 
-int db_open(imdb_t *db, const char *path)
+int imdb_open(imdb_t *db, const char *path)
 {
   int init = 0;
   ssize_t bytes = 0;
@@ -82,7 +82,7 @@ int db_open(imdb_t *db, const char *path)
   return 0;
 }
 
-int db_close(imdb_t *db)
+int imdb_close(imdb_t *db)
 {
   assert(db != NULL);
 

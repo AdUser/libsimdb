@@ -238,7 +238,7 @@ int main(int argc, char **argv)
   if (mode == diff && (a <= 0 || b <= 0))
     usage(EXIT_FAILURE);
 
-  if (db_open(&db, db_path) == -1) {
+  if (imdb_open(&db, db_path) == -1) {
     printf("%s\n", db.errstr);
     exit(EXIT_FAILURE);
   }
@@ -255,7 +255,7 @@ int main(int argc, char **argv)
   if (mode == diff)
     rec_diff(&db, a, b, map);
 
-  db_close(&db);
+  imdb_close(&db);
 
   exit(EXIT_SUCCESS);
 }

@@ -67,8 +67,8 @@ typedef struct {
   float diff;
 } match_t;
 
-extern int db_open(imdb_t *db, const char *path);
-extern int db_close(imdb_t *db);
+extern int imdb_open(imdb_t *db, const char *path);
+extern int imdb_close(imdb_t *db);
 
 extern int db_rd_rec(imdb_t *db, imdb_rec_t *rec);
 extern int db_wr_rec(imdb_t *db, imdb_rec_t *rec);

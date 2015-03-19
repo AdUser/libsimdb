@@ -9,7 +9,7 @@ int main(int argc, char **argv)
   char *path = "test.db";
 
   unlink(path);
-  assert(db_open(&db, path) == 1);
+  assert(imdb_open(&db, path) == 1);
 
   rec[0].num = 1;
   assert(db_rd_rec(&db, rec) == 0);
@@ -30,7 +30,7 @@ int main(int argc, char **argv)
   rec[1].num = 3;
   assert(db_rd_list(&db, rec, 2) == 1);
 
-  assert(db_close(&db) == 0);
+  assert(imdb_close(&db) == 0);
 
   return 0;
 }
