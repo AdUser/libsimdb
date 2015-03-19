@@ -2,7 +2,7 @@
 #define HAS_DATABASE_H 1
 
 #define IMDB_REC_LEN 48
-#define IMDB_VERSION 1
+#define IMDB_VERSION  2
 #define OPEN_FLAGS O_CREAT | O_RDWR
 
 typedef struct {
@@ -18,21 +18,44 @@ typedef struct {
 } block_t;
 
 /**
-  pos len || description
- - 0   1  -- record is used
- - 1   1  -- must be zero
- - 2  32  -- bitmap, each 2 bytes is row of monochrome image 16x16
- - 33  1  -- level of color R__
- - 34  1  -- level of color _G_
- - 35  1  -- level of color __B
- - 36  11 -- must be zero
- */
+  Database header format - fixed length, 48 bytes
 
-#define OFF_USED   0
-#define OFF_BITMAP 2
-#define OFF_COLORR 33
-#define OFF_COLORG 34
-#define OFF_COLORB 35
+ 0-15 : "IMDB vXX, CAPS: "
+16-23 : capabilities, terminated with ';'
+24-48 : padding with null's
+*/
+
+#define CAP_OFF_BITMAP  0
+#define CAP_OFF_COLORS  1
+#define CAP_OFF_RATIO   2
+/* 3 used, 5 reserved */
+
+/**
+  Database record format - fixed length, 48 bytes
+
+ # | off | len | description
+---+-----+-----+-------------------------------------------------------
+ 1 |   0 |   1 | record is used
+ 2 |   1 |   1 | overall level of color: R--
+ 3 |   2 |   1 | overall level of color: -G-
+ 4 |   3 |   1 | overall level of color: --B
+ 5 |   4 |   2 | image width
+ 6 |   6 |   2 | image height
+ - |   8 |   8 | reserved for future use
+ 7 |  16 |  32 | bitmap, each 2 bytes is row of monochrome image 16x16
+
+field |  12345 6 +       7
+map   |  XRGBWWHH________MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+sect  |  [     0-15     ][    16-31     ][    32-48     ]
+*/
+
+#define REC_OFF_RU  0 /* record is used */
+#define REC_OFF_CR  1 /* color level: red */
+#define REC_OFF_CG  2 /* color level: green */
+#define REC_OFF_CB  3 /* color level: blue */
+#define REC_OFF_IW  4 /* image width  */
+#define REC_OFF_IH  6 /* image height */
+#define REC_OFF_BM 16 /* image bitmap */
 
 typedef struct {
   uint64_t num;

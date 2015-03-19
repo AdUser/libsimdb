@@ -78,7 +78,7 @@ int db_usage_map(db_t *db, unsigned short int cols)
   while (db_rd_blk(db, &blk) > 0) {
     p = blk.data;
     for (i = 0; i < blk.records; i++, p += IMDB_REC_LEN) {
-      t = p + OFF_USED;
+      t = p + REC_OFF_RU;
       buf[j] = (*t == 0xFF) ? '1' : '0';
       if (j++ < cols)
         continue;
@@ -111,7 +111,7 @@ int rec_bitmap(db_t *db, rec_t *sample)
   }
 
   for (i = 0; i < 16; i++) {
-    row = *(((uint16_t *) (&sample->data[OFF_BITMAP])) + i);
+    row = *(((uint16_t *) (&sample->data[REC_OFF_BM])) + i);
     for (j = 0; j < 16; j++) {
       putchar((row & 1) == 1 ? '1' : '0');
       row >>= 1;
@@ -156,13 +156,13 @@ int rec_diff(db_t *db, unsigned long a, unsigned long b, unsigned short int show
   }
 
   if (showmap == 0) {
-    diff  = (float) bitmap_compare(&src.data[OFF_BITMAP], &dst.data[OFF_BITMAP]);
+    diff  = (float) bitmap_compare(&src.data[REC_OFF_BM], &dst.data[REC_OFF_BM]);
     diff /= BITMAP_BITS;
     printf("%.2f%%\n", diff * 100);
     return 0;
   }
 
-  bitmap_diffmap(&map[0], src.data + OFF_BITMAP, dst.data + OFF_BITMAP);
+  bitmap_diffmap(&map[0], src.data + REC_OFF_BM, dst.data + REC_OFF_BM);
 
   for (i = 0; i < 16; i++) {
     row = *(((uint16_t *) map) + i);

@@ -42,6 +42,8 @@
     return -1; \
   }
 
+const char *imdb_hdr_fmt = "IMDB v%02u, CAPS: %s;";
+
 int db_open(db_t *db, const char *path)
 {
   int init = 0;
@@ -70,7 +72,7 @@ int db_open(db_t *db, const char *path)
 
   if (init) {
     memset(buf, 0x0, IMDB_REC_LEN);
-    snprintf((char *) buf, IMDB_REC_LEN, "DB of image fingerprints (vers %d)", IMDB_VERSION);
+    snprintf((char *) buf, IMDB_REC_LEN, imdb_hdr_fmt, IMDB_VERSION, "M-R");
     DB_SEEK(db, 0);
     DB_WRITE(db, buf, IMDB_REC_LEN);
 
@@ -213,11 +215,11 @@ int db_search(db_t *db, rec_t *sample, float tresh, match_t **matches)
   while (db_rd_blk(db, &blk) > 0) {
     p = blk.data;
     for (i = 0; i < blk.records; i++, p += IMDB_REC_LEN) {
-      t = p + OFF_USED;
+      t = p + REC_OFF_RU;
       if (*t == 0x0) continue;
 
-      t = p + OFF_BITMAP;
-      diff  = (float) bitmap_compare(t, sample->data + OFF_BITMAP);
+      t = p + REC_OFF_BM;
+      diff  = (float) bitmap_compare(t, sample->data + REC_OFF_BM);
       diff /= BITMAP_BITS;
       if (diff > tresh) continue;
 
