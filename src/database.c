@@ -96,7 +96,7 @@ int imdb_close(imdb_t *db)
   return 0;
 }
 
-int db_rd_rec(imdb_t *db, imdb_rec_t *rec)
+int imdb_read_rec(imdb_t *db, imdb_rec_t *rec)
 {
   ssize_t bytes = 0;
 
@@ -110,7 +110,7 @@ int db_rd_rec(imdb_t *db, imdb_rec_t *rec)
   return bytes / IMDB_REC_LEN;
 }
 
-int db_wr_rec(imdb_t *db, imdb_rec_t *rec)
+int imdb_write_rec(imdb_t *db, imdb_rec_t *rec)
 {
   ssize_t bytes = 0;
 
@@ -124,7 +124,7 @@ int db_wr_rec(imdb_t *db, imdb_rec_t *rec)
   return bytes / IMDB_REC_LEN;
 }
 
-int db_rd_blk(imdb_t *db, block_t *blk)
+int imdb_read_blk(imdb_t *db, block_t *blk)
 {
   ssize_t bytes = 0;
 
@@ -142,7 +142,7 @@ int db_rd_blk(imdb_t *db, block_t *blk)
   return blk->records;
 }
 
-int db_rd_list(imdb_t *db, imdb_rec_t *list, size_t list_len)
+int imdb_read_list(imdb_t *db, imdb_rec_t *list, size_t list_len)
 {
   imdb_rec_t *r = NULL;
   ssize_t bytes;
@@ -163,7 +163,7 @@ int db_rd_list(imdb_t *db, imdb_rec_t *list, size_t list_len)
   return processed;
 }
 
-int db_wr_list(imdb_t *db, imdb_rec_t *list, size_t list_len)
+int imdb_write_list(imdb_t *db, imdb_rec_t *list, size_t list_len)
 {
   imdb_rec_t *r = NULL;
   ssize_t bytes;
@@ -184,7 +184,7 @@ int db_wr_list(imdb_t *db, imdb_rec_t *list, size_t list_len)
   return processed;
 }
 
-int db_search(imdb_t *db, imdb_rec_t *sample, float tresh, match_t **matches)
+int imdb_search(imdb_t *db, imdb_rec_t *sample, float tresh, match_t **matches)
 {
   const int blk_size = 4096;
   uint64_t found = 0;
@@ -201,7 +201,7 @@ int db_search(imdb_t *db, imdb_rec_t *sample, float tresh, match_t **matches)
   blk.start = 1;
   blk.records = blk_size;
 
-  if (db_rd_rec(db, sample) < 1) {
+  if (imdb_read_rec(db, sample) < 1) {
     db->errstr = "Can't read source sample";
     return -1;
   }
@@ -212,7 +212,7 @@ int db_search(imdb_t *db, imdb_rec_t *sample, float tresh, match_t **matches)
   }
 
   *matches = NULL;
-  while (db_rd_blk(db, &blk) > 0) {
+  while (imdb_read_blk(db, &blk) > 0) {
     p = blk.data;
     for (i = 0; i < blk.records; i++, p += IMDB_REC_LEN) {
       t = p + REC_OFF_RU;

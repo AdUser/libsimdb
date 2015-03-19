@@ -42,7 +42,7 @@ int search_similar(imdb_t *db, imdb_rec_t *sample, float tresh)
   int ret = 0, i = 0;
   match_t *matches = NULL;
 
-  ret = db_search(db, sample, tresh, &matches);
+  ret = imdb_search(db, sample, tresh, &matches);
   if (ret == -1) {
     printf("%s\n", db->errstr);
     exit(EXIT_FAILURE);
@@ -75,7 +75,7 @@ int db_usage_map(imdb_t *db, unsigned short int cols)
   blk.start = 1;
   blk.records = blk_size;
 
-  while (db_rd_blk(db, &blk) > 0) {
+  while (imdb_read_blk(db, &blk) > 0) {
     p = blk.data;
     for (i = 0; i < blk.records; i++, p += IMDB_REC_LEN) {
       t = p + REC_OFF_RU;
@@ -102,7 +102,7 @@ int rec_bitmap(imdb_t *db, imdb_rec_t *sample)
   assert(db      != NULL);
   assert(sample  != NULL);
 
-  if (db_rd_rec(db, sample) < 1)
+  if (imdb_read_rec(db, sample) < 1)
     return -1;
 
   if (!sample->data[0]) {
@@ -139,7 +139,7 @@ int rec_diff(imdb_t *db, unsigned long a, unsigned long b, unsigned short int sh
   src.num = a;
   dst.num = b;
 
-  if (db_rd_rec(db, &src) < 1)
+  if (imdb_read_rec(db, &src) < 1)
     return -1;
 
   if (!src.data[0]) {
@@ -147,7 +147,7 @@ int rec_diff(imdb_t *db, unsigned long a, unsigned long b, unsigned short int sh
     return 0;
   }
 
-  if (db_rd_rec(db, &dst) < 1)
+  if (imdb_read_rec(db, &dst) < 1)
     return -1;
 
   if (!src.data[0]) {

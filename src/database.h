@@ -67,17 +67,17 @@ typedef struct {
   float diff;
 } match_t;
 
-extern int imdb_open(imdb_t *db, const char *path);
+extern int imdb_open (imdb_t *db, const char *path);
 extern int imdb_close(imdb_t *db);
 
-extern int db_rd_rec(imdb_t *db, imdb_rec_t *rec);
-extern int db_wr_rec(imdb_t *db, imdb_rec_t *rec);
+extern int imdb_read_rec (imdb_t *db, imdb_rec_t *rec);
+extern int imdb_write_rec(imdb_t *db, imdb_rec_t *rec);
 
-extern int db_rd_blk(imdb_t *db, block_t *blk);
-extern int db_wr_blk(imdb_t *db, block_t *blk);
+extern int imdb_read_blk (imdb_t *db, block_t *blk);
+extern int imdb_write_blk(imdb_t *db, block_t *blk);
 
-extern int db_rd_list(imdb_t *db, imdb_rec_t *list, size_t list_len);
-extern int db_wr_list(imdb_t *db, imdb_rec_t *list, size_t list_len);
+extern int imdb_read_list (imdb_t *db, imdb_rec_t *list, size_t list_len);
+extern int imdb_write_list(imdb_t *db, imdb_rec_t *list, size_t list_len);
 
 /**
  @returns:
@@ -85,6 +85,6 @@ extern int db_wr_list(imdb_t *db, imdb_rec_t *list, size_t list_len);
    0 if nothing found
   >0 if found some matches
  */
-extern int db_search(imdb_t *db, imdb_rec_t *sample, float tresh, match_t **matches);
+extern int imdb_search(imdb_t *db, imdb_rec_t *sample, float tresh, match_t **matches);
 
 #endif
