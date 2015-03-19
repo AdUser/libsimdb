@@ -37,7 +37,7 @@ void usage(int exitcode) {
     exit(exitcode);
 }
 
-int search_similar(imdb_t *db, rec_t *sample, float tresh)
+int search_similar(imdb_t *db, imdb_rec_t *sample, float tresh)
 {
   int ret = 0, i = 0;
   match_t *matches = NULL;
@@ -95,7 +95,7 @@ int db_usage_map(imdb_t *db, unsigned short int cols)
   return 0;
 }
 
-int rec_bitmap(imdb_t *db, rec_t *sample)
+int rec_bitmap(imdb_t *db, imdb_rec_t *sample)
 {
   uint16_t row;
   uint8_t i, j;
@@ -124,8 +124,8 @@ int rec_bitmap(imdb_t *db, rec_t *sample)
 
 int rec_diff(imdb_t *db, unsigned long a, unsigned long b, unsigned short int showmap)
 {
-  rec_t src;
-  rec_t dst;
+  imdb_rec_t src;
+  imdb_rec_t dst;
   float diff = 0.0;
   unsigned char map[BITMAP_SIZE];
   uint16_t row;
@@ -133,8 +133,8 @@ int rec_diff(imdb_t *db, unsigned long a, unsigned long b, unsigned short int sh
 
   assert(db != NULL);
 
-  memset(&src, 1, sizeof(rec_t));
-  memset(&dst, 2, sizeof(rec_t));
+  memset(&src, 1, sizeof(imdb_rec_t));
+  memset(&dst, 2, sizeof(imdb_rec_t));
 
   src.num = a;
   dst.num = b;
@@ -183,13 +183,13 @@ int main(int argc, char **argv)
   float tresh = 0.10;
   unsigned short int cols = 64, map = 0;
   imdb_t db;
-  rec_t sample;
+  imdb_rec_t sample;
   unsigned long a = 0, b = 0;
   char *c = NULL;
   char opt = '\0';
 
   memset(&db,     0x0, sizeof(imdb_t));
-  memset(&sample, 0x0, sizeof(rec_t));
+  memset(&sample, 0x0, sizeof(imdb_rec_t));
 
   if (argc < 3)
     usage(EXIT_FAILURE);

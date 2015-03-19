@@ -19,7 +19,7 @@ void usage(const char *message) {
 
 int main(int argc, char **argv) {
   int in, out;
-  long unsigned int rec_total, rec_first, rec_last, records;
+  long unsigned int imdb_rec_total, rec_first, rec_last, records;
   unsigned char  in_buf[IMDB_REC_LEN * BLK_SIZE];
   unsigned char out_buf[IMDB_REC_LEN * BLK_SIZE];
   unsigned char  header[IMDB_REC_LEN];
@@ -46,8 +46,8 @@ int main(int argc, char **argv) {
   if ((st.st_size % IMDB_REC_LEN) != 0)
     usage("database size expected to be multiples to 48");
 
-  rec_total = (st.st_size / IMDB_REC_LEN);
-  printf("Processing %lu records\n", rec_total - 1);
+  imdb_rec_total = (st.st_size / IMDB_REC_LEN);
+  printf("Processing %lu records\n", imdb_rec_total - 1);
 
   if (lseek(in, IMDB_REC_LEN, SEEK_SET) < 0)
     usage(strerror(errno));
@@ -57,9 +57,9 @@ int main(int argc, char **argv) {
   if (write(out, header, IMDB_REC_LEN) != IMDB_REC_LEN)
     usage(strerror(errno));
 
-  for (unsigned int block = 0; block <= (rec_total / BLK_SIZE); block++) {
+  for (unsigned int block = 0; block <= (imdb_rec_total / BLK_SIZE); block++) {
     rec_first = rec_last = (block * BLK_SIZE) + 1;
-    records   = ((rec_first + BLK_SIZE) > rec_total) ? rec_total - rec_first : BLK_SIZE;
+    records   = ((rec_first + BLK_SIZE) > imdb_rec_total) ? imdb_rec_total - rec_first : BLK_SIZE;
     rec_last  = rec_first + records;
     printf("* block %u, %4lu records [%lu, %lu]\n",
       block + 1, records, rec_first, rec_last - 1);

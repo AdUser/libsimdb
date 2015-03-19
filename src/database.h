@@ -60,7 +60,7 @@ sect  |  [     0-15     ][    16-31     ][    32-48     ]
 typedef struct {
   uint64_t num;
   unsigned char data[IMDB_REC_LEN];
-} rec_t;
+} imdb_rec_t;
 
 typedef struct {
   uint64_t num;
@@ -70,14 +70,14 @@ typedef struct {
 extern int db_open(imdb_t *db, const char *path);
 extern int db_close(imdb_t *db);
 
-extern int db_rd_rec(imdb_t *db, rec_t *rec);
-extern int db_wr_rec(imdb_t *db, rec_t *rec);
+extern int db_rd_rec(imdb_t *db, imdb_rec_t *rec);
+extern int db_wr_rec(imdb_t *db, imdb_rec_t *rec);
 
 extern int db_rd_blk(imdb_t *db, block_t *blk);
 extern int db_wr_blk(imdb_t *db, block_t *blk);
 
-extern int db_rd_list(imdb_t *db, rec_t *list, size_t list_len);
-extern int db_wr_list(imdb_t *db, rec_t *list, size_t list_len);
+extern int db_rd_list(imdb_t *db, imdb_rec_t *list, size_t list_len);
+extern int db_wr_list(imdb_t *db, imdb_rec_t *list, size_t list_len);
 
 /**
  @returns:
