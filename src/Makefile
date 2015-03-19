@@ -20,6 +20,7 @@ imdb_1to2: imdb_1to2.c
 
 clean:
 	rm -f *.o
+	rm -f imdb_*to*
 	rm -f util
 	rm -f util-static
 	rm -f libimgdup*
