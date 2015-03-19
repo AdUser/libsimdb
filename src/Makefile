@@ -2,7 +2,7 @@ CFLAGS=-Wall -Wextra -O2 -g -std=c99 -pedantic -fstack-protector --param=ssp-buf
 CPPFLAGS=-D_FORTIFY_SOURCE=2
 LDFLAGS=-Wl,-soname,libimgdup.so.1 -fPIC
 
-all: lib util
+all: lib util imdb_1to2
 
 %.o: %.c
 	gcc $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -c $<
@@ -14,6 +14,9 @@ lib: database.o bitmap.o
 util: util.c
 	gcc $(CFLAGS) $(CPPFLAGS) -L. $^ -limgdup    -o $@
 	gcc $(CFLAGS) $(CPPFLAGS) -L. $^ libimgdup.a -o $@-static -static
+
+imdb_1to2: imdb_1to2.c
+	gcc $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o $@ $^
 
 clean:
 	rm -f *.o
