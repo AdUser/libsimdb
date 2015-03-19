@@ -22,8 +22,8 @@
 #include <getopt.h>
 
 void usage(int exitcode) {
-    printf("Usage:\n"
-"  util <opts>\n"
+    printf(
+"Usage: imdb-util <opts>\n"
 "  -b <path>   Path to database\n"
 "  -t <float>  Maximum difference percent (0.0 - 1.0, default: 0.1)\n"
 );
