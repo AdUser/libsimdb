@@ -21,6 +21,9 @@
 #include <unistd.h>
 #include <getopt.h>
 
+#define CHAR_USED '@'
+#define CHAR_NONE '-'
+
 void usage(int exitcode) {
     printf(
 "Usage: imdb-util <opts>\n"
@@ -79,7 +82,7 @@ int db_usage_map(imdb_t *db, unsigned short int cols)
     p = blk.data;
     for (i = 0; i < blk.records; i++, p += IMDB_REC_LEN) {
       t = p + REC_OFF_RU;
-      buf[j] = (*t == 0xFF) ? '1' : '0';
+      buf[j] = (*t == 0xFF) ? CHAR_USED : CHAR_NONE;
       if (j++ < cols)
         continue;
       puts(buf);
@@ -99,6 +102,7 @@ int rec_bitmap(imdb_t *db, imdb_rec_t *sample)
 {
   uint16_t row;
   uint8_t i, j;
+  char c;
   assert(db      != NULL);
   assert(sample  != NULL);
 
@@ -113,7 +117,9 @@ int rec_bitmap(imdb_t *db, imdb_rec_t *sample)
   for (i = 0; i < 16; i++) {
     row = *(((uint16_t *) (&sample->data[REC_OFF_BM])) + i);
     for (j = 0; j < 16; j++) {
-      putchar((row & 1) == 1 ? '1' : '0');
+      c = (row & 1) == 1 ? CHAR_USED : CHAR_NONE;
+      putchar(c);
+      putchar(c);
       row >>= 1;
     }
     putchar('\n');
