@@ -14,7 +14,7 @@ int main(int argc, char **argv)
   rec[0].num = 1;
   assert(db_rd_rec(&db, rec) == 0);
 
-  memset(rec[0].data, 0xAA, REC_LEN);
+  memset(rec[0].data, 0xAA, IMDB_REC_LEN);
   assert(db_wr_rec(&db, rec) == 1);
 
   assert(db_rd_rec(&db, rec) == 1);

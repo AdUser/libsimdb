@@ -77,7 +77,7 @@ int db_usage_map(db_t *db, unsigned short int cols)
 
   while (db_rd_blk(db, &blk) > 0) {
     p = blk.data;
-    for (i = 0; i < blk.records; i++, p += REC_LEN) {
+    for (i = 0; i < blk.records; i++, p += IMDB_REC_LEN) {
       t = p + OFF_USED;
       buf[j] = (*t == 0xFF) ? '1' : '0';
       if (j++ < cols)

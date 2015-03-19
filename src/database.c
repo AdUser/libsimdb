@@ -47,7 +47,7 @@ int db_open(db_t *db, const char *path)
   int init = 0;
   ssize_t bytes = 0;
   struct stat st;
-  char buf[REC_LEN] = "\0";
+  char buf[IMDB_REC_LEN] = "\0";
 
   assert(db   != NULL);
   assert(path != NULL);
@@ -69,12 +69,12 @@ int db_open(db_t *db, const char *path)
   db->path = path;
 
   if (init) {
-    memset(buf, 0x0, REC_LEN);
-    snprintf((char *) buf, REC_LEN, "DB of image fingerprints (vers %d)", DB_VERSION);
+    memset(buf, 0x0, IMDB_REC_LEN);
+    snprintf((char *) buf, IMDB_REC_LEN, "DB of image fingerprints (vers %d)", IMDB_VERSION);
     DB_SEEK(db, 0);
-    DB_WRITE(db, buf, REC_LEN);
+    DB_WRITE(db, buf, IMDB_REC_LEN);
 
-    return bytes / REC_LEN;
+    return bytes / IMDB_REC_LEN;
   }
 
   return 0;
@@ -102,10 +102,10 @@ int db_rd_rec(db_t *db, rec_t *rec)
   assert(rec != NULL);
   assert(rec->num > 0);
 
-  DB_SEEK(db, rec->num * REC_LEN);
-  DB_READ(db, rec->data, REC_LEN);
+  DB_SEEK(db, rec->num * IMDB_REC_LEN);
+  DB_READ(db, rec->data, IMDB_REC_LEN);
 
-  return bytes / REC_LEN;
+  return bytes / IMDB_REC_LEN;
 }
 
 int db_wr_rec(db_t *db, rec_t *rec)
@@ -116,10 +116,10 @@ int db_wr_rec(db_t *db, rec_t *rec)
   assert(rec != NULL);
   assert(rec->num > 0);
 
-  DB_SEEK(db, rec->num * REC_LEN);
-  DB_WRITE(db, rec->data, REC_LEN);
+  DB_SEEK(db, rec->num * IMDB_REC_LEN);
+  DB_WRITE(db, rec->data, IMDB_REC_LEN);
 
-  return bytes / REC_LEN;
+  return bytes / IMDB_REC_LEN;
 }
 
 int db_rd_blk(db_t *db, block_t *blk)
@@ -132,10 +132,10 @@ int db_rd_blk(db_t *db, block_t *blk)
   assert(blk->records > 0);
 
   FREE(blk->data);
-  CALLOC(blk->data, blk->records, REC_LEN);
-  DB_SEEK(db, blk->start * REC_LEN);
-  DB_READ(db, blk->data, blk->records * REC_LEN);
-  blk->records = bytes / REC_LEN;
+  CALLOC(blk->data, blk->records, IMDB_REC_LEN);
+  DB_SEEK(db, blk->start * IMDB_REC_LEN);
+  DB_READ(db, blk->data, blk->records * IMDB_REC_LEN);
+  blk->records = bytes / IMDB_REC_LEN;
 
   return blk->records;
 }
@@ -153,9 +153,9 @@ int db_rd_list(db_t *db, rec_t *list, size_t list_len)
 
   r = list;
   for (i = 0; i < list_len; i++, r++) {
-    DB_SEEK(db, r->num * REC_LEN);
-    DB_READ(db, r->data, REC_LEN);
-    if (bytes == REC_LEN) { processed++; }
+    DB_SEEK(db, r->num * IMDB_REC_LEN);
+    DB_READ(db, r->data, IMDB_REC_LEN);
+    if (bytes == IMDB_REC_LEN) { processed++; }
   }
 
   return processed;
@@ -174,9 +174,9 @@ int db_wr_list(db_t *db, rec_t *list, size_t list_len)
 
   r = list;
   for (i = 0; i < list_len; i++, r++) {
-    DB_SEEK(db, r->num * REC_LEN);
-    DB_WRITE(db, r->data, REC_LEN);
-    if (bytes == REC_LEN) { processed++; }
+    DB_SEEK(db, r->num * IMDB_REC_LEN);
+    DB_WRITE(db, r->data, IMDB_REC_LEN);
+    if (bytes == IMDB_REC_LEN) { processed++; }
   }
 
   return processed;
@@ -212,7 +212,7 @@ int db_search(db_t *db, rec_t *sample, float tresh, match_t **matches)
   *matches = NULL;
   while (db_rd_blk(db, &blk) > 0) {
     p = blk.data;
-    for (i = 0; i < blk.records; i++, p += REC_LEN) {
+    for (i = 0; i < blk.records; i++, p += IMDB_REC_LEN) {
       t = p + OFF_USED;
       if (*t == 0x0) continue;
 

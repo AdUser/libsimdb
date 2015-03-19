@@ -1,8 +1,8 @@
 #ifndef HAS_DATABASE_H
 #define HAS_DATABASE_H 1
 
-#define REC_LEN 48
-#define DB_VERSION 1
+#define IMDB_REC_LEN 48
+#define IMDB_VERSION 1
 #define OPEN_FLAGS O_CREAT | O_RDWR
 
 typedef struct {
@@ -36,7 +36,7 @@ typedef struct {
 
 typedef struct {
   uint64_t num;
-  unsigned char data[REC_LEN];
+  unsigned char data[IMDB_REC_LEN];
 } rec_t;
 
 typedef struct {
