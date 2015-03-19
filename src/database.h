@@ -9,6 +9,7 @@ typedef struct {
   int fd;
   const char *path;
   const char *errstr;
+  unsigned char caps[8];
 } imdb_t;
 
 typedef struct {

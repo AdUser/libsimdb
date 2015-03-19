@@ -70,13 +70,21 @@ int imdb_open(imdb_t *db, const char *path)
 
   db->path = path;
 
+  memset(buf, 0x0, IMDB_REC_LEN);
   if (init) {
-    memset(buf, 0x0, IMDB_REC_LEN);
     snprintf((char *) buf, IMDB_REC_LEN, imdb_hdr_fmt, IMDB_VERSION, "M-R");
     DB_SEEK(db, 0);
     DB_WRITE(db, buf, IMDB_REC_LEN);
 
-    return bytes / IMDB_REC_LEN;
+    if (bytes != IMDB_REC_LEN)
+      return -1;
+    memcpy(db->caps, "M-R", sizeof(char) * 3);
+  } else {
+    DB_SEEK(db, 0);
+    DB_READ(db, buf, IMDB_REC_LEN);
+    if (bytes != IMDB_REC_LEN)
+      return -1;
+    memcpy(db->caps, buf + 16, sizeof(char) * 8);
   }
 
   return 0;
