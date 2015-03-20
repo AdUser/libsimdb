@@ -192,17 +192,34 @@ int imdb_write_list(imdb_t *db, imdb_rec_t *list, size_t list_len)
   return processed;
 }
 
-int imdb_search(imdb_t *db, imdb_rec_t *sample, float tresh, imdb_match_t **matches)
+inline float
+ratio_from_rec_data(unsigned char * const data) {
+  uint16_t iw, ih;
+
+  iw = *((uint16_t *)(data + REC_OFF_IW));
+  ih = *((uint16_t *)(data + REC_OFF_IH));
+
+  return (iw > 0 && ih > 0) ? (iw / ih) : 0.0;
+}
+
+int
+imdb_search(imdb_t        * const db,
+            imdb_rec_t    * const sample,
+            imdb_search_t * const search,
+            imdb_match_t  **matches)
 {
+  imdb_block_t blk;
   const int blk_size = 4096;
   uint64_t found = 0;
-  imdb_block_t blk;
   unsigned int i = 0;
-  unsigned char *p = NULL, *t = NULL;
+  unsigned char *p = NULL;
   float diff = 0.0;
+  float ratio_s = 0.0; /* source */
+  float ratio_t = 0.0; /* tested */
 
   assert(db      != NULL);
   assert(sample  != NULL);
+  assert(search  != NULL);
   assert(matches != NULL);
 
   memset(&blk, 0x0, sizeof(imdb_block_t));
@@ -219,17 +236,31 @@ int imdb_search(imdb_t *db, imdb_rec_t *sample, float tresh, imdb_match_t **matc
     return -1;
   }
 
+  if (search->tresh_ratio > 0.0)
+    ratio_s = ratio_from_rec_data(sample->data);
+
   *matches = NULL;
   while (imdb_read_blk(db, &blk) > 0) {
     p = blk.data;
     for (i = 0; i < blk.records; i++, p += IMDB_REC_LEN) {
-      t = p + REC_OFF_RU;
-      if (*t == 0x0) continue;
+      if (*(p + REC_OFF_RU) == 0x0)
+        continue; /* record missing */
 
-      t = p + REC_OFF_BM;
-      diff  = (float) bitmap_compare(t, sample->data + REC_OFF_BM);
+      /* - compare ratio - cheap */
+      if (ratio_s > 0.0 && (ratio_t = ratio_from_rec_data(p)) > 0.0) {
+        diff  =  ratio_s - ratio_t;
+        diff *= (ratio_s > ratio_t) ? 1.0 : -1.0;
+        if (diff > search->tresh_ratio)
+          continue;
+      } else {
+        /* either ratio not set, can't compare, skipping test */
+      }
+
+      /* - compare bitmap - more expensive */
+      diff  = (float) bitmap_compare(p + REC_OFF_BM, sample->data + REC_OFF_BM);
       diff /= BITMAP_BITS;
-      if (diff > tresh) continue;
+      if (diff > search->tresh_bitmap)
+        continue;
 
       /* allocate more memory, if needed */
       if (found % 10 == 0) {
@@ -246,8 +277,12 @@ int imdb_search(imdb_t *db, imdb_rec_t *sample, float tresh, imdb_match_t **matc
       (*matches)[found].num  = blk.start + i;
       (*matches)[found].diff = diff;
       found++;
+      if (search->limit && found >= search->limit)
+        break;
     }
     FREE(blk.data);
+    if (search->limit && found >= search->limit)
+      break;
     blk.start += blk_size;
   }
 

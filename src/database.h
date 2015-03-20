@@ -92,6 +92,10 @@ extern int imdb_close(imdb_t *db);
    0 if nothing found
   >0 if found some matches
  */
-extern int imdb_search(imdb_t *db, imdb_rec_t *sample, float tresh, imdb_match_t **matches);
+extern int
+imdb_search(imdb_t        * const db,
+            imdb_rec_t    * const sample,
+            imdb_search_t * const search,
+            imdb_match_t  **matches);
 
 #endif

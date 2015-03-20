@@ -44,8 +44,12 @@ int search_similar(imdb_t *db, imdb_rec_t *sample, float tresh)
 {
   int ret = 0, i = 0;
   imdb_match_t *matches = NULL;
+  imdb_search_t search;
+  memset(&search, 0x0, sizeof(search));
+  search.tresh_ratio  = tresh;
+  search.tresh_bitmap = tresh;
 
-  ret = imdb_search(db, sample, tresh, &matches);
+  ret = imdb_search(db, sample, &search, &matches);
   if (ret == -1) {
     printf("%s\n", db->errstr);
     exit(EXIT_FAILURE);
