@@ -132,7 +132,7 @@ int imdb_write_rec(imdb_t *db, imdb_rec_t *rec)
   return bytes / IMDB_REC_LEN;
 }
 
-int imdb_read_blk(imdb_t *db, block_t *blk)
+int imdb_read_blk(imdb_t *db, imdb_block_t *blk)
 {
   ssize_t bytes = 0;
 
@@ -196,7 +196,7 @@ int imdb_search(imdb_t *db, imdb_rec_t *sample, float tresh, imdb_match_t **matc
 {
   const int blk_size = 4096;
   uint64_t found = 0;
-  block_t blk;
+  imdb_block_t blk;
   unsigned int i = 0;
   unsigned char *p = NULL, *t = NULL;
   float diff = 0.0;
@@ -205,7 +205,7 @@ int imdb_search(imdb_t *db, imdb_rec_t *sample, float tresh, imdb_match_t **matc
   assert(sample  != NULL);
   assert(matches != NULL);
 
-  memset(&blk, 0x0, sizeof(block_t));
+  memset(&blk, 0x0, sizeof(imdb_block_t));
   blk.start = 1;
   blk.records = blk_size;
 

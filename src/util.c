@@ -67,12 +67,12 @@ int db_usage_map(imdb_t *db, unsigned short int cols)
   unsigned int i, j = 0;
   unsigned char *p, *t;
   char buf[256];
-  block_t blk;
+  imdb_block_t blk;
 
   assert(db   != NULL);
   assert(cols <= 256);
 
-  memset(&blk, 0x0, sizeof(block_t));
+  memset(&blk, 0x0, sizeof(imdb_block_t));
   memset(buf,  0x0, sizeof(char) * 256);
 
   blk.start = 1;
