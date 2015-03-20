@@ -192,7 +192,7 @@ int imdb_write_list(imdb_t *db, imdb_rec_t *list, size_t list_len)
   return processed;
 }
 
-int imdb_search(imdb_t *db, imdb_rec_t *sample, float tresh, match_t **matches)
+int imdb_search(imdb_t *db, imdb_rec_t *sample, float tresh, imdb_match_t **matches)
 {
   const int blk_size = 4096;
   uint64_t found = 0;
@@ -233,13 +233,13 @@ int imdb_search(imdb_t *db, imdb_rec_t *sample, float tresh, match_t **matches)
 
       /* allocate more memory, if needed */
       if (found % 10 == 0) {
-        *matches = realloc(*matches, (found + 10) * sizeof(match_t));
+        *matches = realloc(*matches, (found + 10) * sizeof(imdb_match_t));
         if (*matches == NULL) {
           db->errstr = "Memory allocation error";
           FREE(blk.data);
           return -1;
         }
-        memset(&(*matches)[found], 0x0, sizeof(match_t) * 10);
+        memset(&(*matches)[found], 0x0, sizeof(imdb_match_t) * 10);
       }
 
       /* create match record */

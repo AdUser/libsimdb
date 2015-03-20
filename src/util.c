@@ -43,7 +43,7 @@ void usage(int exitcode) {
 int search_similar(imdb_t *db, imdb_rec_t *sample, float tresh)
 {
   int ret = 0, i = 0;
-  match_t *matches = NULL;
+  imdb_match_t *matches = NULL;
 
   ret = imdb_search(db, sample, tresh, &matches);
   if (ret == -1) {

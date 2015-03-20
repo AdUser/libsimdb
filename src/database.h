@@ -66,7 +66,7 @@ typedef struct {
 typedef struct {
   uint64_t num;
   float diff;
-} match_t;
+} imdb_match_t;
 
 extern int imdb_open (imdb_t *db, const char *path);
 extern int imdb_close(imdb_t *db);
@@ -86,6 +86,6 @@ extern int imdb_write_list(imdb_t *db, imdb_rec_t *list, size_t list_len);
    0 if nothing found
   >0 if found some matches
  */
-extern int imdb_search(imdb_t *db, imdb_rec_t *sample, float tresh, match_t **matches);
+extern int imdb_search(imdb_t *db, imdb_rec_t *sample, float tresh, imdb_match_t **matches);
 
 #endif
