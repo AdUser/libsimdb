@@ -12,12 +12,6 @@ typedef struct {
   unsigned char caps[8];
 } imdb_t;
 
-typedef struct {
-  uint64_t start;
-  size_t records;
-  unsigned char *data;
-} imdb_block_t;
-
 /**
   Database header format - fixed length, 48 bytes
 
@@ -59,17 +53,26 @@ sect  |  [     0-15     ][    16-31     ][    32-48     ]
 #define REC_OFF_BM 16 /* image bitmap */
 
 typedef struct {
+  uint64_t start;
+  size_t records;
+  unsigned char *data;
+} imdb_block_t;
+
+typedef struct {
   uint64_t num;
   unsigned char data[IMDB_REC_LEN];
 } imdb_rec_t;
 
 typedef struct {
+  uint64_t limit;
+  float tresh_bitmap;
+  float tresh_ratio;
+} imdb_search_t;
+
+typedef struct {
   uint64_t num;
   float diff;
 } imdb_match_t;
-
-extern int imdb_open (imdb_t *db, const char *path);
-extern int imdb_close(imdb_t *db);
 
 extern int imdb_read_rec (imdb_t *db, imdb_rec_t *rec);
 extern int imdb_write_rec(imdb_t *db, imdb_rec_t *rec);
@@ -79,6 +82,9 @@ extern int imdb_write_blk(imdb_t *db, imdb_block_t *blk);
 
 extern int imdb_read_list (imdb_t *db, imdb_rec_t *list, size_t list_len);
 extern int imdb_write_list(imdb_t *db, imdb_rec_t *list, size_t list_len);
+
+extern int imdb_open (imdb_t *db, const char *path);
+extern int imdb_close(imdb_t *db);
 
 /**
  @returns:
