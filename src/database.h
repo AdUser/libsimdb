@@ -106,4 +106,12 @@ imdb_search(imdb_t        * const db,
 */
 uint64_t
 imdb_records_count(imdb_t * const db);
+
+/**
+  @brief   fills buffer 'map' according to records existense in database
+  @returns records processed (and also buffer size)
+*/
+uint64_t
+imdb_usage_map(imdb_t * const db,
+               char   * const map);
 #endif

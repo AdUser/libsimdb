@@ -42,6 +42,9 @@
     return -1; \
   }
 
+#define CHAR_USED '@'
+#define CHAR_NONE '-'
+
 const char *imdb_hdr_fmt = "IMDB v%02u, CAPS: %s;";
 
 int imdb_open(imdb_t *db, const char *path)
@@ -300,4 +303,29 @@ imdb_search(imdb_t        * const db,
   }
 
   return found;
+}
+
+uint64_t
+imdb_usage_map(imdb_t * const db,
+               char   * const map) {
+  const int blk_size = 4096;
+  imdb_block_t blk;
+  unsigned char *r; /* mnemonics : block, record */
+  char *m = map;    /* mnemonics : map */
+
+  memset(&blk, 0x0, sizeof(imdb_block_t));
+
+  blk.start = 1;
+  blk.records = blk_size;
+
+  while (imdb_read_blk(db, &blk) > 0) {
+    r = blk.data;
+    for (unsigned int i = 0;  i < blk.records;  i++, m++, r += IMDB_REC_LEN) {
+      *m = (r[REC_OFF_RU] == 0xFF) ? CHAR_USED : CHAR_NONE;
+    }
+    blk.start += blk_size;
+  }
+  FREE(blk.data);
+
+  return blk.start + blk.records;
 }
