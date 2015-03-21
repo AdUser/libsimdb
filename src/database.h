@@ -114,5 +114,5 @@ imdb_records_count(imdb_t * const db);
 */
 uint64_t
 imdb_usage_map(imdb_t * const db,
-               char   * const map);
+               char  ** const map);
 #endif

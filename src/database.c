@@ -334,14 +334,19 @@ imdb_search(imdb_t        * const db,
 
 uint64_t
 imdb_usage_map(imdb_t * const db,
-               char   * const map) {
+               char  ** const map) {
   const int blk_size = 4096;
   imdb_block_t blk;
+  uint64_t records;
   unsigned char *r; /* mnemonics : block, record */
-  char *m = map;    /* mnemonics : map */
+  char *m = NULL;   /* mnemonics : map */
 
   memset(&blk, 0x0, sizeof(imdb_block_t));
 
+  records = imdb_records_count(db);
+  CALLOC(*map, records + 1, sizeof(char));
+
+  m = *map;
   blk.start = 1;
   blk.records = blk_size;
 
@@ -354,5 +359,5 @@ imdb_usage_map(imdb_t * const db,
   }
   FREE(blk.data);
 
-  return blk.start + blk.records;
+  return records;
 }

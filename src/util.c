@@ -76,11 +76,8 @@ int db_usage_map(imdb_t *db, unsigned short int cols)
 
   memset(row, 0x0, sizeof(char) * 256);
 
-  records = imdb_records_count(db);
-  CALLOC(map, records + 1, sizeof(char));
-
-  if ((records = imdb_usage_map(db, map)) == 0) {
-    printf("Cant get database usage map\n");
+  if ((records = imdb_usage_map(db, &map)) == 0) {
+    printf("Can't get database usage map\n");
     FREE(map);
     exit(1);
   }
