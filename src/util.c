@@ -67,37 +67,33 @@ int search_similar(imdb_t *db, imdb_rec_t *sample, float tresh)
 
 int db_usage_map(imdb_t *db, unsigned short int cols)
 {
-  const int blk_size = 4096;
-  unsigned int i, j = 0;
-  unsigned char *p, *t;
-  char buf[256];
-  imdb_block_t blk;
+  char *map = NULL;
+  char *m   = NULL;
+  char row[256];
+  uint64_t records;
+  uint8_t rest = 0;
 
-  assert(db   != NULL);
-  assert(cols <= 256);
+  memset(row, 0x0, sizeof(char) * 256);
 
-  memset(&blk, 0x0, sizeof(imdb_block_t));
-  memset(buf,  0x0, sizeof(char) * 256);
+  records = imdb_records_count(db);
+  CALLOC(map, records + 1, sizeof(char));
 
-  blk.start = 1;
-  blk.records = blk_size;
-
-  while (imdb_read_blk(db, &blk) > 0) {
-    p = blk.data;
-    for (i = 0; i < blk.records; i++, p += IMDB_REC_LEN) {
-      t = p + REC_OFF_RU;
-      buf[j] = (*t == 0xFF) ? CHAR_USED : CHAR_NONE;
-      if (j++ < cols)
-        continue;
-      puts(buf);
-      memset(buf,  0x0, sizeof(char) * 256);
-      j = 0;
-    }
-    if (j > 0)
-      puts(buf);
-    FREE(blk.data);
-    blk.start += blk_size;
+  if ((records = imdb_usage_map(db, map)) == 0) {
+    printf("Cant get database usage map\n");
+    FREE(map);
+    exit(1);
   }
+
+  m = map;
+  while (records) {
+    rest = (records > cols) ? cols : records;
+    memcpy(row, m, rest);
+    printf("%7d : %s\n", (m - map + 1), row);
+    m       += rest;
+    records -= rest;
+  }
+
+  FREE(map);
 
   return 0;
 }
