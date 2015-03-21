@@ -192,7 +192,20 @@ int imdb_write_list(imdb_t *db, imdb_rec_t *list, size_t list_len)
   return processed;
 }
 
-inline float
+uint64_t
+imdb_records_count(imdb_t * const db) {
+  struct stat st;
+  off_t size = 0;
+
+  memset(&st, 0x0, sizeof(struct stat));
+
+  fstat(db->fd, &st);
+  size = st.st_size;
+
+  return size / IMDB_REC_LEN;
+}
+
+float
 ratio_from_rec_data(unsigned char * const data) {
   uint16_t iw, ih;
 

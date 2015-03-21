@@ -86,6 +86,9 @@ extern int imdb_write_list(imdb_t *db, imdb_rec_t *list, size_t list_len);
 extern int imdb_open (imdb_t *db, const char *path);
 extern int imdb_close(imdb_t *db);
 
+float
+ratio_from_rec_data(unsigned char * const data);
+
 /**
  @returns:
   -1 on error
@@ -98,4 +101,9 @@ imdb_search(imdb_t        * const db,
             imdb_search_t * const search,
             imdb_match_t  **matches);
 
+/**
+ @returns: number of records in database
+*/
+uint64_t
+imdb_records_count(imdb_t * const db);
 #endif
