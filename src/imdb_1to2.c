@@ -66,20 +66,20 @@ int main(int argc, char **argv) {
     lseek(in,  rec_first * IMDB_REC_LEN, SEEK_SET);
     lseek(out, rec_first * IMDB_REC_LEN, SEEK_SET);
     bytes = read(in, in_buf, IMDB_REC_LEN * records);
-    if (bytes != IMDB_REC_LEN * records) {
+    if (bytes != (ssize_t) records * IMDB_REC_LEN) {
       printf("Read size mismatch, expected %lu, got: %i\n",
         IMDB_REC_LEN * records, bytes);
       exit(EXIT_FAILURE);
     }
-    memset(out_buf, 0x0, IMDB_REC_LEN * records);
-    for (int i = 0; i < records; i++) {
+    memset(out_buf, 0x0, records * IMDB_REC_LEN);
+    for (unsigned int i = 0; i < records; i++) {
       src =  &in_buf[i * IMDB_REC_LEN];
       dst = &out_buf[i * IMDB_REC_LEN];
       memcpy(dst +  0, src + 0, sizeof(char) *  1); // usage flag
       memcpy(dst + 16, src + 2, sizeof(char) *  32); // image bitmap
     }
     bytes = write(out, out_buf, IMDB_REC_LEN * records);
-    if (bytes != IMDB_REC_LEN * records) {
+    if (bytes != (ssize_t) records * IMDB_REC_LEN) {
       printf("Write size mismatch, expected %lu, got: %i\n",
         IMDB_REC_LEN * records, bytes);
       exit(EXIT_FAILURE); 
