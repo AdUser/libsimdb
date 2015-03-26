@@ -171,7 +171,8 @@ int rec_diff(imdb_t *db, unsigned long a, unsigned long b, unsigned short int sh
   for (i = 0; i < 16; i++) {
     row = *(((uint16_t *) map) + i);
     for (j = 0; j < 16; j++) {
-      putchar((row & 1) == 1 ? '1' : '0');
+      putchar((row & 1) == 1 ? CHAR_USED : CHAR_NONE);
+      putchar((row & 1) == 1 ? CHAR_USED : CHAR_NONE);
       row >>= 1;
     }
     putchar('\n');
