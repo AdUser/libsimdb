@@ -47,6 +47,30 @@
 
 const char *imdb_hdr_fmt = "IMDB v%02u, CAPS: %s;";
 
+int imdb_init(imdb_t *db, const char *path)
+{
+  ssize_t bytes = 0;
+  unsigned char buf[IMDB_REC_LEN];
+
+  memset(buf, 0x0, sizeof(char) * IMDB_REC_LEN);
+
+  if ((db->fd = open(path, O_WRONLY | O_CREAT | O_EXCL, 0644)) == -1) {
+    db->errstr = strerror(errno);
+    return -1;
+  }
+
+  snprintf((char *) buf, IMDB_REC_LEN, imdb_hdr_fmt, IMDB_VERSION, "M-R");
+  DB_SEEK(db, 0);
+  DB_WRITE(db, buf, IMDB_REC_LEN);
+
+  if (bytes != IMDB_REC_LEN) {
+    db->errstr = "Can't write database header";
+    return -1;
+  }
+
+  return 0;
+}
+
 int imdb_open(imdb_t *db, const char *path)
 {
   int init = 0;
