@@ -1,22 +1,32 @@
 CFLAGS=-Wall -Wextra -O2 -g -std=c99 -pedantic -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security
 CPPFLAGS=-D_FORTIFY_SOURCE=2
-LDFLAGS=-Wl,-soname,libimgdup.so.1 -fPIC
+SONAME=libimgdup.so.2
+LDFLAGS=-Wl,-soname,$(SONAME) -fPIC
 
-all: lib util imdb_1to2
+all: libs utils imdb_1to2
 
 %.o: %.c
 	gcc $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -c $<
 
-lib: database.o bitmap.o
-	gcc $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -shared -o libimgdup.so $^
+libimgdup.so: database.o bitmap.o
+	gcc $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -shared -o $(SONAME) $^
+	ln -sf $(SONAME) libimgdup.so
+
+libimgdup.a: database.o bitmap.o
 	ar rcs libimgdup.a $^
 
-util: util.c lib
-	gcc $(CFLAGS) $(CPPFLAGS) -L. $< -limgdup    -o $@
-	gcc $(CFLAGS) $(CPPFLAGS) -L. $< libimgdup.a -o $@-static -static
+libs: libimgdup.so libimgdup.a
+
+util: util.o libimgdup.so
+	gcc $(CFLAGS) $(CPPFLAGS) -L. $< -o $@ -limgdup
+
+util-static: util.o libimgdup.a
+	gcc $(CFLAGS) $(CPPFLAGS) -L. $^ -o $@ -static
+
+utils: util util-static
 
 imdb_1to2: imdb_1to2.c
-	gcc $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o $@ $^
+	gcc $(CFLAGS) $(CPPFLAGS) -o $@ $^
 
 clean:
 	rm -f *.o
