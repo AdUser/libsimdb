@@ -3,7 +3,7 @@
 
 #define IMDB_REC_LEN 48
 #define IMDB_VERSION  2
-#define OPEN_FLAGS O_CREAT | O_RDWR
+#define OPEN_FLAGS O_RDWR
 
 typedef struct {
   int fd;

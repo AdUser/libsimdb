@@ -73,7 +73,6 @@ int imdb_init(imdb_t *db, const char *path)
 
 int imdb_open(imdb_t *db, const char *path)
 {
-  int init = 0;
   ssize_t bytes = 0;
   struct stat st;
   char buf[IMDB_REC_LEN] = "\0";
@@ -85,34 +84,38 @@ int imdb_open(imdb_t *db, const char *path)
   db->fd = -1;
 
   errno = 0;
-  if (stat(path, &st) == -1 && errno == ENOENT) {
-    init = 1;
-  }
-
-  errno = 0;
-  if ((db->fd = open(path, OPEN_FLAGS, 0644)) == -1) {
+  if (stat(path, &st) == -1) {
     db->errstr = strerror(errno);
     return -1;
   }
 
+  errno = 0;
+  if ((db->fd = open(path, OPEN_FLAGS)) == -1) {
+    db->errstr = strerror(errno);
+    return -1;
+  }
   db->path = path;
 
   memset(buf, 0x0, IMDB_REC_LEN);
-  if (init) {
-    snprintf((char *) buf, IMDB_REC_LEN, imdb_hdr_fmt, IMDB_VERSION, "M-R");
-    DB_SEEK(db, 0);
-    DB_WRITE(db, buf, IMDB_REC_LEN);
-
-    if (bytes != IMDB_REC_LEN)
-      return -1;
-    memcpy(db->caps, "M-R", sizeof(char) * 3);
-  } else {
-    DB_SEEK(db, 0);
-    DB_READ(db, buf, IMDB_REC_LEN);
-    if (bytes != IMDB_REC_LEN)
-      return -1;
-    memcpy(db->caps, buf + 16, sizeof(char) * 8);
+  DB_SEEK(db, 0);
+  DB_READ(db, buf, IMDB_REC_LEN);
+  if (bytes != IMDB_REC_LEN) {
+    db->errstr = "Empty or damaged database file";
+    return -1;
   }
+  if (memcmp("IMDB", buf, 4) != 0) {
+    db->errstr = "Not a database file";
+    return -1;
+  }
+  if (atoi(buf + 6) != IMDB_VERSION) {
+    db->errstr = "Database version mismatch";
+    return -1;
+  }
+  if (memcmp("CAPS", buf + 10, 4) != 0) {
+    db->errstr = "Can't read database capabilities";
+    return -1;
+  }
+  memcpy(db->caps, buf + 16, sizeof(char) * 8);
 
   return 0;
 }
