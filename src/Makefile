@@ -11,9 +11,9 @@ lib: database.o bitmap.o
 	gcc $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -shared -o libimgdup.so $^
 	ar rcs libimgdup.a $^
 
-util: util.c
-	gcc $(CFLAGS) $(CPPFLAGS) -L. $^ -limgdup    -o $@
-	gcc $(CFLAGS) $(CPPFLAGS) -L. $^ libimgdup.a -o $@-static -static
+util: util.c lib
+	gcc $(CFLAGS) $(CPPFLAGS) -L. $< -limgdup    -o $@
+	gcc $(CFLAGS) $(CPPFLAGS) -L. $< libimgdup.a -o $@-static -static
 
 imdb_1to2: imdb_1to2.c
 	gcc $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o $@ $^
