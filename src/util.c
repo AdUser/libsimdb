@@ -31,6 +31,7 @@ void usage(int exitcode) {
 "  -t <float>  Maximum difference percent (0.0 - 1.0, default: 0.1)\n"
 );
     printf("\n"
+"  -I          Create database (init)\n"
 "  -B <num>    Show bitmap for this sample\n"
 "  -C <a>,<b>  Show difference percent for this samples\n"
 "  -D <a>,<b>  Show difference bitmap for this samples\n"
@@ -184,7 +185,7 @@ int rec_diff(imdb_t *db, unsigned long a, unsigned long b, unsigned short int sh
 
 int main(int argc, char **argv)
 {
-  enum { undef, search, bitmap, usage_map, diff } mode = undef;
+  enum { undef, init, search, bitmap, usage_map, diff } mode = undef;
   const char *db_path = NULL;
   float tresh = 0.10;
   unsigned short int cols = 64, map = 0;
@@ -200,7 +201,7 @@ int main(int argc, char **argv)
   if (argc < 3)
     usage(EXIT_FAILURE);
 
-  while ((opt = getopt(argc, argv, "b:t:B:C:D:S:U:")) != -1) {
+  while ((opt = getopt(argc, argv, "b:t:IB:C:D:S:U:")) != -1) {
     switch (opt) {
       case 'b' :
         db_path = optarg;
@@ -208,6 +209,9 @@ int main(int argc, char **argv)
       case 't' :
         tresh = atof(optarg);
         tresh = (tresh > 0.0 && tresh < 1.0) ? tresh : 0.10;
+        break;
+      case 'I' :
+        mode = init;
         break;
       case 'B' :
         mode = bitmap;
@@ -244,8 +248,16 @@ int main(int argc, char **argv)
   if (mode == diff && (a <= 0 || b <= 0))
     usage(EXIT_FAILURE);
 
+  if (mode == init) {
+    if (imdb_init(&db, db_path) == -1) {
+      printf("database init: %s\n", db.errstr);
+      exit(EXIT_FAILURE);
+    }
+    exit(EXIT_SUCCESS);
+  }
+
   if (imdb_open(&db, db_path) == -1) {
-    printf("%s\n", db.errstr);
+    printf("database open: %s\n", db.errstr);
     exit(EXIT_FAILURE);
   }
 
