@@ -57,34 +57,42 @@ imdb_sample(imdb_rec_t * const rec,
   if (status == MagickPass)
     status = MagickSampleImage(wand, 16, 16);
 
-  /* 2 -> 0.5 : threshold (tune?) */
+  /* 2 -> 50%, tuned by magick number, see 'magick/image.h' */
   if (status == MagickPass)
-    status = MagickThresholdImage(wand, 0.5);
+    status = MagickThresholdImage(wand, 50.0 * (MaxRGB / 100));
 
   if (status == MagickPass)
     status = MagickSetImageType(wand, BilevelType);
 
   if (status == MagickPass)
-    status = MagickSetImageFormat(wand, "BMP");
+    status = MagickSetImageFormat(wand, "MONO");
 
   if (status == MagickPass)
     buf = MagickWriteImageBlob(wand, &buf_size);
 
-  if (status != MagickPass) {
+#ifdef DEBUG
+  fprintf(stderr, "sample H: %lu\n", MagickGetImageWidth(wand));
+  fprintf(stderr, "sample W: %lu\n", MagickGetImageWidth(wand));
+  fprintf(stderr, "buf size: %u\n", buf_size);
+  for (unsigned int i = 0; i < buf_size; i++)
+    fprintf(stderr, "%02X", buf[i]);
+#endif
+  assert(buf_size == 32);
+
+  if (status == MagickPass) {
+    memset(rec, 0x0, sizeof(imdb_rec_t));
+    rec->data[REC_OFF_RU] = 1;
+    *((uint16_t *) &rec->data[REC_OFF_IW]) = (uint16_t) w;
+    *((uint16_t *) &rec->data[REC_OFF_IH]) = (uint16_t) h;
+    memcpy(&rec->data[REC_OFF_BM], buf, 32);
+  } else {
     description = MagickGetException(wand, &severity);
     fprintf(stderr, "%03d %.1024s\n", severity, description); /* FIXME */
   }
 
+
   DestroyMagickWand(wand);
   DestroyMagick();
 
-  if (status != MagickPass)
-    return -1;
-
-  rec->data[REC_OFF_RU] = 1;
-  *((uint16_t *) &rec->data[REC_OFF_IW]) = (uint16_t) w;
-  *((uint16_t *) &rec->data[REC_OFF_IH]) = (uint16_t) h;
-  memcpy(&rec->data[REC_OFF_BM], buf, 32);
-
-  return 0;
+  return (status == MagickPass) ? 0 : -1;
 }
