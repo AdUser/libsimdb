@@ -28,6 +28,10 @@ utils: util util-static
 imdb_1to2: imdb_1to2.c
 	gcc $(CFLAGS) $(CPPFLAGS) -o $@ $^
 
+FLAGS=$(shell GraphicsMagickWand-config --cppflags --ldflags --libs)
+sampler-test: sampler.c sampler-test.c
+	gcc $(CFLAGS) $(CPPFLAGS) $(FLAGS) -o $@ $^
+
 clean:
 	rm -f *.o
 	rm -f imdb_?to?
