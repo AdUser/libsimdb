@@ -41,16 +41,20 @@ void usage(int exitcode) {
     exit(exitcode);
 }
 
-int search_similar(imdb_t *db, imdb_rec_t *sample, float tresh)
+int search_similar(imdb_t *db, uint64_t number, float tresh)
 {
   int ret = 0, i = 0;
+  imdb_rec_t sample;
   imdb_match_t *matches = NULL;
   imdb_search_t search;
-  memset(&search, 0x0, sizeof(search));
+
+  memset(&sample, 0x0, sizeof(imdb_rec_t));
+  memset(&search, 0x0, sizeof(imdb_search_t));
   search.tresh_ratio  = tresh;
   search.tresh_bitmap = tresh;
 
-  ret = imdb_search(db, sample, &search, &matches);
+  sample.num = number;
+  ret = imdb_search(db, &sample, &search, &matches);
   if (ret == -1) {
     printf("%s\n", db->errstr);
     exit(EXIT_FAILURE);
@@ -96,24 +100,27 @@ int db_usage_map(imdb_t *db, unsigned short int cols)
   return 0;
 }
 
-int rec_bitmap(imdb_t *db, imdb_rec_t *sample)
+int rec_bitmap(imdb_t *db, uint64_t number)
 {
+  imdb_rec_t rec;
   uint16_t row;
   uint8_t i, j;
   char c;
-  assert(db      != NULL);
-  assert(sample  != NULL);
 
-  if (imdb_read_rec(db, sample) < 1)
+  assert(db != NULL);
+  memset(&rec, 0x0, sizeof(imdb_rec_t));
+
+  rec.num = number;
+  if (imdb_read_rec(db, &rec) < 1)
     return -1;
 
-  if (!sample->data[0]) {
+  if (!rec.data[0]) {
     puts("Sample not exists");
     return 0;
   }
 
   for (i = 0; i < 16; i++) {
-    row = *(((uint16_t *) (&sample->data[REC_OFF_BM])) + i);
+    row = *(((uint16_t *) (&rec.data[REC_OFF_BM])) + i);
     for (j = 0; j < 16; j++) {
       c = (row & 1) == 1 ? CHAR_USED : CHAR_NONE;
       putchar(c);
@@ -188,13 +195,11 @@ int main(int argc, char **argv)
   float tresh = 0.10;
   unsigned short int cols = 64, map = 0;
   imdb_t db;
-  imdb_rec_t sample;
   uint64_t a = 0, b = 0;
   char *c = NULL;
   char opt = '\0';
 
   memset(&db,     0x0, sizeof(imdb_t));
-  memset(&sample, 0x0, sizeof(imdb_rec_t));
 
   if (argc < 3)
     usage(EXIT_FAILURE);
@@ -213,7 +218,7 @@ int main(int argc, char **argv)
         break;
       case 'B' :
         mode = bitmap;
-        sample.num = atoll(optarg);
+        a = atoll(optarg);
         break;
       case 'D' :
         map = 1;
@@ -226,7 +231,7 @@ int main(int argc, char **argv)
         break;
       case 'S' :
         mode = search;
-        sample.num = atoll(optarg);
+        a = atoll(optarg);
         break;
       case 'U' :
         mode = usage_map;
@@ -240,7 +245,7 @@ int main(int argc, char **argv)
     }
   }
 
-  if ((mode == search || mode == bitmap) && sample.num <= 0)
+  if ((mode == search || mode == bitmap) && a <= 0)
     usage(EXIT_FAILURE);
 
   if (mode == diff && (a <= 0 || b <= 0))
@@ -260,10 +265,10 @@ int main(int argc, char **argv)
   }
 
   if (mode == search)
-    search_similar(&db, &sample, tresh);
+    search_similar(&db, a, tresh);
 
   if (mode == bitmap)
-    rec_bitmap(&db, &sample);
+    rec_bitmap(&db, a);
 
   if (mode == usage_map)
     db_usage_map(&db, cols);
