@@ -67,3 +67,25 @@ bitmap_diffmap(unsigned char *diff,
 
   return i;
 }
+
+size_t
+bitmap_unpack(const unsigned char *map,
+              unsigned char ** const buf) {
+  size_t buf_size = BITMAP_BITS;
+  uint16_t *p, row, mask;
+  unsigned char *q = NULL;
+
+  CALLOC(*buf, buf_size, sizeof(char));
+
+  p = (uint16_t *) map;
+  q = *buf;
+  for (size_t i = 0; i < BITMAP_SIDE; i++, p++) {
+    row = *p; mask = 0x1;
+    for (size_t j = 0; j < 16; j++, q++) {
+      *q = (row & mask) ? 0xFF : 0x00;
+      mask <<= 1;
+    }
+  }
+
+  return buf_size;
+}

@@ -15,4 +15,8 @@ int
 bitmap_diffmap(unsigned char *diff,
                const unsigned char *a,
                const unsigned char *b);
+
+size_t
+bitmap_unpack(const unsigned char *map,
+              unsigned char ** const buf);
 #endif
