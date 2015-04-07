@@ -126,7 +126,7 @@ int rec_bitmap(imdb_t *db, imdb_rec_t *sample)
   return 0;
 }
 
-int rec_diff(imdb_t *db, unsigned long a, unsigned long b, unsigned short int showmap)
+int rec_diff(imdb_t *db, uint64_t a, uint64_t b, unsigned short int showmap)
 {
   imdb_rec_t src;
   imdb_rec_t dst;
@@ -189,7 +189,7 @@ int main(int argc, char **argv)
   unsigned short int cols = 64, map = 0;
   imdb_t db;
   imdb_rec_t sample;
-  unsigned long a = 0, b = 0;
+  uint64_t a = 0, b = 0;
   char *c = NULL;
   char opt = '\0';
 
