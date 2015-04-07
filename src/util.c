@@ -103,9 +103,7 @@ int db_usage_map(imdb_t *db, unsigned short int cols)
 int rec_bitmap(imdb_t *db, uint64_t number)
 {
   imdb_rec_t rec;
-  uint16_t row;
-  uint8_t i, j;
-  char c;
+  unsigned char *map, *p, c;
 
   assert(db != NULL);
   memset(&rec, 0x0, sizeof(imdb_rec_t));
@@ -119,13 +117,13 @@ int rec_bitmap(imdb_t *db, uint64_t number)
     return 0;
   }
 
-  for (i = 0; i < 16; i++) {
-    row = *(((uint16_t *) (&rec.data[REC_OFF_BM])) + i);
-    for (j = 0; j < 16; j++) {
-      c = (row & 1) == 1 ? CHAR_USED : CHAR_NONE;
+  bitmap_unpack(&rec.data[REC_OFF_BM], &map);
+
+  p = map;
+  for (size_t i = 0; i < BITMAP_SIDE; i++) {
+    for (size_t j = 0; j < BITMAP_SIDE; j++, p++) {
+      c = (*p == 0x00) ? CHAR_NONE : CHAR_USED;
       putchar(c);
-      putchar(c);
-      row >>= 1;
     }
     putchar('\n');
   }
