@@ -5,6 +5,9 @@
 #define BITMAP_SIZE (BITMAP_SIDE * (BITMAP_SIDE / 8))
 #define BITMAP_BITS (BITMAP_SIZE * 8)
 
+#define CHAR_USED '@'
+#define CHAR_NONE '-'
+
 typedef unsigned char bitmap_t[BITMAP_SIZE];
 
 int

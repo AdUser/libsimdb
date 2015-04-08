@@ -42,9 +42,6 @@
     return -1; \
   }
 
-#define CHAR_USED '@'
-#define CHAR_NONE '-'
-
 const char *imdb_hdr_fmt = "IMDB v%02u, CAPS: %s;";
 
 int imdb_init(imdb_t *db, const char *path)

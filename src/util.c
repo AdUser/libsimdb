@@ -21,9 +21,6 @@
 #include <unistd.h>
 #include <getopt.h>
 
-#define CHAR_USED '@'
-#define CHAR_NONE '-'
-
 void usage(int exitcode) {
     printf(
 "Usage: imdb-util <opts>\n"
