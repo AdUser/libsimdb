@@ -3,7 +3,7 @@ CPPFLAGS=-D_FORTIFY_SOURCE=2
 SONAME=libimgdup.so.2
 LDFLAGS=-Wl,-soname,$(SONAME) -fPIC
 
-all: libs utils imdb_1to2
+all: libs utils
 
 %.o: %.c
 	gcc $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -c $<
@@ -23,14 +23,14 @@ util: util.o libimgdup.so
 util-static: util.o libimgdup.a
 	gcc $(CFLAGS) $(CPPFLAGS) -L. $^ -o $@ -static
 
-utils: util util-static
-
 imdb_1to2: imdb_1to2.c
 	gcc $(CFLAGS) $(CPPFLAGS) -o $@ $^
 
-FLAGS=$(shell GraphicsMagickWand-config --cppflags --ldflags --libs)
+utils: util util-static imdb_1to2
+
+GMFLAGS=$(shell GraphicsMagickWand-config --cppflags --ldflags --libs)
 sampler-test: sampler.c bitmap.c sampler-test.c
-	gcc $(CFLAGS) $(CPPFLAGS) $(FLAGS) -o $@ $^
+	gcc $(CFLAGS) $(CPPFLAGS) $(GMFLAGS) -o $@ $^
 
 clean:
 	rm -f *.o
