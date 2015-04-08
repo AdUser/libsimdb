@@ -142,7 +142,13 @@ int imdb_read_rec(imdb_t *db, imdb_rec_t *rec)
   DB_SEEK(db, rec->num * IMDB_REC_LEN);
   DB_READ(db, rec->data, IMDB_REC_LEN);
 
-  return bytes / IMDB_REC_LEN;
+  if (bytes != IMDB_REC_LEN)
+    return -1;
+
+  if (rec->data[0] != 0xFF)
+    return 0;
+
+  return 1;
 }
 
 int imdb_write_rec(imdb_t *db, imdb_rec_t *rec)

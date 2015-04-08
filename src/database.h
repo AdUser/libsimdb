@@ -74,6 +74,10 @@ typedef struct {
   float diff;
 } imdb_match_t;
 
+/**
+ * @return 1 on success, 0 if record not used
+ *          and -1 if record number not exists,
+ */
 extern int imdb_read_rec (imdb_t *db, imdb_rec_t *rec);
 extern int imdb_write_rec(imdb_t *db, imdb_rec_t *rec);
 
