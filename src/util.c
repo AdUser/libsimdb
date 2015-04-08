@@ -100,7 +100,7 @@ int db_usage_map(imdb_t *db, unsigned short int cols)
 int rec_bitmap(imdb_t *db, uint64_t number)
 {
   imdb_rec_t rec;
-  unsigned char *map, *p, c;
+  unsigned char *map = NULL;
 
   assert(db != NULL);
   memset(&rec, 0x0, sizeof(imdb_rec_t));
@@ -109,21 +109,13 @@ int rec_bitmap(imdb_t *db, uint64_t number)
   if (imdb_read_rec(db, &rec) < 1)
     return -1;
 
-  if (!rec.data[0]) {
+  if (rec.data[0] != 0xFF) {
     puts("Sample not exists");
     return 0;
   }
 
   bitmap_unpack(&rec.data[REC_OFF_BM], &map);
-
-  p = map;
-  for (size_t i = 0; i < BITMAP_SIDE; i++) {
-    for (size_t j = 0; j < BITMAP_SIDE; j++, p++) {
-      c = (*p == 0x00) ? CHAR_NONE : CHAR_USED;
-      putchar(c);
-    }
-    putchar('\n');
-  }
+  bitmap_print(map);
 
   return 0;
 }
@@ -134,8 +126,6 @@ int rec_diff(imdb_t *db, uint64_t a, uint64_t b, unsigned short int showmap)
   imdb_rec_t dst;
   float diff = 0.0;
   unsigned char map[BITMAP_SIZE];
-  uint16_t row;
-  uint8_t i, j;
 
   assert(db != NULL);
 
@@ -168,17 +158,8 @@ int rec_diff(imdb_t *db, uint64_t a, uint64_t b, unsigned short int showmap)
     return 0;
   }
 
-  bitmap_diffmap(&map[0], src.data + REC_OFF_BM, dst.data + REC_OFF_BM);
-
-  for (i = 0; i < 16; i++) {
-    row = *(((uint16_t *) map) + i);
-    for (j = 0; j < 16; j++) {
-      putchar((row & 1) == 1 ? CHAR_USED : CHAR_NONE);
-      putchar((row & 1) == 1 ? CHAR_USED : CHAR_NONE);
-      row >>= 1;
-    }
-    putchar('\n');
-  }
+  bitmap_diffmap(&map[0], &src.data[REC_OFF_BM], &dst.data[REC_OFF_BM]);
+  bitmap_print(map);
 
   return 0;
 }
