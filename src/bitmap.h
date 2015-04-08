@@ -22,4 +22,7 @@ bitmap_diffmap(unsigned char *diff,
 size_t
 bitmap_unpack(const unsigned char *map,
               unsigned char ** const buf);
+
+void
+bitmap_print(const unsigned char *map);
 #endif
