@@ -255,11 +255,11 @@ imdb_search(imdb_t        * const db,
             imdb_match_t  **matches)
 {
   imdb_block_t blk;
+  imdb_match_t match;
   const int blk_size = 4096;
   uint64_t found = 0;
   unsigned int i = 0;
   unsigned char *p = NULL;
-  float diff = 0.0;
   float ratio_s = 0.0; /* source */
   float ratio_t = 0.0; /* tested */
 
@@ -267,8 +267,11 @@ imdb_search(imdb_t        * const db,
   assert(sample  != NULL);
   assert(search  != NULL);
   assert(matches != NULL);
+  assert(search->maxdiff_ratio  >= 0.0 && search->maxdiff_ratio  <= 1.0);
+  assert(search->maxdiff_bitmap >= 0.0 && search->maxdiff_bitmap <= 1.0);
 
-  memset(&blk, 0x0, sizeof(imdb_block_t));
+  memset(&blk,   0x0, sizeof(imdb_block_t));
+  memset(&match, 0x0, sizeof(imdb_match_t));
   blk.start = 1;
   blk.records = blk_size;
 
@@ -283,43 +286,36 @@ imdb_search(imdb_t        * const db,
   if (search->maxdiff_ratio > 0.0)
     ratio_s = ratio_from_rec_data(sample->data);
 
-  *matches = NULL;
+  CALLOC(*matches, search->limit, sizeof(imdb_match_t));
+
   while (imdb_read_blk(db, &blk) > 0) {
     p = blk.data;
     for (i = 0; i < blk.records; i++, p += IMDB_REC_LEN) {
       if (*(p + REC_OFF_RU) == 0x0)
         continue; /* record missing */
 
+      match.diff_ratio  = 0.0;
+      match.diff_bitmap = 0.0;
+
       /* - compare ratio - cheap */
       if (ratio_s > 0.0 && (ratio_t = ratio_from_rec_data(p)) > 0.0) {
-        diff  =  ratio_s - ratio_t;
-        diff *= (ratio_s > ratio_t) ? 1.0 : -1.0;
-        if (diff > search->maxdiff_ratio)
+        match.diff_ratio  =  ratio_s - ratio_t;
+        match.diff_ratio *= (ratio_s > ratio_t) ? 1.0 : -1.0;
+        if (match.diff_ratio > search->maxdiff_ratio)
           continue;
       } else {
         /* either source or target ratio not set, can't compare, skip test */
       }
 
       /* - compare bitmap - more expensive */
-      diff  = (float) bitmap_compare(p + REC_OFF_BM, sample->data + REC_OFF_BM);
-      diff /= BITMAP_BITS;
-      if (diff > search->maxdiff_bitmap)
+      match.diff_bitmap  = (float) bitmap_compare(p + REC_OFF_BM, sample->data + REC_OFF_BM);
+      match.diff_bitmap /= BITMAP_BITS;
+      if (match.diff_bitmap > search->maxdiff_bitmap)
         continue;
 
-      /* allocate more memory, if needed */
-      if (found % 10 == 0) {
-        *matches = realloc(*matches, (found + 10) * sizeof(imdb_match_t));
-        if (*matches == NULL) {
-          db->errstr = "Memory allocation error";
-          FREE(blk.data);
-          return -1;
-        }
-        memset(&(*matches)[found], 0x0, sizeof(imdb_match_t) * 10);
-      }
-
       /* create match record */
-      (*matches)[found].num  = blk.start + i;
-      (*matches)[found].diff = diff;
+      match.num = blk.start + i;
+      memcpy(&(*matches)[found], &match, sizeof(imdb_match_t));
       found++;
       if (found >= search->limit)
         break;
