@@ -22,12 +22,12 @@
 #include <getopt.h>
 
 void usage(int exitcode) {
-    printf(
+    puts(
 "Usage: imdb-util <opts>\n"
 "  -b <path>   Path to database\n"
-"  -t <float>  Maximum difference percent (0.0 - 1.0, default: 0.1)\n"
+"  -t <int>    Maximum difference pct (0 - 50, default: 10%)\n"
 );
-    printf("\n"
+    puts(
 "  -I          Create database (init)\n"
 "  -B <num>    Show bitmap for this sample\n"
 "  -C <a>,<b>  Show difference percent for this samples\n"
@@ -161,14 +161,14 @@ int main(int argc, char **argv)
 {
   enum { undef, init, search, bitmap, usage_map, diff } mode = undef;
   const char *db_path = NULL;
-  float tresh = 0.10;
+  float maxdiff = 0.10;
   unsigned short int cols = 64, map = 0;
   imdb_t db;
   uint64_t a = 0, b = 0;
   char *c = NULL;
   char opt = '\0';
 
-  memset(&db,     0x0, sizeof(imdb_t));
+  memset(&db, 0x0, sizeof(imdb_t));
 
   if (argc < 3)
     usage(EXIT_FAILURE);
@@ -179,8 +179,12 @@ int main(int argc, char **argv)
         db_path = optarg;
         break;
       case 't' :
-        tresh = atof(optarg);
-        tresh = (tresh > 0.0 && tresh < 1.0) ? tresh : 0.10;
+        maxdiff = atoi(optarg);
+        if (maxdiff > 50 || maxdiff < 0) {
+          puts("maxdiff out of bounds (0% - 50%), using default - 10%");
+          maxdiff = 10;
+        }
+        maxdiff /= 100;
         break;
       case 'I' :
         mode = init;
@@ -234,7 +238,7 @@ int main(int argc, char **argv)
   }
 
   if (mode == search)
-    search_similar(&db, a, tresh);
+    search_similar(&db, a, maxdiff);
 
   if (mode == bitmap)
     rec_bitmap(&db, a);
