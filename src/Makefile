@@ -29,7 +29,7 @@ imdb_1to2: imdb_1to2.c
 	gcc $(CFLAGS) $(CPPFLAGS) -o $@ $^
 
 FLAGS=$(shell GraphicsMagickWand-config --cppflags --ldflags --libs)
-sampler-test: sampler.c sampler-test.c
+sampler-test: sampler.c bitmap.c sampler-test.c
 	gcc $(CFLAGS) $(CPPFLAGS) $(FLAGS) -o $@ $^
 
 clean:

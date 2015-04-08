@@ -90,7 +90,6 @@ imdb_sample(imdb_rec_t * const rec,
     fprintf(stderr, "%03d %.1024s\n", severity, description); /* FIXME */
   }
 
-
   DestroyMagickWand(wand);
   DestroyMagick();
 
