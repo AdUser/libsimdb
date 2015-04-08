@@ -52,26 +52,40 @@ sect  |  [     0-15     ][    16-31     ][    32-48     ]
 #define REC_OFF_IH  6 /* image height */
 #define REC_OFF_BM 16 /* image bitmap */
 
+/**
+ * block of sequental records of database
+ */
 typedef struct {
   uint64_t start;
   size_t records;
   unsigned char *data;
 } imdb_block_t;
 
+/**
+ * database record
+ */
 typedef struct {
   uint64_t num;
   unsigned char data[IMDB_REC_LEN];
 } imdb_rec_t;
 
+/**
+ * search parameters
+ * maxdiff_* fields should have value from 0.0 to 1.0 (0% - 100%)
+ */
 typedef struct {
-  uint64_t limit;
-  float maxdiff_bitmap;
-  float maxdiff_ratio;
+  uint8_t limit;        /**< max results */
+  float maxdiff_bitmap; /**< max difference of luma bitmaps */
+  float maxdiff_ratio;  /**< max difference of ratios, default - 7% */
 } imdb_search_t;
 
+/**
+ * search matches
+ */
 typedef struct {
-  uint64_t num;
-  float diff;
+  uint64_t num;       /**< record id */
+  float diff_ratio;   /**< difference of ratio */
+  float diff_bitmap;  /**< difference of bitmap */
 } imdb_match_t;
 
 /**
