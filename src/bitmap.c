@@ -92,14 +92,20 @@ bitmap_unpack(const unsigned char *map,
 
 void
 bitmap_print(const unsigned char *map) {
+  unsigned char *buf = NULL, *p = NULL;
   char line[BITMAP_SIDE * 2 + 1];
+
+  bitmap_unpack(map, &buf);
+  p = buf;
 
   line[BITMAP_SIDE * 2] = '\0';
   for (size_t i = 0; i < BITMAP_SIDE; i++) {
-    for (size_t j = 0; j < BITMAP_SIDE; j++, map++) {
-      line[(j * 2) + 0] = (*map == 0x00) ? CHAR_NONE : CHAR_USED;
-      line[(j * 2) + 1] = (*map == 0x00) ? CHAR_NONE : CHAR_USED;
+    for (size_t j = 0; j < BITMAP_SIDE; j++, p++) {
+      line[(j * 2) + 0] = (*p == 0x00) ? CHAR_NONE : CHAR_USED;
+      line[(j * 2) + 1] = (*p == 0x00) ? CHAR_NONE : CHAR_USED;
     }
     puts(line);
   }
+
+  FREE(buf);
 }
