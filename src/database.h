@@ -65,8 +65,8 @@ typedef struct {
 
 typedef struct {
   uint64_t limit;
-  float tresh_bitmap;
-  float tresh_ratio;
+  float maxdiff_bitmap;
+  float maxdiff_ratio;
 } imdb_search_t;
 
 typedef struct {

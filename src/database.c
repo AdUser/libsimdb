@@ -277,12 +277,10 @@ imdb_search(imdb_t        * const db,
     return -1;
   }
 
-  if (!sample->data[0]) {
-    db->errstr = "Source sample not exists";
-    return -1;
-  }
+  if (search->limit == 0)
+    search->limit = -1; /* unsigned -> max */
 
-  if (search->tresh_ratio > 0.0)
+  if (search->maxdiff_ratio > 0.0)
     ratio_s = ratio_from_rec_data(sample->data);
 
   *matches = NULL;
@@ -296,16 +294,16 @@ imdb_search(imdb_t        * const db,
       if (ratio_s > 0.0 && (ratio_t = ratio_from_rec_data(p)) > 0.0) {
         diff  =  ratio_s - ratio_t;
         diff *= (ratio_s > ratio_t) ? 1.0 : -1.0;
-        if (diff > search->tresh_ratio)
+        if (diff > search->maxdiff_ratio)
           continue;
       } else {
-        /* either ratio not set, can't compare, skipping test */
+        /* either source or target ratio not set, can't compare, skip test */
       }
 
       /* - compare bitmap - more expensive */
       diff  = (float) bitmap_compare(p + REC_OFF_BM, sample->data + REC_OFF_BM);
       diff /= BITMAP_BITS;
-      if (diff > search->tresh_bitmap)
+      if (diff > search->maxdiff_bitmap)
         continue;
 
       /* allocate more memory, if needed */
@@ -323,11 +321,11 @@ imdb_search(imdb_t        * const db,
       (*matches)[found].num  = blk.start + i;
       (*matches)[found].diff = diff;
       found++;
-      if (search->limit && found >= search->limit)
+      if (found >= search->limit)
         break;
     }
     FREE(blk.data);
-    if (search->limit && found >= search->limit)
+    if (found >= search->limit)
       break;
     blk.start += blk_size;
   }

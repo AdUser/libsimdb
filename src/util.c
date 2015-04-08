@@ -38,7 +38,7 @@ void usage(int exitcode) {
     exit(exitcode);
 }
 
-int search_similar(imdb_t *db, uint64_t number, float tresh)
+int search_similar(imdb_t *db, uint64_t number, float maxdiff)
 {
   int ret = 0, i = 0;
   imdb_rec_t sample;
@@ -47,23 +47,22 @@ int search_similar(imdb_t *db, uint64_t number, float tresh)
 
   memset(&sample, 0x0, sizeof(imdb_rec_t));
   memset(&search, 0x0, sizeof(imdb_search_t));
-  search.tresh_ratio  = tresh;
-  search.tresh_bitmap = tresh;
+  search.maxdiff_ratio  = 0.2; /* 20% */
+  search.maxdiff_bitmap = maxdiff;
 
   sample.num = number;
-  ret = imdb_search(db, &sample, &search, &matches);
-  if (ret == -1) {
+  if ((ret = imdb_search(db, &sample, &search, &matches)) < 0) {
     printf("%s\n", db->errstr);
     exit(EXIT_FAILURE);
   }
 
-  if (ret == 0)
-    return 0;
+  if (ret > 0) {
+    for (i = 0; i < ret; i++)
+      printf("%llu -- %.2f\n", matches[i].num, matches[i].diff * 100);
 
-  for (i = 0; i < ret; i++) {
-    printf("%llu -- %.2f\n", matches[i].num, matches[i].diff * 100);
+    FREE(matches);
   }
-  FREE(matches);
+
   return 0;
 }
 
