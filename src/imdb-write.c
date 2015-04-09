@@ -13,13 +13,14 @@ void usage(int exitcode) {
 puts(
 "  -A <num>,<path>  Add sample from 'path' as record 'num'\n"
 "  -D <num>         Delete record <num>\n"
+"  -I               Create database (init)\n"
 );
   exit(exitcode);
 }
 
 int main(int argc, char **argv)
 {
-  enum { undef, add, del } mode = undef;
+  enum { undef, add, del, init } mode = undef;
   char opt;
   const char *db_path = NULL;
   const char *sample = NULL;
@@ -33,7 +34,7 @@ int main(int argc, char **argv)
   if (argc < 3)
     usage(EXIT_FAILURE);
 
-  while ((opt = getopt(argc, argv, "b:A:D:")) != -1) {
+  while ((opt = getopt(argc, argv, "b:A:D:I")) != -1) {
     switch (opt) {
       case 'b' :
         db_path = optarg;
@@ -52,16 +53,21 @@ int main(int argc, char **argv)
         mode = del;
         rec.num = atoll(optarg);
         break;
+      case 'I' :
+        mode = init;
+        break;
       default :
         usage(EXIT_FAILURE);
         break;
     }
   }
 
-  if (db_path == NULL)
+  if (db_path == NULL) {
+    puts("db path not set");
     usage(EXIT_FAILURE);
+  }
 
-  if (imdb_open(&db, db_path, 1) != 0) {
+  if (mode != init && imdb_open(&db, db_path, 1) != 0) {
     puts(db.errstr);
     exit(EXIT_FAILURE);
   }
@@ -83,6 +89,12 @@ int main(int argc, char **argv)
     case del :
       if (imdb_write_rec(&db, &rec) < 1) {
         puts(db.errstr);
+        exit(EXIT_FAILURE);
+      }
+      break;
+    case init :
+      if (imdb_init(&db, db_path) == -1) {
+        printf("database init: %s\n", db.errstr);
         exit(EXIT_FAILURE);
       }
       break;

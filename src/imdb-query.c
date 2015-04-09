@@ -28,7 +28,6 @@ void usage(int exitcode) {
 "  -t <int>    Maximum difference pct (0 - 50, default: 10%)\n"
 );
     puts(
-"  -I          Create database (init)\n"
 "  -B <num>    Show bitmap for this sample\n"
 "  -C <a>,<b>  Show difference percent for this samples\n"
 "  -D <a>,<b>  Show difference bitmap for this samples\n"
@@ -154,7 +153,7 @@ int rec_diff(imdb_db_t *db, uint64_t a, uint64_t b, unsigned short int showmap)
 
 int main(int argc, char **argv)
 {
-  enum { undef, init, search, bitmap, usage_map, diff } mode = undef;
+  enum { undef, search, bitmap, usage_map, diff } mode = undef;
   const char *db_path = NULL;
   float maxdiff = 0.10;
   unsigned short int cols = 64, map = 0;
@@ -168,7 +167,7 @@ int main(int argc, char **argv)
   if (argc < 3)
     usage(EXIT_FAILURE);
 
-  while ((opt = getopt(argc, argv, "b:t:IB:C:D:S:U:")) != -1) {
+  while ((opt = getopt(argc, argv, "b:t:B:C:D:S:U:")) != -1) {
     switch (opt) {
       case 'b' :
         db_path = optarg;
@@ -180,9 +179,6 @@ int main(int argc, char **argv)
           maxdiff = 10;
         }
         maxdiff /= 100;
-        break;
-      case 'I' :
-        mode = init;
         break;
       case 'B' :
         mode = bitmap;
@@ -213,36 +209,40 @@ int main(int argc, char **argv)
     }
   }
 
-  if ((mode == search || mode == bitmap) && a <= 0)
-    usage(EXIT_FAILURE);
-
-  if (mode == diff && (a <= 0 || b <= 0))
-    usage(EXIT_FAILURE);
-
-  if (mode == init) {
-    if (imdb_init(&db, db_path) == -1) {
-      printf("database init: %s\n", db.errstr);
-      exit(EXIT_FAILURE);
-    }
-    exit(EXIT_SUCCESS);
-  }
-
   if (imdb_open(&db, db_path, 0) == -1) {
     printf("database open: %s\n", db.errstr);
     exit(EXIT_FAILURE);
   }
 
-  if (mode == search)
-    search_similar(&db, a, maxdiff);
-
-  if (mode == bitmap)
-    rec_bitmap(&db, a);
-
-  if (mode == usage_map)
-    db_usage_map(&db, cols);
-
-  if (mode == diff)
-    rec_diff(&db, a, b, map);
+  switch (mode) {
+    case search :
+      if (a <= 0) {
+        puts("can't parse number");
+        usage(EXIT_FAILURE);
+      }
+      search_similar(&db, a, maxdiff);
+      break;
+    case bitmap :
+      if (a <= 0) {
+        puts("can't parse number");
+        usage(EXIT_FAILURE);
+      }
+      rec_bitmap(&db, a);
+      break;
+    case usage_map :
+      db_usage_map(&db, cols);
+      break;
+    case diff :
+      if (a <= 0 || b <= 0) {
+        puts("both numbers must be set");
+        exit(EXIT_FAILURE);
+      }
+      rec_diff(&db, a, b, map);
+      break;
+    default :
+      usage(EXIT_SUCCESS);
+      break;
+  }
 
   imdb_close(&db);
 
