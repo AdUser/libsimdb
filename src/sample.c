@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bitmap.h"
 #include "database.h"
 #include "sample.h"
 
@@ -11,7 +12,7 @@ imdb_sample(imdb_rec_t * const rec,
   MagickWand *wand = NULL;
   MagickPassFail status = MagickPass;
   ExceptionType severity = 0;
-  unsigned long w = 0, h = 0;
+  uint16_t w = 0, h = 0;
   char *description = NULL;
   size_t buf_size = 64 * sizeof(char);
   unsigned char *buf = NULL;
@@ -82,9 +83,9 @@ imdb_sample(imdb_rec_t * const rec,
   if (status == MagickPass) {
     memset(rec, 0x0, sizeof(imdb_rec_t));
     rec->data[REC_OFF_RU] = 0xFF;
-    *((uint16_t *) &rec->data[REC_OFF_IW]) = (uint16_t) w;
-    *((uint16_t *) &rec->data[REC_OFF_IH]) = (uint16_t) h;
-    memcpy(&rec->data[REC_OFF_BM], buf, 32);
+    memcpy(&rec->data[REC_OFF_IW], &w, sizeof(uint16_t));
+    memcpy(&rec->data[REC_OFF_IH], &h, sizeof(uint16_t));
+    memcpy(&rec->data[REC_OFF_BM], buf, BITMAP_SIZE);
   } else {
     description = MagickGetException(wand, &severity);
     fprintf(stderr, "%03d %.1024s\n", severity, description); /* FIXME */
