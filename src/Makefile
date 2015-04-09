@@ -1,7 +1,8 @@
 CFLAGS=-Wall -Wextra -O2 -g -std=c99 -pedantic -fstack-protector --param=ssp-buffer-size=4 -Wformat -Werror=format-security
 CPPFLAGS=-D_FORTIFY_SOURCE=2
-SONAME=libimgdup.so.2
+SONAME=libimgdup.so.3
 LDFLAGS=-Wl,-soname,$(SONAME) -fPIC
+PREFIX ?= /usr/local
 
 all: libs utils
 
@@ -30,7 +31,14 @@ utils: imdb-query imdb-query-st imdb-write imdb-1to2
 
 GMFLAGS=$(shell GraphicsMagickWand-config --cppflags --ldflags --libs)
 imdb-write: imdb-write.c sample.c bitmap.c database.c
-	gcc $(CFLAGS) $(CPPFLAGS) $(GMFLAGS) -o $@ $^
+	gcc $(CFLAGS) $(CPPFLAGS) $(GMFLAGS) -limgdup -o $@ $^
+
+install: libimgdup.so utils
+	install -m755 -s -o root imdb-query   $(PREFIX)/bin
+	install -m755 -s -o root imdb-write   $(PREFIX)/bin
+	install -m755 -s -o root imdb-1to2    $(PREFIX)/bin
+	install -m644 -s -o root $(SONAME)    $(PREFIX)/lib
+	install -m644 -s -o root libimgdup.so $(PREFIX)/lib
 
 clean:
 	rm -f *.o
