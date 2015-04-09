@@ -7,7 +7,7 @@
 
 int
 imdb_sample(imdb_rec_t * const rec,
-                  char * const source)
+            const char * const source)
 {
   MagickWand *wand = NULL;
   MagickPassFail status = MagickPass;
