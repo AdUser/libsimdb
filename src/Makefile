@@ -17,16 +17,16 @@ libimgdup.a: database.o bitmap.o
 
 libs: libimgdup.so libimgdup.a
 
-util: util.o libimgdup.so
+imdb-query: query.o libimgdup.so
 	gcc $(CFLAGS) $(CPPFLAGS) -L. $< -o $@ -limgdup
 
-util-static: util.o libimgdup.a
+imdb-query-st: query.o libimgdup.a
 	gcc $(CFLAGS) $(CPPFLAGS) -L. $^ -o $@ -static
 
 imdb_1to2: imdb_1to2.c
 	gcc $(CFLAGS) $(CPPFLAGS) -o $@ $^
 
-utils: util util-static imdb_1to2
+utils: imdb-query imdb-query-st imdb_1to2
 
 GMFLAGS=$(shell GraphicsMagickWand-config --cppflags --ldflags --libs)
 sampler-test: sampler.c bitmap.c sampler-test.c
@@ -35,6 +35,6 @@ sampler-test: sampler.c bitmap.c sampler-test.c
 clean:
 	rm -f *.o
 	rm -f imdb_?to?
-	rm -f util
-	rm -f util-static
+	rm -f imdb-query
+	rm -f imdb-query-st
 	rm -f libimgdup*
