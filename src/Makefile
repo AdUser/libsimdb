@@ -23,18 +23,19 @@ imdb-query: query.o libimgdup.so
 imdb-query-st: query.o libimgdup.a
 	gcc $(CFLAGS) $(CPPFLAGS) -L. $^ -o $@ -static
 
-imdb_1to2: imdb_1to2.c
+imdb-1to2: imdb-1to2.c
 	gcc $(CFLAGS) $(CPPFLAGS) -o $@ $^
 
-utils: imdb-query imdb-query-st imdb_1to2
+utils: imdb-query imdb-query-st imdb-sampler imdb-1to2
 
 GMFLAGS=$(shell GraphicsMagickWand-config --cppflags --ldflags --libs)
-sampler-test: sampler.c bitmap.c sampler-test.c
+imdb-sampler: sampler.c sample.c bitmap.c
 	gcc $(CFLAGS) $(CPPFLAGS) $(GMFLAGS) -o $@ $^
 
 clean:
 	rm -f *.o
-	rm -f imdb_?to?
+	rm -f imdb-1to2
 	rm -f imdb-query
 	rm -f imdb-query-st
+	rm -f imdb-sampler
 	rm -f libimgdup*
