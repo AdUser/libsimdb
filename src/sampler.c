@@ -25,7 +25,7 @@ int main(int argc, char **argv)
     usage();
   }
 
-  if (imdb_open(&db, argv[1]) != 0) {
+  if (imdb_open(&db, argv[1], 1) != 0) {
     puts(db.errstr);
     usage();
   }

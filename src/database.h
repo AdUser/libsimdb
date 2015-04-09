@@ -3,10 +3,10 @@
 
 #define IMDB_REC_LEN 48
 #define IMDB_VERSION  2
-#define OPEN_FLAGS O_RDWR
 
 typedef struct {
   int fd;
+  int write;
   const char *path;
   const char *errstr;
   unsigned char caps[8];
@@ -99,7 +99,7 @@ extern int imdb_read_blk (imdb_db_t *db, imdb_block_t *blk);
 extern int imdb_write_blk(imdb_db_t *db, imdb_block_t *blk);
 
 extern int imdb_init (imdb_db_t *db, const char *path);
-extern int imdb_open (imdb_db_t *db, const char *path);
+extern int imdb_open (imdb_db_t *db, const char *path, int write);
 extern int imdb_close(imdb_db_t *db);
 
 float

@@ -60,6 +60,9 @@ int imdb_init(imdb_db_t *db, const char *path)
   DB_SEEK(db, 0);
   DB_WRITE(db, buf, IMDB_REC_LEN);
 
+  close(db->fd);
+  db->fd = -1;
+
   if (bytes != IMDB_REC_LEN) {
     db->errstr = "Can't write database header";
     return -1;
@@ -68,7 +71,7 @@ int imdb_init(imdb_db_t *db, const char *path)
   return 0;
 }
 
-int imdb_open(imdb_db_t *db, const char *path)
+int imdb_open(imdb_db_t *db, const char *path, int write)
 {
   ssize_t bytes = 0;
   struct stat st;
@@ -87,11 +90,12 @@ int imdb_open(imdb_db_t *db, const char *path)
   }
 
   errno = 0;
-  if ((db->fd = open(path, OPEN_FLAGS)) == -1) {
+  if ((db->fd = open(path, write ? O_RDWR : O_RDONLY)) == -1) {
     db->errstr = strerror(errno);
     return -1;
   }
-  db->path = path;
+  db->write = write;
+  db->path  = path;
 
   memset(buf, 0x0, IMDB_REC_LEN);
   DB_SEEK(db, 0);

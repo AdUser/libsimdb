@@ -227,7 +227,7 @@ int main(int argc, char **argv)
     exit(EXIT_SUCCESS);
   }
 
-  if (imdb_open(&db, db_path) == -1) {
+  if (imdb_open(&db, db_path, 0) == -1) {
     printf("database open: %s\n", db.errstr);
     exit(EXIT_FAILURE);
   }
