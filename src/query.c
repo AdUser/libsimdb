@@ -52,19 +52,18 @@ int search_similar(imdb_t *db, uint64_t number, float maxdiff)
 
   sample.num = number;
   if ((ret = imdb_search(db, &sample, &search, &matches)) < 0) {
-    printf("%s\n", db->errstr);
-    exit(EXIT_FAILURE);
+    puts(db->errstr);
+    return 0;
   }
 
-  if (ret > 0) {
-    for (i = 0; i < ret; i++)
-      printf("%llu -- bitmap: %.1f, ratio: %.1f\n",
-             matches[i].num,
-             matches[i].diff_bitmap * 100,
-             matches[i].diff_ratio  * 100);
-
-    FREE(matches);
+  for (i = 0; i < ret; i++) {
+    printf("%llu -- bitmap: %.1f, ratio: %.1f\n",
+           matches[i].num,
+           matches[i].diff_bitmap * 100,
+           matches[i].diff_ratio  * 100);
   }
+
+  FREE(matches);
 
   return 0;
 }
@@ -82,7 +81,7 @@ int db_usage_map(imdb_t *db, unsigned short int cols)
   if ((records = imdb_usage_map(db, &map)) == 0) {
     printf("Can't get database usage map\n");
     FREE(map);
-    exit(1);
+    return 0;
   }
 
   m = map;
@@ -95,7 +94,6 @@ int db_usage_map(imdb_t *db, unsigned short int cols)
   }
 
   FREE(map);
-
   return 0;
 }
 
@@ -107,10 +105,7 @@ int rec_bitmap(imdb_t *db, uint64_t number)
   memset(&rec, 0x0, sizeof(imdb_rec_t));
 
   rec.num = number;
-  if (imdb_read_rec(db, &rec) < 1)
-    return -1;
-
-  if (rec.data[0] != 0xFF) {
+  if (imdb_read_rec(db, &rec) < 1) {
     puts("Sample not exists");
     return 0;
   }
