@@ -98,9 +98,6 @@ extern int imdb_write_rec(imdb_t *db, imdb_rec_t *rec);
 extern int imdb_read_blk (imdb_t *db, imdb_block_t *blk);
 extern int imdb_write_blk(imdb_t *db, imdb_block_t *blk);
 
-extern int imdb_read_list (imdb_t *db, imdb_rec_t *list, size_t list_len);
-extern int imdb_write_list(imdb_t *db, imdb_rec_t *list, size_t list_len);
-
 extern int imdb_init (imdb_t *db, const char *path);
 extern int imdb_open (imdb_t *db, const char *path);
 extern int imdb_close(imdb_t *db);

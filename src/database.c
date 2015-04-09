@@ -183,48 +183,6 @@ int imdb_read_blk(imdb_t *db, imdb_block_t *blk)
   return blk->records;
 }
 
-int imdb_read_list(imdb_t *db, imdb_rec_t *list, size_t list_len)
-{
-  imdb_rec_t *r = NULL;
-  ssize_t bytes;
-  unsigned int i = 0;
-  unsigned int processed = 0;
-
-  assert(db   != NULL);
-  assert(list != NULL);
-  assert(list_len > 0);
-
-  r = list;
-  for (i = 0; i < list_len; i++, r++) {
-    DB_SEEK(db, r->num * IMDB_REC_LEN);
-    DB_READ(db, r->data, IMDB_REC_LEN);
-    if (bytes == IMDB_REC_LEN) { processed++; }
-  }
-
-  return processed;
-}
-
-int imdb_write_list(imdb_t *db, imdb_rec_t *list, size_t list_len)
-{
-  imdb_rec_t *r = NULL;
-  ssize_t bytes;
-  unsigned int i = 0;
-  unsigned int processed = 0;
-
-  assert(db   != NULL);
-  assert(list != NULL);
-  assert(list_len > 0);
-
-  r = list;
-  for (i = 0; i < list_len; i++, r++) {
-    DB_SEEK(db, r->num * IMDB_REC_LEN);
-    DB_WRITE(db, r->data, IMDB_REC_LEN);
-    if (bytes == IMDB_REC_LEN) { processed++; }
-  }
-
-  return processed;
-}
-
 uint64_t
 imdb_records_count(imdb_t * const db) {
   struct stat st;
