@@ -57,10 +57,10 @@ int search_similar(imdb_db_t *db, uint64_t number, float maxdiff)
   }
 
   for (i = 0; i < ret; i++) {
-    printf("%llu -- bitmap: %.1f, ratio: %.1f\n",
-           matches[i].num,
-           matches[i].diff_bitmap * 100,
-           matches[i].diff_ratio  * 100);
+    printf("%llu -- %.1f (bitmap), %.1f (ratio)\n",
+      matches[i].num,
+      matches[i].diff_bitmap * 100,
+      matches[i].diff_ratio  * 100);
   }
 
   FREE(matches);
