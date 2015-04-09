@@ -10,10 +10,10 @@ void usage() {
 
 int main(int argc, char **argv)
 {
-  imdb_t  db;
+  imdb_db_t  db;
   imdb_rec_t rec;
 
-  memset(&db,  0x0, sizeof(imdb_t));
+  memset(&db,  0x0, sizeof(imdb_db_t));
   memset(&rec, 0x0, sizeof(imdb_rec_t));
 
   if (argc < 4)

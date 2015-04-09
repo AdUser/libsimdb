@@ -10,7 +10,7 @@ typedef struct {
   const char *path;
   const char *errstr;
   unsigned char caps[8];
-} imdb_t;
+} imdb_db_t;
 
 /**
   Database header format - fixed length, 48 bytes
@@ -92,15 +92,15 @@ typedef struct {
  * @return 1 on success, 0 if record not used
  *          and -1 if record number not exists,
  */
-extern int imdb_read_rec (imdb_t *db, imdb_rec_t *rec);
-extern int imdb_write_rec(imdb_t *db, imdb_rec_t *rec);
+extern int imdb_read_rec (imdb_db_t *db, imdb_rec_t *rec);
+extern int imdb_write_rec(imdb_db_t *db, imdb_rec_t *rec);
 
-extern int imdb_read_blk (imdb_t *db, imdb_block_t *blk);
-extern int imdb_write_blk(imdb_t *db, imdb_block_t *blk);
+extern int imdb_read_blk (imdb_db_t *db, imdb_block_t *blk);
+extern int imdb_write_blk(imdb_db_t *db, imdb_block_t *blk);
 
-extern int imdb_init (imdb_t *db, const char *path);
-extern int imdb_open (imdb_t *db, const char *path);
-extern int imdb_close(imdb_t *db);
+extern int imdb_init (imdb_db_t *db, const char *path);
+extern int imdb_open (imdb_db_t *db, const char *path);
+extern int imdb_close(imdb_db_t *db);
 
 float
 ratio_from_rec_data(unsigned char * const data);
@@ -112,22 +112,22 @@ ratio_from_rec_data(unsigned char * const data);
   >0 if found some matches
  */
 extern int
-imdb_search(imdb_t        * const db,
+imdb_search(imdb_db_t     * const db,
             imdb_rec_t    * const sample,
             imdb_search_t * const search,
-            imdb_match_t  **matches);
+            imdb_match_t  ** matches);
 
 /**
  @returns: number of records in database
 */
 uint64_t
-imdb_records_count(imdb_t * const db);
+imdb_records_count(imdb_db_t * const db);
 
 /**
   @brief   fills buffer 'map' according to records existense in database
   @returns records processed (and also buffer size)
 */
 uint64_t
-imdb_usage_map(imdb_t * const db,
-               char  ** const map);
+imdb_usage_map(imdb_db_t * const db,
+               char     ** const map);
 #endif

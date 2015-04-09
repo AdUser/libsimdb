@@ -38,7 +38,7 @@ void usage(int exitcode) {
     exit(exitcode);
 }
 
-int search_similar(imdb_t *db, uint64_t number, float maxdiff)
+int search_similar(imdb_db_t *db, uint64_t number, float maxdiff)
 {
   int ret = 0, i = 0;
   imdb_rec_t sample;
@@ -68,7 +68,7 @@ int search_similar(imdb_t *db, uint64_t number, float maxdiff)
   return 0;
 }
 
-int db_usage_map(imdb_t *db, unsigned short int cols)
+int db_usage_map(imdb_db_t *db, unsigned short int cols)
 {
   char *map = NULL;
   char *m   = NULL;
@@ -97,7 +97,7 @@ int db_usage_map(imdb_t *db, unsigned short int cols)
   return 0;
 }
 
-int rec_bitmap(imdb_t *db, uint64_t number)
+int rec_bitmap(imdb_db_t *db, uint64_t number)
 {
   imdb_rec_t rec;
 
@@ -115,7 +115,7 @@ int rec_bitmap(imdb_t *db, uint64_t number)
   return 0;
 }
 
-int rec_diff(imdb_t *db, uint64_t a, uint64_t b, unsigned short int showmap)
+int rec_diff(imdb_db_t *db, uint64_t a, uint64_t b, unsigned short int showmap)
 {
   imdb_rec_t rec;
   float diff = 0.0;
@@ -158,12 +158,12 @@ int main(int argc, char **argv)
   const char *db_path = NULL;
   float maxdiff = 0.10;
   unsigned short int cols = 64, map = 0;
-  imdb_t db;
+  imdb_db_t db;
   uint64_t a = 0, b = 0;
   char *c = NULL;
   char opt = '\0';
 
-  memset(&db, 0x0, sizeof(imdb_t));
+  memset(&db, 0x0, sizeof(imdb_db_t));
 
   if (argc < 3)
     usage(EXIT_FAILURE);

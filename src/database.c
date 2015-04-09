@@ -44,7 +44,7 @@
 
 const char *imdb_hdr_fmt = "IMDB v%02u, CAPS: %s;";
 
-int imdb_init(imdb_t *db, const char *path)
+int imdb_init(imdb_db_t *db, const char *path)
 {
   ssize_t bytes = 0;
   unsigned char buf[IMDB_REC_LEN];
@@ -68,7 +68,7 @@ int imdb_init(imdb_t *db, const char *path)
   return 0;
 }
 
-int imdb_open(imdb_t *db, const char *path)
+int imdb_open(imdb_db_t *db, const char *path)
 {
   ssize_t bytes = 0;
   struct stat st;
@@ -77,7 +77,7 @@ int imdb_open(imdb_t *db, const char *path)
   assert(db   != NULL);
   assert(path != NULL);
 
-  memset(db, 0x0, sizeof(imdb_t));
+  memset(db, 0x0, sizeof(imdb_db_t));
   db->fd = -1;
 
   errno = 0;
@@ -117,7 +117,7 @@ int imdb_open(imdb_t *db, const char *path)
   return 0;
 }
 
-int imdb_close(imdb_t *db)
+int imdb_close(imdb_db_t *db)
 {
   assert(db != NULL);
 
@@ -131,7 +131,7 @@ int imdb_close(imdb_t *db)
   return 0;
 }
 
-int imdb_read_rec(imdb_t *db, imdb_rec_t *rec)
+int imdb_read_rec(imdb_db_t *db, imdb_rec_t *rec)
 {
   ssize_t bytes = 0;
 
@@ -151,7 +151,7 @@ int imdb_read_rec(imdb_t *db, imdb_rec_t *rec)
   return 1;
 }
 
-int imdb_write_rec(imdb_t *db, imdb_rec_t *rec)
+int imdb_write_rec(imdb_db_t *db, imdb_rec_t *rec)
 {
   ssize_t bytes = 0;
 
@@ -168,7 +168,7 @@ int imdb_write_rec(imdb_t *db, imdb_rec_t *rec)
   return 1;
 }
 
-int imdb_read_blk(imdb_t *db, imdb_block_t *blk)
+int imdb_read_blk(imdb_db_t *db, imdb_block_t *blk)
 {
   ssize_t bytes = 0;
 
@@ -187,7 +187,7 @@ int imdb_read_blk(imdb_t *db, imdb_block_t *blk)
 }
 
 uint64_t
-imdb_records_count(imdb_t * const db) {
+imdb_records_count(imdb_db_t * const db) {
   struct stat st;
   off_t size = 0;
 
@@ -210,7 +210,7 @@ ratio_from_rec_data(unsigned char * const data) {
 }
 
 int
-imdb_search(imdb_t        * const db,
+imdb_search(imdb_db_t     * const db,
             imdb_rec_t    * const sample,
             imdb_search_t * const search,
             imdb_match_t  **matches)
@@ -291,8 +291,8 @@ imdb_search(imdb_t        * const db,
 }
 
 uint64_t
-imdb_usage_map(imdb_t * const db,
-               char  ** const map) {
+imdb_usage_map(imdb_db_t * const db,
+               char     ** const map) {
   const int blk_size = 4096;
   imdb_block_t blk;
   uint64_t records;
