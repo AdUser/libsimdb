@@ -29,7 +29,7 @@ imdb-1to2: imdb-1to2.c
 utils: imdb-query imdb-query-st imdb-sampler imdb-1to2
 
 GMFLAGS=$(shell GraphicsMagickWand-config --cppflags --ldflags --libs)
-imdb-sampler: sampler.c sample.c bitmap.c
+imdb-sampler: sampler.c sample.c bitmap.c database.c
 	gcc $(CFLAGS) $(CPPFLAGS) $(GMFLAGS) -o $@ $^
 
 clean:
