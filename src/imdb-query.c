@@ -23,7 +23,7 @@
 
 void usage(int exitcode) {
     puts(
-"Usage: imdb-util <opts>\n"
+"Usage: imdb-query <opts>\n"
 "  -b <path>   Path to database\n"
 "  -t <int>    Maximum difference pct (0 - 50, default: 10%)\n"
 );
