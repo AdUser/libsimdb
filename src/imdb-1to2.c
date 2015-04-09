@@ -46,6 +46,15 @@ int main(int argc, char **argv) {
   if ((st.st_size % IMDB_REC_LEN) != 0)
     usage("database size expected to be multiples to 48");
 
+  if (lseek(in, 0, SEEK_SET) < 0)
+    usage(strerror(errno));
+
+  if (read(in, in_buf, IMDB_REC_LEN) != IMDB_REC_LEN)
+    usage("can't read header of database");
+
+  if (memcmp(in_buf, "DB of image fingerprints (ver 1)", 32) != 0)
+    usage("wrong database header / version mismatch");
+
   imdb_rec_total = (st.st_size / IMDB_REC_LEN);
   printf("Processing %lu records\n", imdb_rec_total - 1);
 
