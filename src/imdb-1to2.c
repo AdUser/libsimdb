@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
     lseek(out, rec_first * IMDB_REC_LEN, SEEK_SET);
     bytes = read(in, in_buf, IMDB_REC_LEN * records);
     if (bytes != (ssize_t) records * IMDB_REC_LEN) {
-      printf("Read size mismatch, expected %lu, got: %i\n",
+      printf("Read size mismatch, expected %lu, got: %zi\n",
         IMDB_REC_LEN * records, bytes);
       exit(EXIT_FAILURE);
     }
@@ -89,7 +89,7 @@ int main(int argc, char **argv) {
     }
     bytes = write(out, out_buf, IMDB_REC_LEN * records);
     if (bytes != (ssize_t) records * IMDB_REC_LEN) {
-      printf("Write size mismatch, expected %lu, got: %i\n",
+      printf("Write size mismatch, expected %lu, got: %zi\n",
         IMDB_REC_LEN * records, bytes);
       exit(EXIT_FAILURE); 
     }
