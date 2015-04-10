@@ -210,7 +210,7 @@ ratio_from_rec_data(unsigned char * const data) {
   iw = *((uint16_t *)(data + REC_OFF_IW));
   ih = *((uint16_t *)(data + REC_OFF_IH));
 
-  return (iw > 0 && ih > 0) ? (iw / ih) : 0.0;
+  return (iw > 0 && ih > 0) ? ((float) iw / ih) : 0.0;
 }
 
 int
