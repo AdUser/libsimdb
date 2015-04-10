@@ -23,7 +23,7 @@ imdb_sample(imdb_rec_t * const rec,
     status = MagickReadImage(wand, source);
 
   if (status == MagickPass)
-    w = MagickGetImageHeight(wand);
+    w = MagickGetImageWidth(wand);
 
   if (status == MagickPass)
     h = MagickGetImageHeight(wand);
