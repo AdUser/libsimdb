@@ -217,6 +217,11 @@ int main(int argc, char **argv)
     }
   }
 
+  if (db_path == NULL) {
+    puts("database path not set");
+    usage(EXIT_FAILURE);
+  }
+
   if (imdb_open(&db, db_path, 0) == -1) {
     printf("database open: %s\n", db.errstr);
     exit(EXIT_FAILURE);
