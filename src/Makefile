@@ -27,11 +27,11 @@ imdb-query-st: imdb-query.o libimgdup.a
 imdb-1to2: imdb-1to2.c
 	gcc $(CFLAGS) $(CPPFLAGS) -o $@ $^
 
-utils: imdb-query imdb-query-st imdb-write imdb-1to2
-
 GMFLAGS=$(shell GraphicsMagickWand-config --cppflags --ldflags --libs)
 imdb-write: imdb-write.c sample.c bitmap.c database.c
-	gcc $(CFLAGS) $(CPPFLAGS) $(GMFLAGS) -limgdup -o $@ $^
+	gcc $(CFLAGS) $(CPPFLAGS) -L. $(GMFLAGS) -o $@ $^ -limgdup
+
+utils: imdb-query imdb-query-st imdb-write imdb-1to2
 
 install: libimgdup.so utils
 	install -m755 -s -o root imdb-query   $(PREFIX)/bin
