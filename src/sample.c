@@ -36,9 +36,9 @@ imdb_sample(imdb_rec_t * const rec,
   /* TODO: color maps */
 
   /* 2 -> 256 : number of colors */
-  /* 3 ->   0 : treedepth     -> auto */
-  /* 4 ->   0 : dither        -> none */
-  /* 5 ->   0 : measure_error -> none */
+  /* 4 ->   0 : treedepth     -> auto */
+  /* 5 ->   0 : dither        -> none */
+  /* 6 ->   0 : measure_error -> none */
   if (status == MagickPass)
     status = MagickQuantizeImage(wand, 256, GRAYColorspace, 0, 0, 0);
 
@@ -90,7 +90,7 @@ imdb_sample(imdb_rec_t * const rec,
     memcpy(&rec->data[REC_OFF_BM], buf, BITMAP_SIZE);
   } else {
     description = MagickGetException(wand, &severity);
-    fprintf(stderr, "%03d %.1024s\n", severity, description); /* FIXME */
+    fprintf(stderr, "%03d %.1024s\n", severity, description);
   }
 
   DestroyMagickWand(wand);
