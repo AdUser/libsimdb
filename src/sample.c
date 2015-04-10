@@ -72,15 +72,17 @@ imdb_sample(imdb_rec_t * const rec,
     buf = MagickWriteImageBlob(wand, &buf_size);
 
 #ifdef DEBUG
-  fprintf(stderr, "sample H: %lu\n", MagickGetImageWidth(wand));
-  fprintf(stderr, "sample W: %lu\n", MagickGetImageWidth(wand));
-  fprintf(stderr, "buf size: %u\n", buf_size);
-  for (unsigned int i = 0; i < buf_size; i++)
-    fprintf(stderr, "%02X", buf[i]);
+  if (status == MagickPass) {
+    fprintf(stderr, "sample H: %lu\n", MagickGetImageWidth(wand));
+    fprintf(stderr, "sample W: %lu\n", MagickGetImageWidth(wand));
+    fprintf(stderr, "buf size: %zu\n", buf_size);
+    for (unsigned int i = 0; i < buf_size; i++)
+      fprintf(stderr, "%02X", buf[i]);
+  }
 #endif
-  assert(buf_size == 32);
 
   if (status == MagickPass) {
+    assert(buf_size == 32);
     memset(rec->data, 0x0, IMDB_REC_LEN);
     rec->data[REC_OFF_RU] = 0xFF;
     memcpy(&rec->data[REC_OFF_IW], &w, sizeof(uint16_t));
