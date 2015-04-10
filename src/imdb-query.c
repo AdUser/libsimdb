@@ -33,6 +33,7 @@ void usage(int exitcode) {
 "  -D <a>,<b>  Show difference bitmap for this samples\n"
 "  -S <num>    Search for images similar ot this sample\n"
 "  -U <num>    Show db usage map, <num> entries per column\n"
+"              Special case - 0, output will be single line\n"
 );
     exit(exitcode);
 }
@@ -79,6 +80,13 @@ int db_usage_map(imdb_db_t *db, unsigned short int cols)
 
   if ((records = imdb_usage_map(db, &map)) == 0) {
     printf("Can't get database usage map\n");
+    FREE(map);
+    return 0;
+  }
+
+  if (cols == 0) {
+    putchar(CHAR_NONE); /* zero */
+    puts(map);
     FREE(map);
     return 0;
   }
@@ -200,8 +208,8 @@ int main(int argc, char **argv)
       case 'U' :
         mode = usage_map;
         cols = atoi(optarg);
-        if (cols <= 0 || cols >= 256)
-          cols = 64;
+        if (cols >= 256)
+          cols = 100;
         break;
       default :
         usage(EXIT_FAILURE);
