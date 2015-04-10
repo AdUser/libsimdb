@@ -73,7 +73,7 @@ int db_usage_map(imdb_db_t *db, unsigned short int cols)
   char *map = NULL;
   char *m   = NULL;
   char row[256];
-  uint64_t records;
+  uint64_t records, pos;
   uint8_t rest = 0;
 
   memset(row, 0x0, sizeof(char) * 256);
@@ -95,7 +95,8 @@ int db_usage_map(imdb_db_t *db, unsigned short int cols)
   while (records) {
     rest = (records > cols) ? cols : records;
     memcpy(row, m, rest);
-    printf("%7d : %s\n", (m - map + 1), row);
+    pos = m - map + 1;
+    printf("%7llu : %s\n", pos, row);
     m       += rest;
     records -= rest;
   }
