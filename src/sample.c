@@ -82,7 +82,7 @@ imdb_sample(imdb_rec_t * const rec,
 #endif
 
   if (status == MagickPass) {
-    assert(buf_size == 32);
+    assert(buf_size == BITMAP_SIZE);
     memset(rec->data, 0x0, IMDB_REC_LEN);
     rec->data[REC_OFF_RU] = 0xFF;
     memcpy(&rec->data[REC_OFF_IW], &w, sizeof(uint16_t));
