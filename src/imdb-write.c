@@ -6,11 +6,11 @@
 #include <getopt.h>
 
 void usage(int exitcode) {
-  puts(
+  fprintf(stderr,
 "Usage: imdb-write <opts>\n"
 "  -b <path>   Path to database\n"
 );
-puts(
+  fprintf(stderr,
 "  -A <num>,<path>  Add sample from 'path' as record 'num'\n"
 "  -D <num>         Delete record <num>\n"
 "  -I               Create database (init)\n"
@@ -63,12 +63,12 @@ int main(int argc, char **argv)
   }
 
   if (db_path == NULL) {
-    puts("db path not set");
+    fprintf(stderr, "error: db path not set\n");
     usage(EXIT_FAILURE);
   }
 
   if (mode != init && imdb_open(&db, db_path, 1) != 0) {
-    puts(db.errstr);
+    fprintf(stderr, "can't open database: %s\n", db.errstr);
     exit(EXIT_FAILURE);
   }
 
@@ -77,24 +77,24 @@ int main(int argc, char **argv)
       if (rec.num == 0 || sample == NULL)
         usage(EXIT_FAILURE);
       if (imdb_sample(&rec, sample) != 0) {
-        puts("sampler failure");
+        fprintf(stderr, "sampler failure\n");
         exit(EXIT_FAILURE);
       }
       if (imdb_write_rec(&db, &rec) < 1) {
-        puts(db.errstr);
+        fprintf(stderr, "%s\n", db.errstr);
         exit(EXIT_FAILURE);
       }
       bitmap_print(&rec.data[REC_OFF_BM]);
       break;
     case del :
       if (imdb_write_rec(&db, &rec) < 1) {
-        puts(db.errstr);
+        fprintf(stderr, "%s\n", db.errstr);
         exit(EXIT_FAILURE);
       }
       break;
     case init :
       if (imdb_init(&db, db_path) == -1) {
-        printf("database init: %s\n", db.errstr);
+        fprintf(stderr, "database init: %s\n", db.errstr);
         exit(EXIT_FAILURE);
       }
       break;

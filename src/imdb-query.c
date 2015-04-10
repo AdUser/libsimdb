@@ -22,12 +22,12 @@
 #include <getopt.h>
 
 void usage(int exitcode) {
-    puts(
+  fprintf(stderr,
 "Usage: imdb-query <opts>\n"
 "  -b <path>   Path to database\n"
-"  -t <int>    Maximum difference pct (0 - 50, default: 10%)\n"
+"  -t <int>    Maximum difference pct (0 - 50, default: 10%%)\n"
 );
-    puts(
+  fprintf(stderr,
 "  -B <num>    Show bitmap for this sample\n"
 "  -C <a>,<b>  Show difference percent for this samples\n"
 "  -D <a>,<b>  Show difference bitmap for this samples\n"
@@ -35,7 +35,7 @@ void usage(int exitcode) {
 "  -U <num>    Show db usage map, <num> entries per column\n"
 "              Special case - 0, output will be single line\n"
 );
-    exit(exitcode);
+  exit(exitcode);
 }
 
 int search_similar(imdb_db_t *db, uint64_t number, float maxdiff)
@@ -52,8 +52,8 @@ int search_similar(imdb_db_t *db, uint64_t number, float maxdiff)
 
   sample.num = number;
   if ((ret = imdb_search(db, &sample, &search, &matches)) < 0) {
-    puts(db->errstr);
-    return 0;
+    fprintf(stderr, "%s\n", db->errstr);
+    return 1;
   }
 
   for (i = 0; i < ret; i++) {
@@ -79,9 +79,9 @@ int db_usage_map(imdb_db_t *db, unsigned short int cols)
   memset(row, 0x0, sizeof(char) * 256);
 
   if ((records = imdb_usage_map(db, &map)) == 0) {
-    printf("Can't get database usage map\n");
+    fprintf(stderr, "database usage: can't get database map\n");
     FREE(map);
-    return 0;
+    return 1;
   }
 
   if (cols == 0) {
@@ -114,8 +114,8 @@ int rec_bitmap(imdb_db_t *db, uint64_t number)
 
   rec.num = number;
   if (imdb_read_rec(db, &rec) < 1) {
-    puts("Sample not exists");
-    return 0;
+    fprintf(stderr, "bitmap: %s\n", "sample not found");
+    return 1;
   }
 
   bitmap_print(&rec.data[REC_OFF_BM]);
@@ -136,15 +136,15 @@ int rec_diff(imdb_db_t *db, uint64_t a, uint64_t b, unsigned short int showmap)
 
   rec.num = a;
   if (imdb_read_rec(db, &rec) < 1) {
-    puts("First sample not exists");
-    return 0;
+    fprintf(stderr, "record diff: first sample not exists\n");
+    return 1;
   }
   memcpy(one, &rec.data[REC_OFF_BM], BITMAP_SIZE);
 
   rec.num = b;
   if (imdb_read_rec(db, &rec) < 1) {
-    puts("Second sample not exists");
-    return 0;
+    fprintf(stderr, "record diff: second sample not exists\n");
+    return 1;
   }
   memcpy(two, &rec.data[REC_OFF_BM], BITMAP_SIZE);
 
@@ -165,7 +165,7 @@ int main(int argc, char **argv)
   enum { undef, search, bitmap, usage_map, diff } mode = undef;
   const char *db_path = NULL;
   float maxdiff = 0.10;
-  unsigned short int cols = 64, map = 0;
+  unsigned short int cols = 64, map = 0, ret = 0;
   imdb_db_t db;
   uint64_t a = 0, b = 0;
   char *c = NULL;
@@ -184,7 +184,7 @@ int main(int argc, char **argv)
       case 't' :
         maxdiff = atoi(optarg);
         if (maxdiff > 50 || maxdiff < 0) {
-          puts("maxdiff out of bounds (0% - 50%), using default - 10%");
+          fprintf(stderr, "maxdiff out of bounds (0%% - 50%%), using default - 10%%\n");
           maxdiff = 10;
         }
         maxdiff /= 100;
@@ -219,39 +219,39 @@ int main(int argc, char **argv)
   }
 
   if (db_path == NULL) {
-    puts("database path not set");
-    usage(EXIT_FAILURE);
+    fprintf(stderr, "database path not set\n");
+    exit(EXIT_FAILURE);
   }
 
   if (imdb_open(&db, db_path, 0) == -1) {
-    printf("database open: %s\n", db.errstr);
+    fprintf(stderr, "database open: %s\n", db.errstr);
     exit(EXIT_FAILURE);
   }
 
   switch (mode) {
     case search :
       if (a <= 0) {
-        puts("can't parse number");
+        fprintf(stderr, "can't parse number\n");
         usage(EXIT_FAILURE);
       }
-      search_similar(&db, a, maxdiff);
+      ret = search_similar(&db, a, maxdiff);
       break;
     case bitmap :
       if (a <= 0) {
-        puts("can't parse number");
+        fprintf(stderr, "can't parse number\n");
         usage(EXIT_FAILURE);
       }
-      rec_bitmap(&db, a);
+      ret = rec_bitmap(&db, a);
       break;
     case usage_map :
-      db_usage_map(&db, cols);
+      ret = db_usage_map(&db, cols);
       break;
     case diff :
       if (a <= 0 || b <= 0) {
-        puts("both numbers must be set");
+        fprintf(stderr, "both numbers must be set\n");
         exit(EXIT_FAILURE);
       }
-      rec_diff(&db, a, b, map);
+      ret = rec_diff(&db, a, b, map);
       break;
     default :
       usage(EXIT_SUCCESS);
@@ -260,5 +260,5 @@ int main(int argc, char **argv)
 
   imdb_close(&db);
 
-  exit(EXIT_SUCCESS);
+  return ret;
 }
