@@ -130,4 +130,17 @@ imdb_records_count(imdb_db_t * const db);
 uint64_t
 imdb_usage_map(imdb_db_t * const db,
                char     ** const map);
+
+/**
+  @brief   fills buffer 'map' according to records existense in given range
+  @param   offset  start of slice position
+  @param   limit   slice size
+  @returns records processed (and also buffer size)
+*/
+uint16_t
+imdb_usage_slice(imdb_db_t * const db,
+                 char     ** const map,
+                 uint64_t  offset,
+                 uint16_t  limit);
+
 #endif

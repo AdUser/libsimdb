@@ -323,3 +323,28 @@ imdb_usage_map(imdb_db_t * const db,
 
   return records;
 }
+
+uint16_t
+imdb_usage_slice(imdb_db_t * const db,
+                 char     ** const map,
+                 uint64_t  offset,
+                 uint16_t  limit) {
+  imdb_block_t blk;
+  unsigned char *r; /* mnemonics : block, record */
+  char *m = NULL;   /* mnemonics : map */
+
+  memset(&blk, 0x0, sizeof(imdb_block_t));
+  CALLOC(*map, limit + 1, sizeof(char));
+
+  m = *map;
+  blk.start = offset;
+  blk.records = limit;
+
+  limit = imdb_read_blk(db, &blk);
+  r = blk.data;
+  for (uint16_t i = 0;  i < blk.records;  i++, m++, r += IMDB_REC_LEN) {
+    *m = (r[REC_OFF_RU] == 0xFF) ? CHAR_USED : CHAR_NONE;
+  }
+
+  return limit;
+}
