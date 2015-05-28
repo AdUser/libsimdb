@@ -84,7 +84,6 @@ int main(int argc, char **argv)
         fprintf(stderr, "%s\n", db.errstr);
         exit(EXIT_FAILURE);
       }
-      bitmap_print(&rec.data[REC_OFF_BM]);
       break;
     case del :
       if (imdb_write_rec(&db, &rec) < 1) {
