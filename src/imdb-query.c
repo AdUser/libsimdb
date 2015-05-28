@@ -34,6 +34,8 @@ void usage(int exitcode) {
 "  -S <num>    Search for images similar ot this sample\n"
 "  -U <num>    Show db usage map, <num> entries per column\n"
 "              Special case - 0, output will be single line\n"
+"  -W <a>,<b>  Show usage map starting from <a>, but no more\n"
+"              than <b> entries (limit)\n"
 );
   exit(exitcode);
 }
@@ -105,6 +107,17 @@ int db_usage_map(imdb_db_t *db, unsigned short int cols)
   return 0;
 }
 
+int db_usage_slice(imdb_db_t *db, uint64_t offset, uint16_t limit)
+{
+  char *map = NULL;
+
+  limit = imdb_usage_slice(db, &map, offset, limit);
+  puts(map);
+  FREE(map);
+
+  return 0;
+}
+
 int rec_bitmap(imdb_db_t *db, uint64_t number)
 {
   imdb_rec_t rec;
@@ -162,7 +175,7 @@ int rec_diff(imdb_db_t *db, uint64_t a, uint64_t b, unsigned short int showmap)
 
 int main(int argc, char **argv)
 {
-  enum { undef, search, bitmap, usage_map, diff } mode = undef;
+  enum { undef, search, bitmap, usage_map, usage_slice, diff } mode = undef;
   const char *db_path = NULL;
   float maxdiff = 0.10;
   unsigned short int cols = 64, map = 0, ret = 0;
@@ -176,7 +189,7 @@ int main(int argc, char **argv)
   if (argc < 3)
     usage(EXIT_FAILURE);
 
-  while ((opt = getopt(argc, argv, "b:t:B:C:D:S:U:")) != -1) {
+  while ((opt = getopt(argc, argv, "b:t:B:C:D:S:U:W:")) != -1) {
     switch (opt) {
       case 'b' :
         db_path = optarg;
@@ -212,6 +225,13 @@ int main(int argc, char **argv)
         if (cols >= 256)
           cols = 100;
         break;
+      case 'W' :
+        mode = usage_slice;
+        if ((c = strchr(optarg, ',')) == NULL)
+          usage(EXIT_FAILURE);
+        a = atoll(optarg);
+        b = atoll(c + 1);
+        break;
       default :
         usage(EXIT_FAILURE);
         break;
@@ -245,6 +265,9 @@ int main(int argc, char **argv)
       break;
     case usage_map :
       ret = db_usage_map(&db, cols);
+      break;
+    case usage_slice :
+      ret = db_usage_slice(&db, a, b);
       break;
     case diff :
       if (a <= 0 || b <= 0) {
