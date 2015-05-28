@@ -38,7 +38,8 @@ install: libimgdup.so utils
 	install -m755 -s -o root imdb-write   $(PREFIX)/bin
 	install -m755 -s -o root imdb-1to2    $(PREFIX)/bin
 	install -m644 -s -o root $(SONAME)    $(PREFIX)/lib
-	install -m644 -s -o root libimgdup.so $(PREFIX)/lib
+	(cd $(PREFIX)/lib && ln -sf $(SONAME) libimgdup.so)
+	ldconfig
 
 clean:
 	rm -f *.o
