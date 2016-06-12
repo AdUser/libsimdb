@@ -2,7 +2,7 @@
 #include "../src/bitmap.h"
 
 int
-main(int argc, char **argv)
+main()
 {
   bitmap_t a, b;
 
