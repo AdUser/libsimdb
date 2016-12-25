@@ -18,25 +18,18 @@
 #include "database.h"
 #include "bitmap.h"
 
-#define DB_SEEK(db, offset) \
-  errno = 0; \
-  if (lseek((db)->fd, (offset), SEEK_SET) == -1) { \
-    (db)->errstr = strerror(errno); \
-    return -1; \
-  }
-
-#define DB_READ(db, buf, len) \
+#define DB_READ(db, buf, len, off) \
   errno = 0; \
   memset((buf), 0x0, (len)); \
-  bytes = read((db)->fd, (buf), (len)); \
+  bytes = pread((db)->fd, (buf), (len), (off)); \
   if (errno) { \
     (db)->errstr = strerror(errno); \
     return -1; \
   }
 
-#define DB_WRITE(db, buf, len) \
+#define DB_WRITE(db, buf, len, off) \
   errno = 0; \
-  bytes = write((db)->fd, (buf), (len)); \
+  bytes = pwrite((db)->fd, (buf), (len), (off)); \
   if (errno) { \
     (db)->errstr = strerror(errno); \
     return -1; \
@@ -57,8 +50,7 @@ int imdb_init(imdb_db_t *db, const char *path)
   }
 
   snprintf((char *) buf, IMDB_REC_LEN, imdb_hdr_fmt, IMDB_VERSION, "M-R");
-  DB_SEEK(db, 0);
-  DB_WRITE(db, buf, IMDB_REC_LEN);
+  DB_WRITE(db, buf, IMDB_REC_LEN, 0);
 
   close(db->fd);
   db->fd = -1;
@@ -97,9 +89,8 @@ int imdb_open(imdb_db_t *db, const char *path, int write)
   db->write = write;
   db->path  = path;
 
-  memset(buf, 0x0, IMDB_REC_LEN);
-  DB_SEEK(db, 0);
-  DB_READ(db, buf, IMDB_REC_LEN);
+  DB_READ(db, buf, IMDB_REC_LEN, 0);
+
   if (bytes != IMDB_REC_LEN) {
     db->errstr = "Empty or damaged database file";
     return -1;
@@ -143,8 +134,7 @@ int imdb_read_rec(imdb_db_t *db, imdb_rec_t *rec)
   assert(rec != NULL);
   assert(rec->num > 0);
 
-  DB_SEEK(db, rec->num * IMDB_REC_LEN);
-  DB_READ(db, rec->data, IMDB_REC_LEN);
+  DB_READ(db, rec->data, IMDB_REC_LEN, rec->num * IMDB_REC_LEN);
 
   if (bytes != IMDB_REC_LEN)
     return -1;
@@ -163,8 +153,7 @@ int imdb_write_rec(imdb_db_t *db, imdb_rec_t *rec)
   assert(rec != NULL);
   assert(rec->num > 0);
 
-  DB_SEEK(db, rec->num * IMDB_REC_LEN);
-  DB_WRITE(db, rec->data, IMDB_REC_LEN);
+  DB_WRITE(db, rec->data, IMDB_REC_LEN, rec->num * IMDB_REC_LEN);
 
   if (bytes != IMDB_REC_LEN)
     return -1;
@@ -183,8 +172,7 @@ int imdb_read_blk(imdb_db_t *db, imdb_block_t *blk)
 
   FREE(blk->data);
   CALLOC(blk->data, blk->records, IMDB_REC_LEN);
-  DB_SEEK(db, blk->start * IMDB_REC_LEN);
-  DB_READ(db, blk->data, blk->records * IMDB_REC_LEN);
+  DB_READ(db, blk->data, blk->records * IMDB_REC_LEN, blk->start * IMDB_REC_LEN);
   blk->records = bytes / IMDB_REC_LEN;
 
   return blk->records;
