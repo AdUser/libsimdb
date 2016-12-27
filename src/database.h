@@ -92,15 +92,15 @@ typedef struct {
  * @return 1 on success, 0 if record not used
  *          and -1 if record number not exists,
  */
-extern int imdb_read_rec (imdb_db_t *db, imdb_rec_t *rec);
-extern int imdb_write_rec(imdb_db_t *db, imdb_rec_t *rec);
+int imdb_read_rec (imdb_db_t *db, imdb_rec_t *rec);
+int imdb_write_rec(imdb_db_t *db, imdb_rec_t *rec);
 
-extern int imdb_read_blk (imdb_db_t *db, imdb_block_t *blk);
-extern int imdb_write_blk(imdb_db_t *db, imdb_block_t *blk);
+int imdb_read_blk (imdb_db_t *db, imdb_block_t *blk);
+int imdb_write_blk(imdb_db_t *db, imdb_block_t *blk);
 
-extern int imdb_init (imdb_db_t *db, const char *path);
-extern int imdb_open (imdb_db_t *db, const char *path, int write);
-extern int imdb_close(imdb_db_t *db);
+int imdb_init (imdb_db_t *db, const char *path);
+int imdb_open (imdb_db_t *db, const char *path, int write);
+int imdb_close(imdb_db_t *db);
 
 float
 ratio_from_rec_data(unsigned char * const data);
@@ -111,7 +111,7 @@ ratio_from_rec_data(unsigned char * const data);
    0 if nothing found
   >0 if found some matches
  */
-extern int
+int
 imdb_search(imdb_db_t     * const db,
             imdb_rec_t    * const sample,
             imdb_search_t * const search,
