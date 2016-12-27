@@ -54,7 +54,7 @@ int search_similar(imdb_db_t *db, uint64_t number, float maxdiff)
 
   sample.num = number;
   if ((ret = imdb_search(db, &sample, &search, &matches)) < 0) {
-    fprintf(stderr, "%s\n", db->errstr);
+    fprintf(stderr, "%s\n", db->error);
     return 1;
   }
 
@@ -244,7 +244,7 @@ int main(int argc, char **argv)
   }
 
   if (imdb_open(&db, db_path, 0) == -1) {
-    fprintf(stderr, "database open: %s\n", db.errstr);
+    fprintf(stderr, "database open: %s\n", db.error);
     exit(EXIT_FAILURE);
   }
 

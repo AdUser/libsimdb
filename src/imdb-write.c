@@ -68,7 +68,7 @@ int main(int argc, char **argv)
   }
 
   if (mode != init && imdb_open(&db, db_path, 1) != 0) {
-    fprintf(stderr, "can't open database: %s\n", db.errstr);
+    fprintf(stderr, "can't open database: %s\n", db.error);
     exit(EXIT_FAILURE);
   }
 
@@ -81,13 +81,13 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
       }
       if (imdb_write_rec(&db, &rec) < 1) {
-        fprintf(stderr, "%s\n", db.errstr);
+        fprintf(stderr, "%s\n", db.error);
         exit(EXIT_FAILURE);
       }
       break;
     case del :
       if (imdb_write_rec(&db, &rec) < 1) {
-        fprintf(stderr, "%s\n", db.errstr);
+        fprintf(stderr, "%s\n", db.error);
         exit(EXIT_FAILURE);
       }
       break;

@@ -8,8 +8,8 @@ typedef struct {
   int fd;
   int write;
   char path[PATH_MAX];
-  const char *errstr;
-  unsigned char caps[8];
+  char error[256];
+  char caps[8];
 } imdb_db_t;
 
 /**

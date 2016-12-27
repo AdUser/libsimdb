@@ -23,7 +23,7 @@
   memset((buf), 0x0, (len)); \
   bytes = pread((db)->fd, (buf), (len), (off)); \
   if (errno) { \
-    (db)->errstr = strerror(errno); \
+    strncpy((db)->error, strerror(errno), sizeof(db->error)); \
     return -1; \
   }
 
@@ -31,7 +31,7 @@
   errno = 0; \
   bytes = pwrite((db)->fd, (buf), (len), (off)); \
   if (errno) { \
-    (db)->errstr = strerror(errno); \
+    strncpy((db)->error, strerror(errno), sizeof(db->error)); \
     return -1; \
   }
 
@@ -75,13 +75,13 @@ int imdb_open(imdb_db_t *db, const char *path, int write)
 
   errno = 0;
   if (stat(path, &st) == -1) {
-    db->errstr = strerror(errno);
+    strncpy(db->error, strerror(errno), sizeof(db->error));
     return -1;
   }
 
   errno = 0;
   if ((db->fd = open(path, write ? O_RDWR : O_RDONLY)) == -1) {
-    db->errstr = strerror(errno);
+    strncpy(db->error, strerror(errno), sizeof(db->error));
     return -1;
   }
   db->write = write;
@@ -90,19 +90,19 @@ int imdb_open(imdb_db_t *db, const char *path, int write)
   DB_READ(db, buf, IMDB_REC_LEN, 0);
 
   if (bytes != IMDB_REC_LEN) {
-    db->errstr = "Empty or damaged database file";
+    strncpy(db->error, "Empty or damaged database file", sizeof(db->error));
     return -1;
   }
   if (memcmp("IMDB", buf, 4) != 0) {
-    db->errstr = "Not a database file";
+    strncpy(db->error, "Not a database file", sizeof(db->error));
     return -1;
   }
   if (atoi(buf + 6) != IMDB_VERSION) {
-    db->errstr = "Database version mismatch";
+    strncpy(db->error, "Database version mismatch", sizeof(db->error));
     return -1;
   }
   if (memcmp("CAPS", buf + 10, 4) != 0) {
-    db->errstr = "Can't read database capabilities";
+    strncpy(db->error, "Can't read database capabilities", sizeof(db->error));
     return -1;
   }
   memcpy(db->caps, buf + 16, sizeof(char) * 8);
@@ -116,7 +116,7 @@ int imdb_close(imdb_db_t *db)
 
   errno = 0;
   if (close(db->fd) != 0) {
-    db->errstr = strerror(errno);
+    strncpy(db->error, strerror(errno), sizeof(db->error));
     return -1;
   }
   db->fd = -1;
@@ -227,7 +227,7 @@ imdb_search(imdb_db_t     * const db,
   blk.records = blk_size;
 
   if (imdb_read_rec(db, sample) < 1) {
-    db->errstr = "Can't read source sample";
+    strncpy(db->error, "Can't read source sample", sizeof(db->error));
     return -1;
   }
 
