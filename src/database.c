@@ -85,7 +85,7 @@ int imdb_open(imdb_db_t *db, const char *path, int write)
     return -1;
   }
   db->write = write;
-  db->path  = path;
+  strncpy(db->path, path, sizeof(db->path));
 
   DB_READ(db, buf, IMDB_REC_LEN, 0);
 

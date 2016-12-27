@@ -7,7 +7,7 @@
 typedef struct {
   int fd;
   int write;
-  const char *path;
+  char path[PATH_MAX];
   const char *errstr;
   unsigned char caps[8];
 } imdb_db_t;
