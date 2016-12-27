@@ -103,15 +103,31 @@ int imdb_write_blk(imdb_db_t *db, imdb_block_t *blk);
 
 /**
  * @brief Creates empty database at given path
- * @param path Where to create database
+ * @param path Path to database
  * @returns true on success, and false on error
  * @note See errno value for details
  * @todo 2nd arg: caps
  */
 bool imdb_create(const char *path);
 
-int imdb_open  (imdb_db_t *db, const char *path, int write);
-int imdb_close (imdb_db_t *db);
+/**
+ * @brief Open database at given path
+ * @param path Path to database
+ * @param mode Database open modes. See IMDB_FLAG_* defines above
+ * @param error Pointer to error code storage
+ * @returns Pointer to database handle on success, NULL on error
+ *  -1 -- system error, see @a errno for details
+ *  -2 -- malloc() failed
+ *  -3 -- damaged database
+ *  -4 -- database version mismatch
+ */
+imdb_db_t * imdb_open(const char *path, int mode, int *error);
+
+/**
+ * @brief Close database and free associated resources
+ * @param db Database handle
+ */
+void imdb_close(imdb_db_t *db);
 
 float
 ratio_from_rec_data(unsigned char * const data);

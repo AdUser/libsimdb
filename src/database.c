@@ -61,52 +61,62 @@ imdb_create(const char *path) {
   return result;
 }
 
-int imdb_open(imdb_db_t *db, const char *path, int write)
-{
+imdb_db_t *
+imdb_open(const char *path, int mode, int *error) {
+  imdb_db_t *db = NULL;
   ssize_t bytes = 0;
   struct stat st;
   char buf[IMDB_REC_LEN] = "\0";
   int flags = 0, fd = -1;
   char *p;
 
-  assert(db   != NULL);
-  assert(path != NULL);
+  assert(path  != NULL);
+  assert(error != NULL);
 
-  memset(db, 0x0, sizeof(imdb_db_t));
-
-  errno = 0;
   if (stat(path, &st) < 0) {
-    strncpy(db->error, strerror(errno), sizeof(db->error));
-    return -1;
+    *error = -1;
+    return NULL;
+  }
+
+  if ((fd = open(path, (mode & IMDB_FLAG_WRITE) ? O_RDWR : O_RDONLY)) < 0) {
+    *error = -1;
+    return NULL;
   }
 
   errno = 0;
-  if ((fd = open(path, write ? O_RDWR : O_RDONLY)) < 0) {
-    strncpy(db->error, strerror(errno), sizeof(db->error));
-    return -1;
+  bytes = pread(fd, buf, IMDB_REC_LEN, 0);
+  if (bytes < IMDB_REC_LEN) {
+    *error = errno ? -1 : -3; /* empty file, damaged database or IO error */
+    return NULL;
   }
 
-  DB_READ(db, buf, IMDB_REC_LEN, 0);
-
-  if (bytes != IMDB_REC_LEN) {
-    strncpy(db->error, "Empty or damaged database file", sizeof(db->error));
-    return -1;
-  }
-  if (memcmp("IMDB", buf, 4) != 0) {
-    strncpy(db->error, "Not a database file", sizeof(db->error));
-    return -1;
-  }
-  if (atoi(buf + 6) != IMDB_VERSION) {
-    strncpy(db->error, "Database version mismatch", sizeof(db->error));
-    return -1;
-  }
-  if (memcmp("CAPS", buf + 10, 4) != 0) {
-    strncpy(db->error, "Can't read database capabilities", sizeof(db->error));
-    return -1;
+  p = buf + 0;
+  if (memcmp("IMDB", p, 4) != 0) {
+    *error = -3; /* Not a database file */
+    return NULL;
   }
 
-  if (write)
+  p = buf + 6;
+  if (atoi(p) != IMDB_VERSION) {
+    *error = -4; /* Database version mismatch */
+    return NULL;
+  }
+
+  p = buf + 10;
+  if (memcmp("CAPS", p, 4) != 0) {
+    *error = -3; /* Can't read database capabilities */
+    return NULL;
+  }
+
+  if (mode & IMDB_FLAG_WRITE)
     flags |= IMDB_FLAG_WRITE;
+
+  /* all seems to be ok */
+
+  if ((db = calloc(1, sizeof(imdb_db_t))) == NULL) {
+    *error = -2; /* out of memory */
+    return NULL;
+  }
 
   p = buf + 16;
   for (size_t i = 0; i < 8 && *p != '\0'; p++) {
@@ -124,21 +134,16 @@ int imdb_open(imdb_db_t *db, const char *path, int write)
 
   strncpy(db->path, path, sizeof(db->path));
 
-  return 0;
+  return db;
 }
 
-int imdb_close(imdb_db_t *db)
+void
+imdb_close(imdb_db_t *db)
 {
   assert(db != NULL);
 
-  errno = 0;
-  if (close(db->fd) != 0) {
-    strncpy(db->error, strerror(errno), sizeof(db->error));
-    return -1;
-  }
-  db->fd = -1;
-
-  return 0;
+  if (db->fd >= 0)
+    close(db->fd);
 }
 
 int imdb_read_rec(imdb_db_t *db, imdb_rec_t *rec)
