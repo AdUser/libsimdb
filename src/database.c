@@ -37,30 +37,28 @@
 
 const char *imdb_hdr_fmt = "IMDB v%02u, CAPS: %s;";
 
-int imdb_init(imdb_db_t *db, const char *path)
-{
+bool
+imdb_create(const char *path) {
   ssize_t bytes = 0;
   unsigned char buf[IMDB_REC_LEN];
+  const char *caps = "M-R";
+  bool result = false;
+  int fd = -1;
 
   memset(buf, 0x0, sizeof(char) * IMDB_REC_LEN);
 
-  if ((db->fd = open(path, O_WRONLY | O_CREAT | O_EXCL, 0644)) == -1) {
-    db->errstr = strerror(errno);
-    return -1;
-  }
+  if ((fd = creat(path, 0644)) < 0)
+    return result;
 
-  snprintf((char *) buf, IMDB_REC_LEN, imdb_hdr_fmt, IMDB_VERSION, "M-R");
-  DB_WRITE(db, buf, IMDB_REC_LEN, 0);
+  snprintf((char *) buf, IMDB_REC_LEN, imdb_hdr_fmt, IMDB_VERSION, caps);
 
-  close(db->fd);
-  db->fd = -1;
+  bytes = pwrite(fd, buf, IMDB_REC_LEN, 0);
+  if (bytes == IMDB_REC_LEN)
+    result = true; /* success */
 
-  if (bytes != IMDB_REC_LEN) {
-    db->errstr = "Can't write database header";
-    return -1;
-  }
+  close(fd);
 
-  return 0;
+  return result;
 }
 
 int imdb_open(imdb_db_t *db, const char *path, int write)

@@ -98,9 +98,17 @@ int imdb_write_rec(imdb_db_t *db, imdb_rec_t *rec);
 int imdb_read_blk (imdb_db_t *db, imdb_block_t *blk);
 int imdb_write_blk(imdb_db_t *db, imdb_block_t *blk);
 
-int imdb_init (imdb_db_t *db, const char *path);
-int imdb_open (imdb_db_t *db, const char *path, int write);
-int imdb_close(imdb_db_t *db);
+/**
+ * @brief Creates empty database at given path
+ * @param path Where to create database
+ * @returns true on success, and false on error
+ * @note See errno value for details
+ * @todo 2nd arg: caps
+ */
+bool imdb_create(const char *path);
+
+int imdb_open  (imdb_db_t *db, const char *path, int write);
+int imdb_close (imdb_db_t *db);
 
 float
 ratio_from_rec_data(unsigned char * const data);

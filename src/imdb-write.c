@@ -92,8 +92,8 @@ int main(int argc, char **argv)
       }
       break;
     case init :
-      if (imdb_init(&db, db_path) == -1) {
-        fprintf(stderr, "database init: %s\n", db.errstr);
+      if (!imdb_create(db_path)) {
+        fprintf(stderr, "database init: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
       }
       break;
