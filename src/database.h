@@ -4,12 +4,20 @@
 #define IMDB_REC_LEN 48
 #define IMDB_VERSION  2
 
+/* runtime flags */
+#define IMDB_FLAG_WRITE    1 << (0 + 0)
+
+/* database capabilities */
+#define IMDB_CAP_BITMAP    1 << (8 + 0)
+#define IMDB_CAP_COLORS    1 << (8 + 1)
+#define IMDB_CAP_RATIO     1 << (8 + 2)
+/* 3 used, 5 reserved */
+
 typedef struct {
   int fd;
-  int write;
+  int flags;
   char path[PATH_MAX];
   char error[256];
-  char caps[8];
 } imdb_db_t;
 
 /**
@@ -19,11 +27,6 @@ typedef struct {
 16-23 : capabilities, terminated with ';'
 24-48 : padding with null's
 */
-
-#define CAP_OFF_BITMAP  0
-#define CAP_OFF_COLORS  1
-#define CAP_OFF_RATIO   2
-/* 3 used, 5 reserved */
 
 /**
   Database record format - fixed length, 48 bytes

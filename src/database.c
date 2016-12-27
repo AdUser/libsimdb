@@ -66,26 +66,25 @@ int imdb_open(imdb_db_t *db, const char *path, int write)
   ssize_t bytes = 0;
   struct stat st;
   char buf[IMDB_REC_LEN] = "\0";
+  int flags = 0, fd = -1;
+  char *p;
 
   assert(db   != NULL);
   assert(path != NULL);
 
   memset(db, 0x0, sizeof(imdb_db_t));
-  db->fd = -1;
 
   errno = 0;
-  if (stat(path, &st) == -1) {
+  if (stat(path, &st) < 0) {
     strncpy(db->error, strerror(errno), sizeof(db->error));
     return -1;
   }
 
   errno = 0;
-  if ((db->fd = open(path, write ? O_RDWR : O_RDONLY)) == -1) {
+  if ((fd = open(path, write ? O_RDWR : O_RDONLY)) < 0) {
     strncpy(db->error, strerror(errno), sizeof(db->error));
     return -1;
   }
-  db->write = write;
-  strncpy(db->path, path, sizeof(db->path));
 
   DB_READ(db, buf, IMDB_REC_LEN, 0);
 
@@ -105,7 +104,25 @@ int imdb_open(imdb_db_t *db, const char *path, int write)
     strncpy(db->error, "Can't read database capabilities", sizeof(db->error));
     return -1;
   }
-  memcpy(db->caps, buf + 16, sizeof(char) * 8);
+
+  if (write)
+    flags |= IMDB_FLAG_WRITE;
+
+  p = buf + 16;
+  for (size_t i = 0; i < 8 && *p != '\0'; p++) {
+    switch (*p) {
+      case 'M' : flags |= IMDB_CAP_BITMAP; break;
+      case 'C' : flags |= IMDB_CAP_COLORS; break;
+      case 'R' : flags |= IMDB_CAP_RATIO;  break;
+      case ';' : i = 9; /* end of flags */ break;
+      default: /* ignore */ break;
+    }
+  }
+
+  db->fd    = fd;
+  db->flags = flags;
+
+  strncpy(db->path, path, sizeof(db->path));
 
   return 0;
 }
