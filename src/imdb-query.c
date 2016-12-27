@@ -179,12 +179,11 @@ int main(int argc, char **argv)
   const char *db_path = NULL;
   float maxdiff = 0.10;
   unsigned short int cols = 64, map = 0, ret = 0;
-  imdb_db_t db;
+  imdb_db_t *db = NULL;
   uint64_t a = 0, b = 0;
   char *c = NULL;
+  int err;
   char opt = '\0';
-
-  memset(&db, 0x0, sizeof(imdb_db_t));
 
   if (argc < 3)
     usage(EXIT_FAILURE);
@@ -243,8 +242,8 @@ int main(int argc, char **argv)
     exit(EXIT_FAILURE);
   }
 
-  if (imdb_open(&db, db_path, 0) == -1) {
-    fprintf(stderr, "database open: %s\n", db.error);
+  if ((db = imdb_open(db_path, 0, &err)) == NULL) {
+    fprintf(stderr, "database open: %d\n", err);
     exit(EXIT_FAILURE);
   }
 
@@ -254,34 +253,34 @@ int main(int argc, char **argv)
         fprintf(stderr, "can't parse number\n");
         usage(EXIT_FAILURE);
       }
-      ret = search_similar(&db, a, maxdiff);
+      ret = search_similar(db, a, maxdiff);
       break;
     case bitmap :
       if (a <= 0) {
         fprintf(stderr, "can't parse number\n");
         usage(EXIT_FAILURE);
       }
-      ret = rec_bitmap(&db, a);
+      ret = rec_bitmap(db, a);
       break;
     case usage_map :
-      ret = db_usage_map(&db, cols);
+      ret = db_usage_map(db, cols);
       break;
     case usage_slice :
-      ret = db_usage_slice(&db, a, b);
+      ret = db_usage_slice(db, a, b);
       break;
     case diff :
       if (a <= 0 || b <= 0) {
         fprintf(stderr, "both numbers must be set\n");
         exit(EXIT_FAILURE);
       }
-      ret = rec_diff(&db, a, b, map);
+      ret = rec_diff(db, a, b, map);
       break;
     default :
       usage(EXIT_SUCCESS);
       break;
   }
 
-  imdb_close(&db);
+  imdb_close(db);
 
   return ret;
 }

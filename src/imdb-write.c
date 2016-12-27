@@ -25,10 +25,10 @@ int main(int argc, char **argv)
   const char *db_path = NULL;
   const char *sample = NULL;
   const char *c = NULL;
-  imdb_db_t  db;
+  imdb_db_t  *db = NULL;
   imdb_rec_t rec;
+  int err;
 
-  memset(&db,  0x0, sizeof(imdb_db_t));
   memset(&rec, 0x0, sizeof(imdb_rec_t));
 
   if (argc < 3)
@@ -67,8 +67,14 @@ int main(int argc, char **argv)
     usage(EXIT_FAILURE);
   }
 
-  if (mode != init && imdb_open(&db, db_path, 1) != 0) {
-    fprintf(stderr, "can't open database: %s\n", db.error);
+  if (mode == init) {
+    if (!imdb_create(db_path)) {
+      fprintf(stderr, "database init: %s\n", strerror(errno));
+      exit(EXIT_FAILURE);
+    }
+  }
+  if ((db = imdb_open(db_path, 1, &err)) == NULL) {
+    fprintf(stderr, "can't open database: %d\n", err);
     exit(EXIT_FAILURE);
   }
 
@@ -80,28 +86,25 @@ int main(int argc, char **argv)
         fprintf(stderr, "sampler failure\n");
         exit(EXIT_FAILURE);
       }
-      if (imdb_write_rec(&db, &rec) < 1) {
-        fprintf(stderr, "%s\n", db.error);
+      if (imdb_write_rec(db, &rec) < 1) {
+        fprintf(stderr, "%s\n", db->error);
         exit(EXIT_FAILURE);
       }
       break;
     case del :
-      if (imdb_write_rec(&db, &rec) < 1) {
-        fprintf(stderr, "%s\n", db.error);
+      if (imdb_write_rec(db, &rec) < 1) {
+        fprintf(stderr, "%s\n", db->error);
         exit(EXIT_FAILURE);
       }
       break;
     case init :
-      if (!imdb_create(db_path)) {
-        fprintf(stderr, "database init: %s\n", strerror(errno));
-        exit(EXIT_FAILURE);
-      }
+      /* this case already handled above */
       break;
     default:
       usage(EXIT_FAILURE);
       break;
   }
-  imdb_close(&db);
+  imdb_close(db);
 
   exit(EXIT_SUCCESS);
 }
