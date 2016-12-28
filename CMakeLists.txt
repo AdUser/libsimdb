@@ -1,4 +1,4 @@
-set(CNAME "libimgdup")
+set(CNAME "libsimdb")
 set(VERSION 0.3)
 
 project($CNAME C)
