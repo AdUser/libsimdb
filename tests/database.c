@@ -24,7 +24,7 @@ int main()
 
   rec[0].num = 1;
   err = imdb_read_rec(db, rec);
-  assert(err < 0); /* no such record */
+  assert(err == 0); /* no such record */
 
   memset(rec[0].data, 0xAA, IMDB_REC_LEN);
   memset(rec[0].data, 0xFF, 1); /* record is used */

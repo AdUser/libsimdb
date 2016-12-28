@@ -13,6 +13,13 @@
 #define IMDB_CAP_RATIO     1 << (8 + 2)
 /* 3 used, 5 reserved */
 
+#define IMDB_SUCCESS          0
+/* database errors */
+#define IMDB_ERR_SYSTEM      -1 /* see errno for details */
+#define IMDB_ERR_OOM         -2 /* can't allocate memory */
+#define IMDB_ERR_CORRUPTDB   -3 /* empty or currupted database */
+#define IMDB_ERR_WRONGVERS   -4 /* database version mismatch */
+
 typedef struct {
   int fd;
   int flags;
@@ -92,8 +99,7 @@ typedef struct {
 } imdb_match_t;
 
 /**
- * @return 1 on success, 0 if record not used
- *          and -1 if record number not exists,
+ * @returns 1 on success, 0 if record missing and <0 on error
  */
 int imdb_read_rec (imdb_db_t *db, imdb_rec_t *rec);
 int imdb_write_rec(imdb_db_t *db, imdb_rec_t *rec);
@@ -116,10 +122,7 @@ bool imdb_create(const char *path);
  * @param mode Database open modes. See IMDB_FLAG_* defines above
  * @param error Pointer to error code storage
  * @returns Pointer to database handle on success, NULL on error
- *  -1 -- system error, see @a errno for details
- *  -2 -- malloc() failed
- *  -3 -- damaged database
- *  -4 -- database version mismatch
+ * @note use @a imdb_error() to get error description
  */
 imdb_db_t * imdb_open(const char *path, int mode, int *error);
 
@@ -129,14 +132,17 @@ imdb_db_t * imdb_open(const char *path, int mode, int *error);
  */
 void imdb_close(imdb_db_t *db);
 
+/**
+ * @brief Get error desctiption by error code
+ * @param error Error code, see IMDB_ERR_* defines above
+ */
+const char * imdb_error(int code);
+
 float
 ratio_from_rec_data(unsigned char * const data);
 
 /**
- @returns:
-  -1 on error
-   0 if nothing found
-  >0 if found some matches
+ @returns: >0 if found some matches, 0 if nothing found, <0 on error
  */
 int
 imdb_search(imdb_db_t     * const db,

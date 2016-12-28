@@ -24,7 +24,7 @@
   bytes = pread((db)->fd, (buf), (len), (off)); \
   if (errno) { \
     strncpy((db)->error, strerror(errno), sizeof(db->error)); \
-    return -1; \
+    return IMDB_ERR_SYSTEM; \
   }
 
 #define DB_WRITE(db, buf, len, off) \
@@ -32,7 +32,7 @@
   bytes = pwrite((db)->fd, (buf), (len), (off)); \
   if (errno) { \
     strncpy((db)->error, strerror(errno), sizeof(db->error)); \
-    return -1; \
+    return IMDB_ERR_SYSTEM; \
   }
 
 const char *imdb_hdr_fmt = "IMDB v%02u, CAPS: %s;";
@@ -74,31 +74,31 @@ imdb_open(const char *path, int mode, int *error) {
   assert(error != NULL);
 
   if (stat(path, &st) < 0) {
-    *error = -1;
+    *error = IMDB_ERR_SYSTEM;
     return NULL;
   }
 
   if ((fd = open(path, (mode & IMDB_FLAG_WRITE) ? O_RDWR : O_RDONLY)) < 0) {
-    *error = -1;
+    *error = IMDB_ERR_SYSTEM;
     return NULL;
   }
 
   errno = 0;
   bytes = pread(fd, buf, IMDB_REC_LEN, 0);
   if (bytes < IMDB_REC_LEN) {
-    *error = errno ? -1 : -3; /* empty file, damaged database or IO error */
+    *error = errno ? IMDB_ERR_SYSTEM : IMDB_ERR_CORRUPTDB;
     return NULL;
   }
 
   p = buf + 0;
   if (memcmp("IMDB", p, 4) != 0) {
-    *error = -3; /* Not a database file */
+    *error = IMDB_ERR_CORRUPTDB;
     return NULL;
   }
 
   p = buf + 6;
   if (atoi(p) != IMDB_VERSION) {
-    *error = -4; /* Database version mismatch */
+    *error = IMDB_ERR_WRONGVERS;
     return NULL;
   }
 
@@ -114,7 +114,7 @@ imdb_open(const char *path, int mode, int *error) {
   /* all seems to be ok */
 
   if ((db = calloc(1, sizeof(imdb_db_t))) == NULL) {
-    *error = -2; /* out of memory */
+    *error = IMDB_ERR_OOM;
     return NULL;
   }
 
@@ -146,6 +146,22 @@ imdb_close(imdb_db_t *db)
     close(db->fd);
 }
 
+const char *
+imdb_error(int error) {
+   if (error == IMDB_SUCCESS) {
+     return "success";
+   } else if (error == IMDB_ERR_SYSTEM) {
+     return strerror(errno);
+   } else if (error == IMDB_ERR_OOM) {
+     return "can't allocate memory";
+   } else if (error == IMDB_ERR_CORRUPTDB) {
+     return "database corrupted";
+   } else if (error == IMDB_ERR_WRONGVERS) {
+     return "database version differs from library version";
+   }
+   return "unknown error";
+}
+
 int imdb_read_rec(imdb_db_t *db, imdb_rec_t *rec)
 {
   ssize_t bytes = 0;
@@ -157,7 +173,7 @@ int imdb_read_rec(imdb_db_t *db, imdb_rec_t *rec)
   DB_READ(db, rec->data, IMDB_REC_LEN, rec->num * IMDB_REC_LEN);
 
   if (bytes != IMDB_REC_LEN)
-    return -1;
+    return errno ? IMDB_ERR_SYSTEM : 0;
 
   if (rec->data[0] != 0xFF)
     return 0;
@@ -176,7 +192,7 @@ int imdb_write_rec(imdb_db_t *db, imdb_rec_t *rec)
   DB_WRITE(db, rec->data, IMDB_REC_LEN, rec->num * IMDB_REC_LEN);
 
   if (bytes != IMDB_REC_LEN)
-    return -1;
+    return IMDB_ERR_SYSTEM;
 
   return 1;
 }
@@ -235,6 +251,7 @@ imdb_search(imdb_db_t     * const db,
   unsigned char *p = NULL;
   float ratio_s = 0.0; /* source */
   float ratio_t = 0.0; /* tested */
+  int ret = 0;
 
   assert(db      != NULL);
   assert(sample  != NULL);
@@ -248,9 +265,9 @@ imdb_search(imdb_db_t     * const db,
   blk.start = 1;
   blk.records = blk_size;
 
-  if (imdb_read_rec(db, sample) < 1) {
+  if ((ret = imdb_read_rec(db, sample)) < 1) {
     strncpy(db->error, "Can't read source sample", sizeof(db->error));
-    return -1;
+    return ret;
   }
 
   if (search->limit == 0)
