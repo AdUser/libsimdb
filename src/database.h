@@ -139,7 +139,7 @@ float
 ratio_from_rec_data(unsigned char * const data);
 
 /**
- @returns: >0 if found some matches, 0 if nothing found, <0 on error
+ * @returns: >0 if found some matches, 0 if nothing found, <0 on error
  */
 int
 simdb_search(simdb_t         * const db,
@@ -148,13 +148,13 @@ simdb_search(simdb_t         * const db,
              simdb_match_t  ** matches);
 
 /**
- @returns: number of records in database
-*/
+ * @returns: number of records in database
+ */
 uint64_t
 simdb_records_count(simdb_t * const db);
 
 /**
-  @brief   fills buffer 'map' according to records existense in database
+  @brief   Fills buffer 'map' according to records existense in database
   @returns records processed (and also buffer size)
 */
 uint64_t
@@ -162,10 +162,10 @@ simdb_usage_map(simdb_t * const db,
                char     ** const map);
 
 /**
-  @brief   fills buffer 'map' according to records existense in given range
-  @param   offset  start of slice position
-  @param   limit   slice size
-  @returns records processed (and also buffer size)
+ * @brief   Fills buffer 'map' according to records existense in given range
+ * @param   offset  start of slice position
+ * @param   limit   slice size
+ * @returns records processed (and also buffer size)
 */
 uint16_t
 simdb_usage_slice(simdb_t * const db,
