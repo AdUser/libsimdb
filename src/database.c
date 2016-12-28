@@ -234,7 +234,7 @@ simdb_records_count(simdb_t * const db) {
   return size / SIMDB_REC_LEN;
 }
 
-float
+static float
 ratio_from_rec_data(unsigned char * const data) {
   uint16_t iw, ih;
 

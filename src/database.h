@@ -135,9 +135,6 @@ void simdb_close(simdb_t *db);
  */
 const char * simdb_error(int code);
 
-float
-ratio_from_rec_data(unsigned char * const data);
-
 /**
  * @returns: >0 if found some matches, 0 if nothing found, <0 on error
  */
