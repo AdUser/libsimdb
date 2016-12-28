@@ -138,8 +138,7 @@ simdb_open(const char *path, int mode, int *error) {
 }
 
 void
-simdb_close(simdb_t *db)
-{
+simdb_close(simdb_t *db) {
   assert(db != NULL);
 
   if (db->fd >= 0)
@@ -166,8 +165,7 @@ simdb_error(int error) {
    return "unknown error";
 }
 
-int simdb_read_rec(simdb_t *db, simdb_rec_t *rec)
-{
+int simdb_read_rec(simdb_t *db, simdb_rec_t *rec) {
   ssize_t bytes = 0;
 
   assert(db  != NULL);
@@ -185,8 +183,7 @@ int simdb_read_rec(simdb_t *db, simdb_rec_t *rec)
   return 1;
 }
 
-int simdb_write_rec(simdb_t *db, simdb_rec_t *rec)
-{
+int simdb_write_rec(simdb_t *db, simdb_rec_t *rec) {
   ssize_t bytes = 0;
 
   assert(db  != NULL);
@@ -204,8 +201,7 @@ int simdb_write_rec(simdb_t *db, simdb_rec_t *rec)
   return 1;
 }
 
-int simdb_read_blk(simdb_t *db, simdb_block_t *blk)
-{
+int simdb_read_blk(simdb_t *db, simdb_block_t *blk) {
   ssize_t bytes = 0;
 
   assert(db  != NULL);
