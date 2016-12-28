@@ -19,9 +19,9 @@
 #include "bitmap.h"
 
 struct _simdb_t {
-  int fd;
-  int flags;
-  char path[PATH_MAX];
+  int fd;               /**< database file descriptor */
+  int flags;            /**< database flags and capabilities, see SIMDB_FLAGS_* and SIMDB_CAP_* defines */
+  char path[PATH_MAX];  /**< path to database file */
 };
 
 #define DB_READ(db, buf, len, off) \
