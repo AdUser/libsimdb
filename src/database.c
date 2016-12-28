@@ -22,18 +22,12 @@
   errno = 0; \
   memset((buf), 0x0, (len)); \
   bytes = pread((db)->fd, (buf), (len), (off)); \
-  if (errno) { \
-    strncpy((db)->error, strerror(errno), sizeof(db->error)); \
-    return IMDB_ERR_SYSTEM; \
-  }
+  if (errno) { return IMDB_ERR_SYSTEM; }
 
 #define DB_WRITE(db, buf, len, off) \
   errno = 0; \
   bytes = pwrite((db)->fd, (buf), (len), (off)); \
-  if (errno) { \
-    strncpy((db)->error, strerror(errno), sizeof(db->error)); \
-    return IMDB_ERR_SYSTEM; \
-  }
+  if (errno) { return IMDB_ERR_SYSTEM; }
 
 const char *imdb_hdr_fmt = "IMDB v%02u, CAPS: %s;";
 
