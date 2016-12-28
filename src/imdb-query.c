@@ -54,7 +54,7 @@ int search_similar(imdb_db_t *db, uint64_t number, float maxdiff)
 
   sample.num = number;
   if ((ret = imdb_search(db, &sample, &search, &matches)) < 0) {
-    fprintf(stderr, "%s\n", db->error);
+    fprintf(stderr, "%s\n", imdb_error(ret));
     return 1;
   }
 

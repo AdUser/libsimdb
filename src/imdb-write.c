@@ -86,14 +86,14 @@ int main(int argc, char **argv)
         fprintf(stderr, "sampler failure\n");
         exit(EXIT_FAILURE);
       }
-      if (imdb_write_rec(db, &rec) < 1) {
-        fprintf(stderr, "%s\n", db->error);
+      if ((err = imdb_write_rec(db, &rec)) < 1) {
+        fprintf(stderr, "%s\n", imdb_error(err));
         exit(EXIT_FAILURE);
       }
       break;
     case del :
-      if (imdb_write_rec(db, &rec) < 1) {
-        fprintf(stderr, "%s\n", db->error);
+      if ((err = imdb_write_rec(db, &rec)) < 1) {
+        fprintf(stderr, "%s\n", imdb_error(err));
         exit(EXIT_FAILURE);
       }
       break;

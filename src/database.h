@@ -26,7 +26,6 @@ typedef struct {
   int fd;
   int flags;
   char path[PATH_MAX];
-  char error[256];
 } imdb_db_t;
 
 /**
