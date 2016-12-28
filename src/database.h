@@ -1,32 +1,32 @@
 #ifndef HAS_DATABASE_H
 #define HAS_DATABASE_H 1
 
-#define IMDB_REC_LEN 48
-#define IMDB_VERSION  2
+#define SIMDB_REC_LEN 48
+#define SIMDB_VERSION  2
 
 /* runtime flags */
-#define IMDB_FLAG_WRITE    1 << (0 + 0)
+#define SIMDB_FLAG_WRITE    1 << (0 + 0)
 
 /* database capabilities */
-#define IMDB_CAP_BITMAP    1 << (8 + 0)
-#define IMDB_CAP_COLORS    1 << (8 + 1)
-#define IMDB_CAP_RATIO     1 << (8 + 2)
+#define SIMDB_CAP_BITMAP    1 << (8 + 0)
+#define SIMDB_CAP_COLORS    1 << (8 + 1)
+#define SIMDB_CAP_RATIO     1 << (8 + 2)
 /* 3 used, 5 reserved */
 
-#define IMDB_SUCCESS          0
+#define SIMDB_SUCCESS          0
 /* database errors */
-#define IMDB_ERR_SYSTEM      -1 /* see errno for details */
-#define IMDB_ERR_OOM         -2 /* can't allocate memory */
-#define IMDB_ERR_CORRUPTDB   -3 /* empty or currupted database */
-#define IMDB_ERR_WRONGVERS   -4 /* database version mismatch */
-#define IMDB_ERR_NXRECORD    -5 /* no such record in database */
-#define IMDB_ERR_READONLY    -6 /* database opened in read-only mode */
+#define SIMDB_ERR_SYSTEM      -1 /* see errno for details */
+#define SIMDB_ERR_OOM         -2 /* can't allocate memory */
+#define SIMDB_ERR_CORRUPTDB   -3 /* empty or currupted database */
+#define SIMDB_ERR_WRONGVERS   -4 /* database version mismatch */
+#define SIMDB_ERR_NXRECORD    -5 /* no such record in database */
+#define SIMDB_ERR_READONLY    -6 /* database opened in read-only mode */
 
 typedef struct {
   int fd;
   int flags;
   char path[PATH_MAX];
-} imdb_db_t;
+} simdb_t;
 
 /**
   Database header format - fixed length, 48 bytes
@@ -70,15 +70,15 @@ typedef struct {
   uint64_t start;
   size_t records;
   unsigned char *data;
-} imdb_block_t;
+} simdb_block_t;
 
 /**
  * database record
  */
 typedef struct {
   uint64_t num;
-  unsigned char data[IMDB_REC_LEN];
-} imdb_rec_t;
+  unsigned char data[SIMDB_REC_LEN];
+} simdb_rec_t;
 
 /**
  * search parameters
@@ -88,7 +88,7 @@ typedef struct {
   uint8_t limit;        /**< max results */
   float maxdiff_bitmap; /**< max difference of luma bitmaps */
   float maxdiff_ratio;  /**< max difference of ratios, default - 7% */
-} imdb_search_t;
+} simdb_search_t;
 
 /**
  * search matches
@@ -97,16 +97,16 @@ typedef struct {
   uint64_t num;       /**< record id */
   float diff_ratio;   /**< difference of ratio */
   float diff_bitmap;  /**< difference of bitmap */
-} imdb_match_t;
+} simdb_match_t;
 
 /**
  * @returns 1 on success, 0 if record missing and <0 on error
  */
-int imdb_read_rec (imdb_db_t *db, imdb_rec_t *rec);
-int imdb_write_rec(imdb_db_t *db, imdb_rec_t *rec);
+int simdb_read_rec (simdb_t *db, simdb_rec_t *rec);
+int simdb_write_rec(simdb_t *db, simdb_rec_t *rec);
 
-int imdb_read_blk (imdb_db_t *db, imdb_block_t *blk);
-int imdb_write_blk(imdb_db_t *db, imdb_block_t *blk);
+int simdb_read_blk (simdb_t *db, simdb_block_t *blk);
+int simdb_write_blk(simdb_t *db, simdb_block_t *blk);
 
 /**
  * @brief Creates empty database at given path
@@ -115,29 +115,29 @@ int imdb_write_blk(imdb_db_t *db, imdb_block_t *blk);
  * @note See errno value for details
  * @todo 2nd arg: caps
  */
-bool imdb_create(const char *path);
+bool simdb_create(const char *path);
 
 /**
  * @brief Open database at given path
  * @param path Path to database
- * @param mode Database open modes. See IMDB_FLAG_* defines above
+ * @param mode Database open modes. See SIMDB_FLAG_* defines above
  * @param error Pointer to error code storage
  * @returns Pointer to database handle on success, NULL on error
- * @note use @a imdb_error() to get error description
+ * @note use @a simdb_error() to get error description
  */
-imdb_db_t * imdb_open(const char *path, int mode, int *error);
+simdb_t * simdb_open(const char *path, int mode, int *error);
 
 /**
  * @brief Close database and free associated resources
  * @param db Database handle
  */
-void imdb_close(imdb_db_t *db);
+void simdb_close(simdb_t *db);
 
 /**
  * @brief Get error desctiption by error code
- * @param error Error code, see IMDB_ERR_* defines above
+ * @param error Error code, see SIMDB_ERR_* defines above
  */
-const char * imdb_error(int code);
+const char * simdb_error(int code);
 
 float
 ratio_from_rec_data(unsigned char * const data);
@@ -146,23 +146,23 @@ ratio_from_rec_data(unsigned char * const data);
  @returns: >0 if found some matches, 0 if nothing found, <0 on error
  */
 int
-imdb_search(imdb_db_t     * const db,
-            imdb_rec_t    * const sample,
-            imdb_search_t * const search,
-            imdb_match_t  ** matches);
+simdb_search(simdb_t         * const db,
+             simdb_rec_t     * const sample,
+             simdb_search_t  * const search,
+             simdb_match_t  ** matches);
 
 /**
  @returns: number of records in database
 */
 uint64_t
-imdb_records_count(imdb_db_t * const db);
+simdb_records_count(simdb_t * const db);
 
 /**
   @brief   fills buffer 'map' according to records existense in database
   @returns records processed (and also buffer size)
 */
 uint64_t
-imdb_usage_map(imdb_db_t * const db,
+simdb_usage_map(simdb_t * const db,
                char     ** const map);
 
 /**
@@ -172,7 +172,7 @@ imdb_usage_map(imdb_db_t * const db,
   @returns records processed (and also buffer size)
 */
 uint16_t
-imdb_usage_slice(imdb_db_t * const db,
+simdb_usage_slice(simdb_t * const db,
                  char     ** const map,
                  uint64_t  offset,
                  uint16_t  limit);

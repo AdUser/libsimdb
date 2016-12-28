@@ -27,5 +27,5 @@
 extern int image_add(uint64_t, char *path);
 extern int image_del(uint64_t);
 extern int image_exists(uint64_t);
-extern int image_search(uint64_t, imdb_rec_t **data, size_t limit);
+extern int image_search(uint64_t, simdb_rec_t **data, size_t limit);
 */

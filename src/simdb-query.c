@@ -23,7 +23,7 @@
 
 void usage(int exitcode) {
   fprintf(stderr,
-"Usage: imdb-query <opts>\n"
+"Usage: simdb-query <opts>\n"
 "  -b <path>   Path to database\n"
 "  -t <int>    Maximum difference pct (0 - 50, default: 10%%)\n"
 );
@@ -40,21 +40,21 @@ void usage(int exitcode) {
   exit(exitcode);
 }
 
-int search_similar(imdb_db_t *db, uint64_t number, float maxdiff)
+int search_similar(simdb_t *db, uint64_t number, float maxdiff)
 {
   int ret = 0, i = 0;
-  imdb_rec_t sample;
-  imdb_match_t *matches = NULL;
-  imdb_search_t search;
+  simdb_rec_t sample;
+  simdb_match_t *matches = NULL;
+  simdb_search_t search;
 
-  memset(&sample, 0x0, sizeof(imdb_rec_t));
-  memset(&search, 0x0, sizeof(imdb_search_t));
+  memset(&sample, 0x0, sizeof(simdb_rec_t));
+  memset(&search, 0x0, sizeof(simdb_search_t));
   search.maxdiff_ratio  = 0.2; /* 20% */
   search.maxdiff_bitmap = maxdiff;
 
   sample.num = number;
-  if ((ret = imdb_search(db, &sample, &search, &matches)) < 0) {
-    fprintf(stderr, "%s\n", imdb_error(ret));
+  if ((ret = simdb_search(db, &sample, &search, &matches)) < 0) {
+    fprintf(stderr, "%s\n", simdb_error(ret));
     return 1;
   }
 
@@ -70,7 +70,7 @@ int search_similar(imdb_db_t *db, uint64_t number, float maxdiff)
   return 0;
 }
 
-int db_usage_map(imdb_db_t *db, unsigned short int cols)
+int db_usage_map(simdb_t *db, unsigned short int cols)
 {
   char *map = NULL;
   char *m   = NULL;
@@ -80,7 +80,7 @@ int db_usage_map(imdb_db_t *db, unsigned short int cols)
 
   memset(row, 0x0, sizeof(char) * 256);
 
-  if ((records = imdb_usage_map(db, &map)) == 0) {
+  if ((records = simdb_usage_map(db, &map)) == 0) {
     fprintf(stderr, "database usage: can't get database map\n");
     FREE(map);
     return 1;
@@ -107,26 +107,26 @@ int db_usage_map(imdb_db_t *db, unsigned short int cols)
   return 0;
 }
 
-int db_usage_slice(imdb_db_t *db, uint64_t offset, uint16_t limit)
+int db_usage_slice(simdb_t *db, uint64_t offset, uint16_t limit)
 {
   char *map = NULL;
 
-  limit = imdb_usage_slice(db, &map, offset, limit);
+  limit = simdb_usage_slice(db, &map, offset, limit);
   puts(map);
   FREE(map);
 
   return 0;
 }
 
-int rec_bitmap(imdb_db_t *db, uint64_t number)
+int rec_bitmap(simdb_t *db, uint64_t number)
 {
-  imdb_rec_t rec;
+  simdb_rec_t rec;
 
   assert(db != NULL);
-  memset(&rec, 0x0, sizeof(imdb_rec_t));
+  memset(&rec, 0x0, sizeof(simdb_rec_t));
 
   rec.num = number;
-  if (imdb_read_rec(db, &rec) < 1) {
+  if (simdb_read_rec(db, &rec) < 1) {
     fprintf(stderr, "bitmap: %s\n", "sample not found");
     return 1;
   }
@@ -136,26 +136,26 @@ int rec_bitmap(imdb_db_t *db, uint64_t number)
   return 0;
 }
 
-int rec_diff(imdb_db_t *db, uint64_t a, uint64_t b, unsigned short int showmap)
+int rec_diff(simdb_t *db, uint64_t a, uint64_t b, unsigned short int showmap)
 {
-  imdb_rec_t rec;
+  simdb_rec_t rec;
   float diff = 0.0;
   unsigned char one[BITMAP_SIZE];
   unsigned char two[BITMAP_SIZE];
   unsigned char map[BITMAP_SIZE];
 
   assert(db != NULL);
-  memset(&rec, 0x0, sizeof(imdb_rec_t));
+  memset(&rec, 0x0, sizeof(simdb_rec_t));
 
   rec.num = a;
-  if (imdb_read_rec(db, &rec) < 1) {
+  if (simdb_read_rec(db, &rec) < 1) {
     fprintf(stderr, "record diff: first sample not exists\n");
     return 1;
   }
   memcpy(one, &rec.data[REC_OFF_BM], BITMAP_SIZE);
 
   rec.num = b;
-  if (imdb_read_rec(db, &rec) < 1) {
+  if (simdb_read_rec(db, &rec) < 1) {
     fprintf(stderr, "record diff: second sample not exists\n");
     return 1;
   }
@@ -179,7 +179,7 @@ int main(int argc, char **argv)
   const char *db_path = NULL;
   float maxdiff = 0.10;
   unsigned short int cols = 64, map = 0, ret = 0;
-  imdb_db_t *db = NULL;
+  simdb_t *db = NULL;
   uint64_t a = 0, b = 0;
   char *c = NULL;
   int err;
@@ -242,7 +242,7 @@ int main(int argc, char **argv)
     exit(EXIT_FAILURE);
   }
 
-  if ((db = imdb_open(db_path, 0, &err)) == NULL) {
+  if ((db = simdb_open(db_path, 0, &err)) == NULL) {
     fprintf(stderr, "database open: %d\n", err);
     exit(EXIT_FAILURE);
   }
@@ -280,7 +280,7 @@ int main(int argc, char **argv)
       break;
   }
 
-  imdb_close(db);
+  simdb_close(db);
 
   return ret;
 }

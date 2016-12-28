@@ -6,8 +6,8 @@
 #include <wand/magick_wand.h>
 
 int
-imdb_sample(imdb_rec_t * const rec,
-            const char * const source)
+simdb_sample(simdb_rec_t * const rec,
+              const char * const source)
 {
   MagickWand *wand = NULL;
   MagickPassFail status = MagickPass;
@@ -83,7 +83,7 @@ imdb_sample(imdb_rec_t * const rec,
 
   if (status == MagickPass) {
     assert(buf_size == BITMAP_SIZE);
-    memset(rec->data, 0x0, IMDB_REC_LEN);
+    memset(rec->data, 0x0, SIMDB_REC_LEN);
     rec->data[REC_OFF_RU] = 0xFF;
     memcpy(&rec->data[REC_OFF_IW], &w, sizeof(uint16_t));
     memcpy(&rec->data[REC_OFF_IH], &h, sizeof(uint16_t));

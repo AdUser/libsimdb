@@ -7,7 +7,7 @@
 
 void usage(int exitcode) {
   fprintf(stderr,
-"Usage: imdb-write <opts>\n"
+"Usage: simdb-write <opts>\n"
 "  -b <path>   Path to database\n"
 );
   fprintf(stderr,
@@ -25,11 +25,11 @@ int main(int argc, char **argv)
   const char *db_path = NULL;
   const char *sample = NULL;
   const char *c = NULL;
-  imdb_db_t  *db = NULL;
-  imdb_rec_t rec;
+  simdb_t  *db = NULL;
+  simdb_rec_t rec;
   int err;
 
-  memset(&rec, 0x0, sizeof(imdb_rec_t));
+  memset(&rec, 0x0, sizeof(simdb_rec_t));
 
   if (argc < 3)
     usage(EXIT_FAILURE);
@@ -68,12 +68,12 @@ int main(int argc, char **argv)
   }
 
   if (mode == init) {
-    if (!imdb_create(db_path)) {
+    if (!simdb_create(db_path)) {
       fprintf(stderr, "database init: %s\n", strerror(errno));
       exit(EXIT_FAILURE);
     }
   }
-  if ((db = imdb_open(db_path, 1, &err)) == NULL) {
+  if ((db = simdb_open(db_path, 1, &err)) == NULL) {
     fprintf(stderr, "can't open database: %d\n", err);
     exit(EXIT_FAILURE);
   }
@@ -82,18 +82,18 @@ int main(int argc, char **argv)
     case add :
       if (rec.num == 0 || sample == NULL)
         usage(EXIT_FAILURE);
-      if (imdb_sample(&rec, sample) != 0) {
+      if (simdb_sample(&rec, sample) != 0) {
         fprintf(stderr, "sampler failure\n");
         exit(EXIT_FAILURE);
       }
-      if ((err = imdb_write_rec(db, &rec)) < 1) {
-        fprintf(stderr, "%s\n", imdb_error(err));
+      if ((err = simdb_write_rec(db, &rec)) < 1) {
+        fprintf(stderr, "%s\n", simdb_error(err));
         exit(EXIT_FAILURE);
       }
       break;
     case del :
-      if ((err = imdb_write_rec(db, &rec)) < 1) {
-        fprintf(stderr, "%s\n", imdb_error(err));
+      if ((err = simdb_write_rec(db, &rec)) < 1) {
+        fprintf(stderr, "%s\n", simdb_error(err));
         exit(EXIT_FAILURE);
       }
       break;
@@ -104,7 +104,7 @@ int main(int argc, char **argv)
       usage(EXIT_FAILURE);
       break;
   }
-  imdb_close(db);
+  simdb_close(db);
 
   exit(EXIT_SUCCESS);
 }

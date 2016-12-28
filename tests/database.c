@@ -1,53 +1,52 @@
 #include "../src/common.h"
 #include "../src/database.h"
 
-int main()
-{
-  imdb_db_t *db;
-  imdb_rec_t rec[2];
-  imdb_block_t blk;
+int main() {
+  simdb_t *db;
+  simdb_rec_t rec[2];
+  simdb_block_t blk;
   char *path = "test.db";
   int mode = 0, err = 0, num;
   bool ret;
 
   unlink(path);
 
-  db = imdb_open(path, mode, &err);
+  db = simdb_open(path, mode, &err);
   assert(db == NULL);
   assert(err == -1); /* no such file */
 
-  ret = imdb_create(path);
+  ret = simdb_create(path);
   assert(ret == true);
 
-  db = imdb_open(path, mode, &err);
+  db = simdb_open(path, mode, &err);
   assert(db != NULL);
 
   rec[0].num = 1;
-  err = imdb_read_rec(db, rec);
-  assert(err == IMDB_ERR_NXRECORD);
+  err = simdb_read_rec(db, rec);
+  assert(err == SIMDB_ERR_NXRECORD);
 
-  memset(rec[0].data, 0xAA, IMDB_REC_LEN);
+  memset(rec[0].data, 0xAA, SIMDB_REC_LEN);
   memset(rec[0].data, 0xFF, 1); /* record is used */
 
-  num = imdb_write_rec(db, rec);
-  assert(num == IMDB_ERR_READONLY); /* database open in read-only mode */
+  num = simdb_write_rec(db, rec);
+  assert(num == SIMDB_ERR_READONLY); /* database open in read-only mode */
 
-  imdb_close(db);
+  simdb_close(db);
 
-  mode |= IMDB_FLAG_WRITE;
-  db = imdb_open(path, mode, &err);
+  mode |= SIMDB_FLAG_WRITE;
+  db = simdb_open(path, mode, &err);
   assert(db != NULL);
 
-  num = imdb_write_rec(db, rec);
+  num = simdb_write_rec(db, rec);
   assert(num == 1); /* success */
 
-  num = imdb_read_rec(db, rec);
+  num = simdb_read_rec(db, rec);
   assert(num == 1);
 
   blk.start   = 1;
   blk.records = 2;
   blk.data    = NULL;
-  num = imdb_read_blk(db, &blk);
+  num = simdb_read_blk(db, &blk);
   assert(num == 1);
   assert(blk.records == 1);
   assert(blk.data != NULL);
@@ -55,7 +54,7 @@ int main()
   rec[0].num = 1;
   rec[1].num = 3;
 
-  imdb_close(db);
+  simdb_close(db);
 
   return 0;
 }

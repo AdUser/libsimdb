@@ -22,32 +22,32 @@
   errno = 0; \
   memset((buf), 0x0, (len)); \
   bytes = pread((db)->fd, (buf), (len), (off)); \
-  if (errno) { return IMDB_ERR_SYSTEM; }
+  if (errno) { return SIMDB_ERR_SYSTEM; }
 
 #define DB_WRITE(db, buf, len, off) \
   errno = 0; \
   bytes = pwrite((db)->fd, (buf), (len), (off)); \
-  if (errno) { return IMDB_ERR_SYSTEM; }
+  if (errno) { return SIMDB_ERR_SYSTEM; }
 
-const char *imdb_hdr_fmt = "IMDB v%02u, CAPS: %s;";
+const char *simdb_hdr_fmt = "IMDB v%02u, CAPS: %s;";
 
 bool
-imdb_create(const char *path) {
+simdb_create(const char *path) {
   ssize_t bytes = 0;
-  unsigned char buf[IMDB_REC_LEN];
+  unsigned char buf[SIMDB_REC_LEN];
   const char *caps = "M-R";
   bool result = false;
   int fd = -1;
 
-  memset(buf, 0x0, sizeof(char) * IMDB_REC_LEN);
+  memset(buf, 0x0, sizeof(char) * SIMDB_REC_LEN);
 
   if ((fd = creat(path, 0644)) < 0)
     return result;
 
-  snprintf((char *) buf, IMDB_REC_LEN, imdb_hdr_fmt, IMDB_VERSION, caps);
+  snprintf((char *) buf, SIMDB_REC_LEN, simdb_hdr_fmt, SIMDB_VERSION, caps);
 
-  bytes = pwrite(fd, buf, IMDB_REC_LEN, 0);
-  if (bytes == IMDB_REC_LEN)
+  bytes = pwrite(fd, buf, SIMDB_REC_LEN, 0);
+  if (bytes == SIMDB_REC_LEN)
     result = true; /* success */
 
   close(fd);
@@ -55,12 +55,12 @@ imdb_create(const char *path) {
   return result;
 }
 
-imdb_db_t *
-imdb_open(const char *path, int mode, int *error) {
-  imdb_db_t *db = NULL;
+simdb_t *
+simdb_open(const char *path, int mode, int *error) {
+  simdb_t *db = NULL;
   ssize_t bytes = 0;
   struct stat st;
-  char buf[IMDB_REC_LEN] = "\0";
+  char buf[SIMDB_REC_LEN] = "\0";
   int flags = 0, fd = -1;
   char *p;
 
@@ -68,31 +68,31 @@ imdb_open(const char *path, int mode, int *error) {
   assert(error != NULL);
 
   if (stat(path, &st) < 0) {
-    *error = IMDB_ERR_SYSTEM;
+    *error = SIMDB_ERR_SYSTEM;
     return NULL;
   }
 
-  if ((fd = open(path, (mode & IMDB_FLAG_WRITE) ? O_RDWR : O_RDONLY)) < 0) {
-    *error = IMDB_ERR_SYSTEM;
+  if ((fd = open(path, (mode & SIMDB_FLAG_WRITE) ? O_RDWR : O_RDONLY)) < 0) {
+    *error = SIMDB_ERR_SYSTEM;
     return NULL;
   }
 
   errno = 0;
-  bytes = pread(fd, buf, IMDB_REC_LEN, 0);
-  if (bytes < IMDB_REC_LEN) {
-    *error = errno ? IMDB_ERR_SYSTEM : IMDB_ERR_CORRUPTDB;
+  bytes = pread(fd, buf, SIMDB_REC_LEN, 0);
+  if (bytes < SIMDB_REC_LEN) {
+    *error = errno ? SIMDB_ERR_SYSTEM : SIMDB_ERR_CORRUPTDB;
     return NULL;
   }
 
   p = buf + 0;
   if (memcmp("IMDB", p, 4) != 0) {
-    *error = IMDB_ERR_CORRUPTDB;
+    *error = SIMDB_ERR_CORRUPTDB;
     return NULL;
   }
 
   p = buf + 6;
-  if (atoi(p) != IMDB_VERSION) {
-    *error = IMDB_ERR_WRONGVERS;
+  if (atoi(p) != SIMDB_VERSION) {
+    *error = SIMDB_ERR_WRONGVERS;
     return NULL;
   }
 
@@ -102,22 +102,22 @@ imdb_open(const char *path, int mode, int *error) {
     return NULL;
   }
 
-  if (mode & IMDB_FLAG_WRITE)
-    flags |= IMDB_FLAG_WRITE;
+  if (mode & SIMDB_FLAG_WRITE)
+    flags |= SIMDB_FLAG_WRITE;
 
   /* all seems to be ok */
 
-  if ((db = calloc(1, sizeof(imdb_db_t))) == NULL) {
-    *error = IMDB_ERR_OOM;
+  if ((db = calloc(1, sizeof(simdb_t))) == NULL) {
+    *error = SIMDB_ERR_OOM;
     return NULL;
   }
 
   p = buf + 16;
   for (size_t i = 0; i < 8 && *p != '\0'; p++) {
     switch (*p) {
-      case 'M' : flags |= IMDB_CAP_BITMAP; break;
-      case 'C' : flags |= IMDB_CAP_COLORS; break;
-      case 'R' : flags |= IMDB_CAP_RATIO;  break;
+      case 'M' : flags |= SIMDB_CAP_BITMAP; break;
+      case 'C' : flags |= SIMDB_CAP_COLORS; break;
+      case 'R' : flags |= SIMDB_CAP_RATIO;  break;
       case ';' : i = 9; /* end of flags */ break;
       default: /* ignore */ break;
     }
@@ -132,7 +132,7 @@ imdb_open(const char *path, int mode, int *error) {
 }
 
 void
-imdb_close(imdb_db_t *db)
+simdb_close(simdb_t *db)
 {
   assert(db != NULL);
 
@@ -141,26 +141,26 @@ imdb_close(imdb_db_t *db)
 }
 
 const char *
-imdb_error(int error) {
-   if (error == IMDB_SUCCESS) {
+simdb_error(int error) {
+   if (error == SIMDB_SUCCESS) {
      return "success";
-   } else if (error == IMDB_ERR_SYSTEM) {
+   } else if (error == SIMDB_ERR_SYSTEM) {
      return strerror(errno);
-   } else if (error == IMDB_ERR_OOM) {
+   } else if (error == SIMDB_ERR_OOM) {
      return "can't allocate memory";
-   } else if (error == IMDB_ERR_CORRUPTDB) {
+   } else if (error == SIMDB_ERR_CORRUPTDB) {
      return "database corrupted";
-   } else if (error == IMDB_ERR_WRONGVERS) {
+   } else if (error == SIMDB_ERR_WRONGVERS) {
      return "database version differs from library version";
-   } else if (error == IMDB_ERR_READONLY) {
+   } else if (error == SIMDB_ERR_READONLY) {
      return "database opened in read-only mode";
-   } else if (error == IMDB_ERR_NXRECORD) {
+   } else if (error == SIMDB_ERR_NXRECORD) {
      return "no such record in database";
    }
    return "unknown error";
 }
 
-int imdb_read_rec(imdb_db_t *db, imdb_rec_t *rec)
+int simdb_read_rec(simdb_t *db, simdb_rec_t *rec)
 {
   ssize_t bytes = 0;
 
@@ -168,10 +168,10 @@ int imdb_read_rec(imdb_db_t *db, imdb_rec_t *rec)
   assert(rec != NULL);
   assert(rec->num > 0);
 
-  DB_READ(db, rec->data, IMDB_REC_LEN, rec->num * IMDB_REC_LEN);
+  DB_READ(db, rec->data, SIMDB_REC_LEN, rec->num * SIMDB_REC_LEN);
 
-  if (bytes != IMDB_REC_LEN)
-    return errno ? IMDB_ERR_SYSTEM : IMDB_ERR_NXRECORD;
+  if (bytes != SIMDB_REC_LEN)
+    return errno ? SIMDB_ERR_SYSTEM : SIMDB_ERR_NXRECORD;
 
   if (rec->data[0] != 0xFF)
     return 0;
@@ -179,7 +179,7 @@ int imdb_read_rec(imdb_db_t *db, imdb_rec_t *rec)
   return 1;
 }
 
-int imdb_write_rec(imdb_db_t *db, imdb_rec_t *rec)
+int simdb_write_rec(simdb_t *db, simdb_rec_t *rec)
 {
   ssize_t bytes = 0;
 
@@ -187,18 +187,18 @@ int imdb_write_rec(imdb_db_t *db, imdb_rec_t *rec)
   assert(rec != NULL);
   assert(rec->num > 0);
 
-  if (!(db->flags & IMDB_FLAG_WRITE))
-    return IMDB_ERR_READONLY;
+  if (!(db->flags & SIMDB_FLAG_WRITE))
+    return SIMDB_ERR_READONLY;
 
-  DB_WRITE(db, rec->data, IMDB_REC_LEN, rec->num * IMDB_REC_LEN);
+  DB_WRITE(db, rec->data, SIMDB_REC_LEN, rec->num * SIMDB_REC_LEN);
 
-  if (bytes != IMDB_REC_LEN)
-    return IMDB_ERR_SYSTEM;
+  if (bytes != SIMDB_REC_LEN)
+    return SIMDB_ERR_SYSTEM;
 
   return 1;
 }
 
-int imdb_read_blk(imdb_db_t *db, imdb_block_t *blk)
+int simdb_read_blk(simdb_t *db, simdb_block_t *blk)
 {
   ssize_t bytes = 0;
 
@@ -208,15 +208,15 @@ int imdb_read_blk(imdb_db_t *db, imdb_block_t *blk)
   assert(blk->records > 0);
 
   FREE(blk->data);
-  CALLOC(blk->data, blk->records, IMDB_REC_LEN);
-  DB_READ(db, blk->data, blk->records * IMDB_REC_LEN, blk->start * IMDB_REC_LEN);
-  blk->records = bytes / IMDB_REC_LEN;
+  CALLOC(blk->data, blk->records, SIMDB_REC_LEN);
+  DB_READ(db, blk->data, blk->records * SIMDB_REC_LEN, blk->start * SIMDB_REC_LEN);
+  blk->records = bytes / SIMDB_REC_LEN;
 
   return blk->records;
 }
 
 uint64_t
-imdb_records_count(imdb_db_t * const db) {
+simdb_records_count(simdb_t * const db) {
   struct stat st;
   off_t size = 0;
 
@@ -225,7 +225,7 @@ imdb_records_count(imdb_db_t * const db) {
   fstat(db->fd, &st);
   size = st.st_size;
 
-  return size / IMDB_REC_LEN;
+  return size / SIMDB_REC_LEN;
 }
 
 float
@@ -235,17 +235,17 @@ ratio_from_rec_data(unsigned char * const data) {
   iw = *((uint16_t *)(data + REC_OFF_IW));
   ih = *((uint16_t *)(data + REC_OFF_IH));
 
-  return (iw > 0 && ih > 0) ? ((float) iw / ih) : 0.0;
+   return (iw > 0 && ih > 0) ? ((float) iw / ih) : 0.0;
 }
 
 int
-imdb_search(imdb_db_t     * const db,
-            imdb_rec_t    * const sample,
-            imdb_search_t * const search,
-            imdb_match_t  **matches)
+simdb_search(simdb_t        * const db,
+             simdb_rec_t    * const sample,
+             simdb_search_t * const search,
+             simdb_match_t  **matches)
 {
-  imdb_block_t blk;
-  imdb_match_t match;
+  simdb_block_t blk;
+  simdb_match_t match;
   const int blk_size = 4096;
   uint64_t found = 0;
   unsigned int i = 0;
@@ -261,12 +261,12 @@ imdb_search(imdb_db_t     * const db,
   assert(search->maxdiff_ratio  >= 0.0 && search->maxdiff_ratio  <= 1.0);
   assert(search->maxdiff_bitmap >= 0.0 && search->maxdiff_bitmap <= 1.0);
 
-  memset(&blk,   0x0, sizeof(imdb_block_t));
-  memset(&match, 0x0, sizeof(imdb_match_t));
+  memset(&blk,   0x0, sizeof(simdb_block_t));
+  memset(&match, 0x0, sizeof(simdb_match_t));
   blk.start = 1;
   blk.records = blk_size;
 
-  if ((ret = imdb_read_rec(db, sample)) < 1)
+  if ((ret = simdb_read_rec(db, sample)) < 1)
     return ret;
 
   if (search->limit == 0)
@@ -275,11 +275,11 @@ imdb_search(imdb_db_t     * const db,
   if (search->maxdiff_ratio > 0.0)
     ratio_s = ratio_from_rec_data(sample->data);
 
-  CALLOC(*matches, search->limit, sizeof(imdb_match_t));
+  CALLOC(*matches, search->limit, sizeof(simdb_match_t));
 
-  while (imdb_read_blk(db, &blk) > 0) {
+  while (simdb_read_blk(db, &blk) > 0) {
     p = blk.data;
-    for (i = 0; i < blk.records; i++, p += IMDB_REC_LEN) {
+    for (i = 0; i < blk.records; i++, p += SIMDB_REC_LEN) {
       if (*(p + REC_OFF_RU) == 0x0)
         continue; /* record missing */
 
@@ -304,7 +304,7 @@ imdb_search(imdb_db_t     * const db,
 
       /* create match record */
       match.num = blk.start + i;
-      memcpy(&(*matches)[found], &match, sizeof(imdb_match_t));
+      memcpy(&(*matches)[found], &match, sizeof(simdb_match_t));
       found++;
       if (found >= search->limit)
         break;
@@ -319,26 +319,26 @@ imdb_search(imdb_db_t     * const db,
 }
 
 uint64_t
-imdb_usage_map(imdb_db_t * const db,
-               char     ** const map) {
+simdb_usage_map(simdb_t * const db,
+               char    ** const map) {
   const int blk_size = 4096;
-  imdb_block_t blk;
+  simdb_block_t blk;
   uint64_t records;
   unsigned char *r; /* mnemonics : block, record */
   char *m = NULL;   /* mnemonics : map */
 
-  memset(&blk, 0x0, sizeof(imdb_block_t));
+  memset(&blk, 0x0, sizeof(simdb_block_t));
 
-  records = imdb_records_count(db);
+  records = simdb_records_count(db);
   CALLOC(*map, records + 1, sizeof(char));
 
   m = *map;
   blk.start = 1;
   blk.records = blk_size;
 
-  while (imdb_read_blk(db, &blk) > 0) {
+  while (simdb_read_blk(db, &blk) > 0) {
     r = blk.data;
-    for (unsigned int i = 0;  i < blk.records;  i++, m++, r += IMDB_REC_LEN) {
+    for (unsigned int i = 0;  i < blk.records;  i++, m++, r += SIMDB_REC_LEN) {
       *m = (r[REC_OFF_RU] == 0xFF) ? CHAR_USED : CHAR_NONE;
     }
     blk.start += blk_size;
@@ -349,24 +349,24 @@ imdb_usage_map(imdb_db_t * const db,
 }
 
 uint16_t
-imdb_usage_slice(imdb_db_t * const db,
-                 char     ** const map,
-                 uint64_t  offset,
-                 uint16_t  limit) {
-  imdb_block_t blk;
+simdb_usage_slice(simdb_t   * const db,
+                  char     ** const map,
+                  uint64_t  offset,
+                  uint16_t  limit) {
+  simdb_block_t blk;
   unsigned char *r; /* mnemonics : block, record */
   char *m = NULL;   /* mnemonics : map */
 
-  memset(&blk, 0x0, sizeof(imdb_block_t));
+  memset(&blk, 0x0, sizeof(simdb_block_t));
   CALLOC(*map, limit + 1, sizeof(char));
 
   m = *map;
   blk.start = offset;
   blk.records = limit;
 
-  limit = imdb_read_blk(db, &blk);
+  limit = simdb_read_blk(db, &blk);
   r = blk.data;
-  for (uint16_t i = 0;  i < blk.records;  i++, m++, r += IMDB_REC_LEN) {
+  for (uint16_t i = 0;  i < blk.records;  i++, m++, r += SIMDB_REC_LEN) {
     *m = (r[REC_OFF_RU] == 0xFF) ? CHAR_USED : CHAR_NONE;
   }
 
