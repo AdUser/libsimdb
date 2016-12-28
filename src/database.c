@@ -18,6 +18,12 @@
 #include "database.h"
 #include "bitmap.h"
 
+struct _simdb_t {
+  int fd;
+  int flags;
+  char path[PATH_MAX];
+};
+
 #define DB_READ(db, buf, len, off) \
   errno = 0; \
   memset((buf), 0x0, (len)); \

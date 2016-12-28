@@ -22,11 +22,7 @@
 #define SIMDB_ERR_NXRECORD    -5 /* no such record in database */
 #define SIMDB_ERR_READONLY    -6 /* database opened in read-only mode */
 
-typedef struct {
-  int fd;
-  int flags;
-  char path[PATH_MAX];
-} simdb_t;
+typedef struct _simdb_t simdb_t; /* opaque database type */
 
 /**
   Database header format - fixed length, 48 bytes
