@@ -152,6 +152,10 @@ imdb_error(int error) {
      return "database corrupted";
    } else if (error == IMDB_ERR_WRONGVERS) {
      return "database version differs from library version";
+   } else if (error == IMDB_ERR_READONLY) {
+     return "database opened in read-only mode";
+   } else if (error == IMDB_ERR_NXRECORD) {
+     return "no such record in database";
    }
    return "unknown error";
 }
@@ -167,7 +171,7 @@ int imdb_read_rec(imdb_db_t *db, imdb_rec_t *rec)
   DB_READ(db, rec->data, IMDB_REC_LEN, rec->num * IMDB_REC_LEN);
 
   if (bytes != IMDB_REC_LEN)
-    return errno ? IMDB_ERR_SYSTEM : 0;
+    return errno ? IMDB_ERR_SYSTEM : IMDB_ERR_NXRECORD;
 
   if (rec->data[0] != 0xFF)
     return 0;
@@ -182,6 +186,9 @@ int imdb_write_rec(imdb_db_t *db, imdb_rec_t *rec)
   assert(db  != NULL);
   assert(rec != NULL);
   assert(rec->num > 0);
+
+  if (!(db->flags & IMDB_FLAG_WRITE))
+    return IMDB_ERR_READONLY;
 
   DB_WRITE(db, rec->data, IMDB_REC_LEN, rec->num * IMDB_REC_LEN);
 
@@ -259,10 +266,8 @@ imdb_search(imdb_db_t     * const db,
   blk.start = 1;
   blk.records = blk_size;
 
-  if ((ret = imdb_read_rec(db, sample)) < 1) {
-    strncpy(db->error, "Can't read source sample", sizeof(db->error));
+  if ((ret = imdb_read_rec(db, sample)) < 1)
     return ret;
-  }
 
   if (search->limit == 0)
     search->limit = -1; /* unsigned -> max */

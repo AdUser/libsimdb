@@ -19,6 +19,8 @@
 #define IMDB_ERR_OOM         -2 /* can't allocate memory */
 #define IMDB_ERR_CORRUPTDB   -3 /* empty or currupted database */
 #define IMDB_ERR_WRONGVERS   -4 /* database version mismatch */
+#define IMDB_ERR_NXRECORD    -5 /* no such record in database */
+#define IMDB_ERR_READONLY    -6 /* database opened in read-only mode */
 
 typedef struct {
   int fd;

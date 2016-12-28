@@ -24,13 +24,13 @@ int main()
 
   rec[0].num = 1;
   err = imdb_read_rec(db, rec);
-  assert(err == 0); /* no such record */
+  assert(err == IMDB_ERR_NXRECORD);
 
   memset(rec[0].data, 0xAA, IMDB_REC_LEN);
   memset(rec[0].data, 0xFF, 1); /* record is used */
 
   num = imdb_write_rec(db, rec);
-  assert(num != 1); /* database open in read-only mode */
+  assert(num == IMDB_ERR_READONLY); /* database open in read-only mode */
 
   imdb_close(db);
 
