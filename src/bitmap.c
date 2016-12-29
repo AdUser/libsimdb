@@ -39,14 +39,14 @@ unsigned char dict[256] = {
 };
 
 int
-bitmap_compare(const unsigned char *a,
-               const unsigned char *b)
+simdb_bitmap_compare(const unsigned char *a,
+                     const unsigned char *b)
 {
   unsigned char diff = 0;
   size_t i = 0;
   size_t cnt = 0;
 
-  for (i = 0; i < BITMAP_SIZE; i++, a++, b++) {
+  for (i = 0; i < SIMDB_BITMAP_SIZE; i++, a++, b++) {
     diff = *a ^ *b;
     cnt += dict[diff];
   }
@@ -55,13 +55,13 @@ bitmap_compare(const unsigned char *a,
 }
 
 size_t
-bitmap_diffmap(unsigned char *diff,
-               const unsigned char *a,
-               const unsigned char *b)
+simdb_bitmap_diffmap(unsigned char *diff,
+                     const unsigned char *a,
+                     const unsigned char *b)
 {
   size_t i = 0;
 
-  for (i = 0; i < BITMAP_SIZE; i++, a++, b++, diff++) {
+  for (i = 0; i < SIMDB_BITMAP_SIZE; i++, a++, b++, diff++) {
     *diff = *a ^ *b;
   }
 
@@ -69,9 +69,9 @@ bitmap_diffmap(unsigned char *diff,
 }
 
 size_t
-bitmap_unpack(const unsigned char *map,
-              unsigned char ** const buf) {
-  size_t buf_size = BITMAP_BITS;
+simdb_bitmap_unpack(const unsigned char *map,
+                    unsigned char ** const buf) {
+  size_t buf_size = SIMDB_BITMAP_BITS;
   uint16_t *p, row, mask;
   unsigned char *q = NULL;
 
@@ -79,9 +79,9 @@ bitmap_unpack(const unsigned char *map,
 
   p = (uint16_t *) map;
   q = *buf;
-  for (size_t i = 0; i < BITMAP_SIDE; i++, p++) {
+  for (size_t i = 0; i < SIMDB_BITMAP_SIDE; i++, p++) {
     row = *p; mask = 0x1;
-    for (size_t j = 0; j < BITMAP_SIDE; j++, q++) {
+    for (size_t j = 0; j < SIMDB_BITMAP_SIDE; j++, q++) {
       *q = (row & mask) ? 0xFF : 0x00;
       mask <<= 1;
     }
@@ -91,16 +91,16 @@ bitmap_unpack(const unsigned char *map,
 }
 
 void
-bitmap_print(const unsigned char *map) {
+simdb_bitmap_print(const unsigned char *map) {
   unsigned char *buf = NULL, *p = NULL;
-  char line[BITMAP_SIDE * 2 + 1];
+  char line[SIMDB_BITMAP_SIDE * 2 + 1];
 
-  bitmap_unpack(map, &buf);
+  simdb_bitmap_unpack(map, &buf);
   p = buf;
 
-  line[BITMAP_SIDE * 2] = '\0';
-  for (size_t i = 0; i < BITMAP_SIDE; i++) {
-    for (size_t j = 0; j < BITMAP_SIDE; j++, p++) {
+  line[SIMDB_BITMAP_SIDE * 2] = '\0';
+  for (size_t i = 0; i < SIMDB_BITMAP_SIDE; i++) {
+    for (size_t j = 0; j < SIMDB_BITMAP_SIDE; j++, p++) {
       line[(j * 2) + 0] = (*p == 0x00) ? CHAR_NONE : CHAR_USED;
       line[(j * 2) + 1] = (*p == 0x00) ? CHAR_NONE : CHAR_USED;
     }

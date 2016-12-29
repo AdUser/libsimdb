@@ -131,7 +131,7 @@ int rec_bitmap(simdb_t *db, uint64_t number)
     return 1;
   }
 
-  bitmap_print(&rec.data[REC_OFF_BM]);
+  simdb_bitmap_print(&rec.data[REC_OFF_BM]);
 
   return 0;
 }
@@ -140,9 +140,9 @@ int rec_diff(simdb_t *db, uint64_t a, uint64_t b, unsigned short int showmap)
 {
   simdb_rec_t rec;
   float diff = 0.0;
-  unsigned char one[BITMAP_SIZE];
-  unsigned char two[BITMAP_SIZE];
-  unsigned char map[BITMAP_SIZE];
+  unsigned char one[SIMDB_BITMAP_SIZE];
+  unsigned char two[SIMDB_BITMAP_SIZE];
+  unsigned char map[SIMDB_BITMAP_SIZE];
 
   assert(db != NULL);
   memset(&rec, 0x0, sizeof(simdb_rec_t));
@@ -152,23 +152,23 @@ int rec_diff(simdb_t *db, uint64_t a, uint64_t b, unsigned short int showmap)
     fprintf(stderr, "record diff: first sample not exists\n");
     return 1;
   }
-  memcpy(one, &rec.data[REC_OFF_BM], BITMAP_SIZE);
+  memcpy(one, &rec.data[REC_OFF_BM], SIMDB_BITMAP_SIZE);
 
   rec.num = b;
   if (simdb_record_read(db, &rec) < 1) {
     fprintf(stderr, "record diff: second sample not exists\n");
     return 1;
   }
-  memcpy(two, &rec.data[REC_OFF_BM], BITMAP_SIZE);
+  memcpy(two, &rec.data[REC_OFF_BM], SIMDB_BITMAP_SIZE);
 
   if (showmap) {
-    bitmap_diffmap(map, one, two);
-    bitmap_print(map);
+    simdb_bitmap_diffmap(map, one, two);
+    simdb_bitmap_print(map);
     return 0;
   }
 
-  diff = (float) bitmap_compare(one, two);
-  printf("%.2f%%\n", (diff / BITMAP_BITS) * 100);
+  diff = (float) simdb_bitmap_compare(one, two);
+  printf("%.2f%%\n", (diff / SIMDB_BITMAP_BITS) * 100);
 
   return 0;
 }

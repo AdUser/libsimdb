@@ -299,8 +299,7 @@ simdb_search(simdb_t        * const db,
       }
 
       /* - compare bitmap - more expensive */
-      match.diff_bitmap  = (float) bitmap_compare(p + REC_OFF_BM, sample->data + REC_OFF_BM);
-      match.diff_bitmap /= BITMAP_BITS;
+      match.diff_bitmap = simdb_bitmap_compare(p + REC_OFF_BM, sample->data + REC_OFF_BM) / SIMDB_BITMAP_BITS;
       if (match.diff_bitmap > search->maxdiff_bitmap)
         continue;
 
