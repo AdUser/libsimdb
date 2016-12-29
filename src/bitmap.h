@@ -8,8 +8,6 @@
 #define CHAR_USED '@'
 #define CHAR_NONE '-'
 
-typedef unsigned char bitmap_t[BITMAP_SIZE];
-
 int
 bitmap_compare(const unsigned char *a,
                const unsigned char *b);
