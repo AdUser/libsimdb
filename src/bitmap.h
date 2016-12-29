@@ -8,10 +8,10 @@
 
 /** Bits per bitmap side (currently - 16) */
 #define SIMDB_BITMAP_SIDE 16
-/** Bitmap size in bytes (currently - 32) */
-#define SIMDB_BITMAP_SIZE (SIMDB_BITMAP_SIDE * (SIMDB_BITMAP_SIDE / 8))
 /** Total bits in bitmap (currently - 256) */
-#define SIMDB_BITMAP_BITS (SIMDB_BITMAP_SIZE * 8)
+#define SIMDB_BITMAP_BITS (SIMDB_BITMAP_SIDE * SIMDB_BITMAP_SIDE)
+/** Bitmap size in bytes (currently - 32) */
+#define SIMDB_BITMAP_SIZE (SIMDB_BITMAP_BITS / 8)
 
 /** placeholders for various bit states */
 #define CHAR_USED '@' /**< bit is 1 */
