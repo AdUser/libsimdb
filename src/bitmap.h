@@ -53,7 +53,7 @@ simdb_bitmap_unpack(const unsigned char *map,
 /**
  * @brief Print bitmap to stdout as ascii-square
  * @param map Source bitmap
- * @note Heigth of "square" is equals to BITMAP_SIDE,
+ * @note Height of "square" is equals to BITMAP_SIDE,
  *   but width is BITMAP_SIDE x 2, for ease of reading
  */
 void

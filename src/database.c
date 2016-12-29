@@ -14,6 +14,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
  */
 
+/**
+ * @file
+ * Common routines to work with database
+ */
+
 #include "common.h"
 #include "bitmap.h"
 #include "simdb.h"
@@ -24,17 +29,20 @@ struct _simdb_t {
   char path[PATH_MAX];  /**< path to database file */
 };
 
+/** read some records from database file and checks for errors */
 #define DB_READ(db, buf, len, off) \
   errno = 0; \
   memset((buf), 0x0, (len)); \
   bytes = pread((db)->fd, (buf), (len), (off)); \
   if (errno) { return SIMDB_ERR_SYSTEM; }
 
+/** write some records from database file and checks for errors */
 #define DB_WRITE(db, buf, len, off) \
   errno = 0; \
   bytes = pwrite((db)->fd, (buf), (len), (off)); \
   if (errno) { return SIMDB_ERR_SYSTEM; }
 
+/** database header format line */
 const char *simdb_hdr_fmt = "IMDB v%02u, CAPS: %s;";
 
 bool

@@ -14,10 +14,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
  */
 
+/**
+ * @file
+ * @brief Functions for work with image bitmaps
+ */
+
 #include "common.h"
 #include "bitmap.h"
 
-unsigned char dict[256] = {
+/** bictionary for speedup bitmap comparing */
+static unsigned char dict[256] = {
 /* 0x00 _0 _1 _2 _3 _4 _5 _6 _7 _8 _9 _A _B _C _D _E _F */
 /* ---------------------------------------------------- */
 /* 0_ */ 0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4,
