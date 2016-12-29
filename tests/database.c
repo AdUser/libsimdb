@@ -56,5 +56,7 @@ int main() {
 
   simdb_close(db);
 
+  unlink(path);
+
   return 0;
 }
