@@ -52,6 +52,14 @@ typedef struct _simdb_t simdb_t;
 /** @} */
 
 /**
+ * database record
+ */
+typedef struct {
+  uint64_t num;                      /**< record number in database */
+  unsigned char data[SIMDB_REC_LEN]; /**< record raw data */
+} simdb_rec_t;
+
+/**
  * block of sequental records of database
  */
 typedef struct {
@@ -59,14 +67,6 @@ typedef struct {
   size_t records;      /**< records count */
   unsigned char *data; /**< raw records data */
 } simdb_block_t;
-
-/**
- * database record
- */
-typedef struct {
-  uint64_t num;                      /**< record number in database */
-  unsigned char data[SIMDB_REC_LEN]; /**< record raw data */
-} simdb_rec_t;
 
 /**
  * search parameters
