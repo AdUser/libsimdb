@@ -1,6 +1,6 @@
 #include "common.h"
 #include "bitmap.h"
-#include "database.h"
+#include "simdb.h"
 #include "sample.h"
 
 #include <wand/magick_wand.h>

@@ -1,5 +1,5 @@
 #include "../src/common.h"
-#include "../src/database.h"
+#include "../src/simdb.h"
 
 int main() {
   simdb_t *db;

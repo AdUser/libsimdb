@@ -1,6 +1,6 @@
 #include "common.h"
-#include "database.h"
 #include "bitmap.h"
+#include "simdb.h"
 #include "sample.h"
 
 #include <getopt.h>

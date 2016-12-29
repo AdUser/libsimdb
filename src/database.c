@@ -15,8 +15,8 @@
  */
 
 #include "common.h"
-#include "database.h"
 #include "bitmap.h"
+#include "simdb.h"
 
 struct _simdb_t {
   int fd;               /**< database file descriptor */
