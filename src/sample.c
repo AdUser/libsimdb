@@ -1,6 +1,7 @@
 #include "common.h"
 #include "bitmap.h"
 #include "simdb.h"
+#include "record.h"
 #include "sample.h"
 
 #include <wand/magick_wand.h>
@@ -82,12 +83,14 @@ simdb_sample(simdb_rec_t * const rec,
 #endif
 
   if (status == MagickPass) {
+    simdb_urec_t urec;
     assert(buf_size == SIMDB_BITMAP_SIZE);
-    memset(rec->data, 0x0, SIMDB_REC_LEN);
-    rec->data[REC_OFF_RU] = 0xFF;
-    memcpy(&rec->data[REC_OFF_IW], &w, sizeof(uint16_t));
-    memcpy(&rec->data[REC_OFF_IH], &h, sizeof(uint16_t));
-    memcpy(&rec->data[REC_OFF_BM], buf, SIMDB_BITMAP_SIZE);
+    memset(&urec, 0x0, sizeof(urec));
+    urec.used = 0xFF;
+    urec.image_w = w;
+    urec.image_h = h;
+    memcpy(urec.bitmap, buf, SIMDB_BITMAP_SIZE);
+    memcpy(rec->data, &urec, sizeof(rec->data));
   } else {
     description = MagickGetException(wand, &severity);
     fprintf(stderr, "%03d %.1024s\n", severity, description);

@@ -257,10 +257,10 @@ simdb_search(simdb_t        * const db,
 {
   simdb_block_t blk;
   simdb_match_t match;
+  simdb_urec_t *rec;
   const int blk_size = 4096;
   uint64_t found = 0;
   unsigned int i = 0;
-  unsigned char *p = NULL;
   float ratio_s = 0.0; /* source */
   float ratio_t = 0.0; /* tested */
   int ret = 0;
@@ -289,16 +289,16 @@ simdb_search(simdb_t        * const db,
   CALLOC(*matches, search->limit, sizeof(simdb_match_t));
 
   while (simdb_block_read(db, &blk) > 0) {
-    p = blk.data;
-    for (i = 0; i < blk.records; i++, p += SIMDB_REC_LEN) {
-      if (*(p + REC_OFF_RU) == 0x0)
+    rec = (simdb_urec_t *) blk.data;
+    for (i = 0; i < blk.records; i++, rec++) {
+      if (rec->used == 0x0)
         continue; /* record missing */
 
       match.diff_ratio  = 0.0;
       match.diff_bitmap = 0.0;
 
       /* - compare ratio - cheap */
-      if (ratio_s > 0.0 && (ratio_t = simdb_record_ratio((simdb_urec_t *) p)) > 0.0) {
+      if (ratio_s > 0.0 && (ratio_t = simdb_record_ratio(rec)) > 0.0) {
         match.diff_ratio  =  ratio_s - ratio_t;
         match.diff_ratio *= (ratio_s > ratio_t) ? 1.0 : -1.0;
         if (match.diff_ratio > search->maxdiff_ratio)
@@ -308,7 +308,7 @@ simdb_search(simdb_t        * const db,
       }
 
       /* - compare bitmap - more expensive */
-      match.diff_bitmap = simdb_bitmap_compare(p + REC_OFF_BM, sample->data + REC_OFF_BM) / SIMDB_BITMAP_BITS;
+      match.diff_bitmap = simdb_bitmap_compare(rec->bitmap, ((simdb_urec_t *) sample)->bitmap) / SIMDB_BITMAP_BITS;
       if (match.diff_bitmap > search->maxdiff_bitmap)
         continue;
 
@@ -334,7 +334,7 @@ simdb_usage_map(simdb_t * const db,
   const int blk_size = 4096;
   simdb_block_t blk;
   uint64_t records;
-  unsigned char *r; /* mnemonics : block, record */
+  simdb_urec_t *r; /* mnemonics : block, record */
   char *m = NULL;   /* mnemonics : map */
 
   memset(&blk, 0x0, sizeof(simdb_block_t));
@@ -347,9 +347,9 @@ simdb_usage_map(simdb_t * const db,
   blk.records = blk_size;
 
   while (simdb_block_read(db, &blk) > 0) {
-    r = blk.data;
-    for (unsigned int i = 0;  i < blk.records;  i++, m++, r += SIMDB_REC_LEN) {
-      *m = (r[REC_OFF_RU] == 0xFF) ? CHAR_USED : CHAR_NONE;
+    r = (simdb_urec_t *) blk.data;
+    for (unsigned int i = 0; i < blk.records; i++, m++, r++) {
+      *m = (r->used == 0xFF) ? CHAR_USED : CHAR_NONE;
     }
     blk.start += blk_size;
   }
@@ -364,7 +364,7 @@ simdb_usage_slice(simdb_t   * const db,
                   uint64_t  offset,
                   uint16_t  limit) {
   simdb_block_t blk;
-  unsigned char *r; /* mnemonics : block, record */
+  simdb_urec_t *r;  /* mnemonics : block, record */
   char *m = NULL;   /* mnemonics : map */
 
   memset(&blk, 0x0, sizeof(simdb_block_t));
@@ -375,9 +375,9 @@ simdb_usage_slice(simdb_t   * const db,
   blk.records = limit;
 
   limit = simdb_block_read(db, &blk);
-  r = blk.data;
-  for (uint16_t i = 0;  i < blk.records;  i++, m++, r += SIMDB_REC_LEN) {
-    *m = (r[REC_OFF_RU] == 0xFF) ? CHAR_USED : CHAR_NONE;
+  r = (simdb_urec_t *) blk.data;
+  for (uint16_t i = 0;  i < blk.records;  i++, m++, r++) {
+    *m = (r->used == 0xFF) ? CHAR_USED : CHAR_NONE;
   }
 
   return limit;
