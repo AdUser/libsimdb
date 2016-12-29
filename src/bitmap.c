@@ -54,7 +54,7 @@ bitmap_compare(const unsigned char *a,
   return cnt;
 }
 
-int
+size_t
 bitmap_diffmap(unsigned char *diff,
                const unsigned char *a,
                const unsigned char *b)
@@ -81,7 +81,7 @@ bitmap_unpack(const unsigned char *map,
   q = *buf;
   for (size_t i = 0; i < BITMAP_SIDE; i++, p++) {
     row = *p; mask = 0x1;
-    for (size_t j = 0; j < 16; j++, q++) {
+    for (size_t j = 0; j < BITMAP_SIDE; j++, q++) {
       *q = (row & mask) ? 0xFF : 0x00;
       mask <<= 1;
     }
