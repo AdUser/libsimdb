@@ -21,6 +21,7 @@
 
 #include "common.h"
 #include "bitmap.h"
+#include "record.h"
 #include "simdb.h"
 
 struct _simdb_t {
@@ -238,14 +239,14 @@ simdb_records_count(simdb_t * const db) {
   return size / SIMDB_REC_LEN;
 }
 
-static float
-ratio_from_rec_data(unsigned char * const data) {
-  uint16_t iw, ih;
+inline static float
+simdb_record_ratio(simdb_urec_t *r) {
+  assert(r != NULL);
 
-  iw = *((uint16_t *)(data + REC_OFF_IW));
-  ih = *((uint16_t *)(data + REC_OFF_IH));
+  if (r->image_w > 0 && r->image_h > 0)
+    return (float) r->image_w / r->image_h;
 
-   return (iw > 0 && ih > 0) ? ((float) iw / ih) : 0.0;
+  return 0.0;
 }
 
 int
@@ -283,7 +284,7 @@ simdb_search(simdb_t        * const db,
     search->limit = -1; /* unsigned -> max */
 
   if (search->maxdiff_ratio > 0.0)
-    ratio_s = ratio_from_rec_data(sample->data);
+    ratio_s = simdb_record_ratio((simdb_urec_t *) sample->data);
 
   CALLOC(*matches, search->limit, sizeof(simdb_match_t));
 
@@ -297,7 +298,7 @@ simdb_search(simdb_t        * const db,
       match.diff_bitmap = 0.0;
 
       /* - compare ratio - cheap */
-      if (ratio_s > 0.0 && (ratio_t = ratio_from_rec_data(p)) > 0.0) {
+      if (ratio_s > 0.0 && (ratio_t = simdb_record_ratio((simdb_urec_t *) p)) > 0.0) {
         match.diff_ratio  =  ratio_s - ratio_t;
         match.diff_ratio *= (ratio_s > ratio_t) ? 1.0 : -1.0;
         if (match.diff_ratio > search->maxdiff_ratio)
