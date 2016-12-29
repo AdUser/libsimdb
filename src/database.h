@@ -143,7 +143,7 @@ simdb_search(simdb_t         * const db,
  * @retval  0 if record exists but not used,
  * @retval <0 on error (system error or record missing)
  */
-int simdb_read_rec (simdb_t *db, simdb_rec_t *rec);
+int simdb_record_read(simdb_t *db, simdb_rec_t *rec);
 /**
  * @brief Write single record to database
  * @param db  Database handle
@@ -152,7 +152,7 @@ int simdb_read_rec (simdb_t *db, simdb_rec_t *rec);
  * @retval  1 on success
  * @retval <0 on error (system error or record missing)
  */
-int simdb_write_rec(simdb_t *db, simdb_rec_t *rec);
+int simdb_record_write(simdb_t *db, simdb_rec_t *rec);
 
 /**
  * @brief Read continious records block from database
@@ -162,7 +162,7 @@ int simdb_write_rec(simdb_t *db, simdb_rec_t *rec);
  * @retval >=0 As number of records actually read
  * @retval  <0 on error
  */
-int simdb_read_blk (simdb_t *db, simdb_block_t *blk);
+int simdb_block_read(simdb_t *db, simdb_block_t *blk);
 
 /**
  * @brief Get database capacity

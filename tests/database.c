@@ -22,13 +22,13 @@ int main() {
   assert(db != NULL);
 
   rec[0].num = 1;
-  err = simdb_read_rec(db, rec);
+  err = simdb_record_read(db, rec);
   assert(err == SIMDB_ERR_NXRECORD);
 
   memset(rec[0].data, 0xAA, SIMDB_REC_LEN);
   memset(rec[0].data, 0xFF, 1); /* record is used */
 
-  num = simdb_write_rec(db, rec);
+  num = simdb_record_write(db, rec);
   assert(num == SIMDB_ERR_READONLY); /* database open in read-only mode */
 
   simdb_close(db);
@@ -37,16 +37,16 @@ int main() {
   db = simdb_open(path, mode, &err);
   assert(db != NULL);
 
-  num = simdb_write_rec(db, rec);
+  num = simdb_record_write(db, rec);
   assert(num == 1); /* success */
 
-  num = simdb_read_rec(db, rec);
+  num = simdb_record_read(db, rec);
   assert(num == 1);
 
   blk.start   = 1;
   blk.records = 2;
   blk.data    = NULL;
-  num = simdb_read_blk(db, &blk);
+  num = simdb_block_read(db, &blk);
   assert(num == 1);
   assert(blk.records == 1);
   assert(blk.data != NULL);

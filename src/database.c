@@ -165,7 +165,7 @@ simdb_error(int error) {
    return "unknown error";
 }
 
-int simdb_read_rec(simdb_t *db, simdb_rec_t *rec) {
+int simdb_record_read(simdb_t *db, simdb_rec_t *rec) {
   ssize_t bytes = 0;
 
   assert(db  != NULL);
@@ -183,7 +183,7 @@ int simdb_read_rec(simdb_t *db, simdb_rec_t *rec) {
   return 1;
 }
 
-int simdb_write_rec(simdb_t *db, simdb_rec_t *rec) {
+int simdb_record_write(simdb_t *db, simdb_rec_t *rec) {
   ssize_t bytes = 0;
 
   assert(db  != NULL);
@@ -201,7 +201,7 @@ int simdb_write_rec(simdb_t *db, simdb_rec_t *rec) {
   return 1;
 }
 
-int simdb_read_blk(simdb_t *db, simdb_block_t *blk) {
+int simdb_block_read(simdb_t *db, simdb_block_t *blk) {
   ssize_t bytes = 0;
 
   assert(db  != NULL);
@@ -268,7 +268,7 @@ simdb_search(simdb_t        * const db,
   blk.start = 1;
   blk.records = blk_size;
 
-  if ((ret = simdb_read_rec(db, sample)) < 1)
+  if ((ret = simdb_record_read(db, sample)) < 1)
     return ret;
 
   if (search->limit == 0)
@@ -279,7 +279,7 @@ simdb_search(simdb_t        * const db,
 
   CALLOC(*matches, search->limit, sizeof(simdb_match_t));
 
-  while (simdb_read_blk(db, &blk) > 0) {
+  while (simdb_block_read(db, &blk) > 0) {
     p = blk.data;
     for (i = 0; i < blk.records; i++, p += SIMDB_REC_LEN) {
       if (*(p + REC_OFF_RU) == 0x0)
@@ -338,7 +338,7 @@ simdb_usage_map(simdb_t * const db,
   blk.start = 1;
   blk.records = blk_size;
 
-  while (simdb_read_blk(db, &blk) > 0) {
+  while (simdb_block_read(db, &blk) > 0) {
     r = blk.data;
     for (unsigned int i = 0;  i < blk.records;  i++, m++, r += SIMDB_REC_LEN) {
       *m = (r[REC_OFF_RU] == 0xFF) ? CHAR_USED : CHAR_NONE;
@@ -366,7 +366,7 @@ simdb_usage_slice(simdb_t   * const db,
   blk.start = offset;
   blk.records = limit;
 
-  limit = simdb_read_blk(db, &blk);
+  limit = simdb_block_read(db, &blk);
   r = blk.data;
   for (uint16_t i = 0;  i < blk.records;  i++, m++, r += SIMDB_REC_LEN) {
     *m = (r[REC_OFF_RU] == 0xFF) ? CHAR_USED : CHAR_NONE;

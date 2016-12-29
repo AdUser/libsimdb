@@ -126,7 +126,7 @@ int rec_bitmap(simdb_t *db, uint64_t number)
   memset(&rec, 0x0, sizeof(simdb_rec_t));
 
   rec.num = number;
-  if (simdb_read_rec(db, &rec) < 1) {
+  if (simdb_record_read(db, &rec) < 1) {
     fprintf(stderr, "bitmap: %s\n", "sample not found");
     return 1;
   }
@@ -148,14 +148,14 @@ int rec_diff(simdb_t *db, uint64_t a, uint64_t b, unsigned short int showmap)
   memset(&rec, 0x0, sizeof(simdb_rec_t));
 
   rec.num = a;
-  if (simdb_read_rec(db, &rec) < 1) {
+  if (simdb_record_read(db, &rec) < 1) {
     fprintf(stderr, "record diff: first sample not exists\n");
     return 1;
   }
   memcpy(one, &rec.data[REC_OFF_BM], BITMAP_SIZE);
 
   rec.num = b;
-  if (simdb_read_rec(db, &rec) < 1) {
+  if (simdb_record_read(db, &rec) < 1) {
     fprintf(stderr, "record diff: second sample not exists\n");
     return 1;
   }

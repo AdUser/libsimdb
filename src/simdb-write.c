@@ -86,13 +86,13 @@ int main(int argc, char **argv)
         fprintf(stderr, "sampler failure\n");
         exit(EXIT_FAILURE);
       }
-      if ((err = simdb_write_rec(db, &rec)) < 1) {
+      if ((err = simdb_record_write(db, &rec)) < 1) {
         fprintf(stderr, "%s\n", simdb_error(err));
         exit(EXIT_FAILURE);
       }
       break;
     case del :
-      if ((err = simdb_write_rec(db, &rec)) < 1) {
+      if ((err = simdb_record_write(db, &rec)) < 1) {
         fprintf(stderr, "%s\n", simdb_error(err));
         exit(EXIT_FAILURE);
       }
