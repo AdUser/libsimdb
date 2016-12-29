@@ -162,7 +162,7 @@ int rec_diff(simdb_t *db, uint64_t a, uint64_t b, unsigned short int showmap)
   memcpy(two, &rec.data[REC_OFF_BM], SIMDB_BITMAP_SIZE);
 
   if (showmap) {
-    simdb_bitmap_diffmap(map, one, two);
+    simdb_bitmap_diffmap(one, two, map);
     simdb_bitmap_print(map);
     return 0;
   }

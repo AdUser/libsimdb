@@ -55,9 +55,9 @@ simdb_bitmap_compare(const unsigned char *a,
 }
 
 size_t
-simdb_bitmap_diffmap(unsigned char *diff,
-                     const unsigned char *a,
-                     const unsigned char *b)
+simdb_bitmap_diffmap(const unsigned char *a,
+                     const unsigned char *b,
+                     unsigned char *diff)
 {
   size_t i = 0;
 

@@ -29,15 +29,15 @@ simdb_bitmap_compare(const unsigned char *a,
 
 /**
  * @brief Make difference map of to bitmaps
- * @param diff Storage for difference map
  * @param a    First bitmap to compare
  * @param b    Second bitmap to compare
+ * @param diff Storage for difference map
  * @returns Size of generated map (now is @a BITMAP_SIZE)
  */
 size_t
-simdb_bitmap_diffmap(unsigned char *diff,
-                     const unsigned char *a,
-                     const unsigned char *b);
+simdb_bitmap_diffmap(const unsigned char *a,
+                     const unsigned char *b,
+                     unsigned char *diff);
 
 
 /**
