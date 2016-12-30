@@ -1,4 +1,5 @@
 set(LIB_SOURCES "database.c" "bitmap.c")
+set(SAMPLER "magick") # TODO: GD2
 
 add_library("simdb" SHARED ${LIB_SOURCES})
 set_property(TARGET "simdb" PROPERTY SONAME ${VERSION})
@@ -14,7 +15,7 @@ if (WITH_TOOLS)
 
   find_package(ImageMagick COMPONENTS MagickCore MagickWand)
 
-  add_executable("simdb-write" "simdb-write.c" "sample.c")
+  add_executable("simdb-write" "simdb-write.c" "samplers/${SAMPLER}.c")
   target_link_libraries("simdb-write" "simdb")
   target_link_libraries("simdb-write" ${ImageMagick_MagickCore_LIBRARY})
   target_link_libraries("simdb-write" ${ImageMagick_MagickWand_LIBRARY})

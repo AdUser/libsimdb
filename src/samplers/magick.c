@@ -1,7 +1,7 @@
-#include "common.h"
-#include "bitmap.h"
-#include "simdb.h"
-#include "record.h"
+#include "../common.h"
+#include "../bitmap.h"
+#include "../simdb.h"
+#include "../record.h"
 
 #include <wand/magick_wand.h>
 
