@@ -13,6 +13,9 @@ simdb_record_create(simdb_rec_t * const rec, const char * const source) {
   size_t buf_size = 64 * sizeof(char);
   unsigned char *buf = NULL;
 
+  assert(rec != NULL);
+  assert(source != NULL);
+
   InitializeMagick("/");
   wand = NewMagickWand();
   if (status == MagickPass)
