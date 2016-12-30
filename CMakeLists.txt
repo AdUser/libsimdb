@@ -9,6 +9,7 @@ include(GNUInstallDirs)
 
 option(WITH_HARDENING "Enable hardening options" ON)
 option(WITH_TOOLS     "Build library management tools" ON)
+set(SAMPLER "magick" CACHE STRING "Library for sampling")
 
 set(CMAKE_INSTALL_PREFIX "/usr/local")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -std=c99")
@@ -18,6 +19,12 @@ if (WITH_HARDENING)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wformat -Wformat-security -Werror=format-security" )
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstack-protector --param ssp-buffer-size=4" )
   add_definitions("-D_FORTIFY_SOURCE=2")
+endif ()
+
+if (${SAMPLER} STREQUAL "dummy")
+  set(SAMPLER "dummy")
+else ()
+  set(SAMPLER "magick")
 endif ()
 
 message(STATUS "Project    : ${CNAME} v${VERSION}")
@@ -31,6 +38,7 @@ message(STATUS "Build type : ${CMAKE_BUILD_TYPE}")
 message(STATUS "Options:")
 message(STATUS "- WITH_HARDENING : ${WITH_HARDENING}")
 message(STATUS "- WITH_TOOLS     : ${WITH_TOOLS}")
+message(STATUS "- SAMPLER        : ${SAMPLER}")
 
 add_subdirectory("src")
 add_subdirectory("tests")

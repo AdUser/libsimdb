@@ -1,8 +1,14 @@
-set(LIB_SOURCES "database.c" "bitmap.c")
-set(SAMPLER "magick") # TODO: GD2
+set(LIB_SOURCES "database.c" "bitmap.c" "samplers/${SAMPLER}.c")
 
 add_library("simdb" SHARED ${LIB_SOURCES})
 set_property(TARGET "simdb" PROPERTY SONAME ${VERSION})
+
+if (${SAMPLER} STREQUAL "magick")
+  find_package(ImageMagick COMPONENTS MagickCore MagickWand)
+  target_link_libraries("simdb" ${ImageMagick_MagickCore_LIBRARY})
+  target_link_libraries("simdb" ${ImageMagick_MagickWand_LIBRARY})
+endif ()
+
 install(TARGETS "simdb" LIBRARY DESTINATION "lib")
 
 if (WITH_TOOLS)
@@ -13,11 +19,11 @@ if (WITH_TOOLS)
   target_link_libraries("simdb-query" "simdb")
   install(TARGETS "simdb-query" RUNTIME DESTINATION "bin")
 
-  find_package(ImageMagick COMPONENTS MagickCore MagickWand)
-
-  add_executable("simdb-write" "simdb-write.c" "samplers/${SAMPLER}.c")
-  target_link_libraries("simdb-write" "simdb")
-  target_link_libraries("simdb-write" ${ImageMagick_MagickCore_LIBRARY})
-  target_link_libraries("simdb-write" ${ImageMagick_MagickWand_LIBRARY})
-  install(TARGETS "simdb-write" RUNTIME DESTINATION "bin")
+  if (${SAMPLER} STREQUAL "dummy")
+    message(STATUS "Sampler set to 'dummy', not building 'simdb-write' tool")
+  else ()
+    add_executable("simdb-write" "simdb-write.c")
+    target_link_libraries("simdb-write" "simdb")
+    install(TARGETS "simdb-write" RUNTIME DESTINATION "bin")
+  endif ()
 endif ()
