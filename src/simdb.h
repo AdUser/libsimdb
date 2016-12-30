@@ -40,18 +40,6 @@
 typedef struct _simdb_t simdb_t;
 
 /**
- * @defgroup SIMDBRecOffsets Sample data parts offset in database record
- * @{ */
-#define REC_OFF_RU  0 /**< record is used */
-#define REC_OFF_CR  1 /**< color level: red */
-#define REC_OFF_CG  2 /**< color level: green */
-#define REC_OFF_CB  3 /**< color level: blue */
-#define REC_OFF_IW  4 /**< image width  */
-#define REC_OFF_IH  6 /**< image height */
-#define REC_OFF_BM 16 /**< image bitmap */
-/** @} */
-
-/**
  * database record
  */
 typedef struct {

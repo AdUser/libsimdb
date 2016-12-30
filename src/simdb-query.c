@@ -17,6 +17,7 @@
 #include "common.h"
 #include "bitmap.h"
 #include "simdb.h"
+#include "record.h"
 
 #include <unistd.h>
 #include <getopt.h>
@@ -121,6 +122,7 @@ int db_usage_slice(simdb_t *db, uint64_t offset, uint16_t limit)
 int rec_bitmap(simdb_t *db, uint64_t number)
 {
   simdb_rec_t rec;
+  simdb_urec_t *r;
 
   assert(db != NULL);
   memset(&rec, 0x0, sizeof(simdb_rec_t));
@@ -131,7 +133,8 @@ int rec_bitmap(simdb_t *db, uint64_t number)
     return 1;
   }
 
-  simdb_bitmap_print(&rec.data[REC_OFF_BM]);
+  r = (simdb_urec_t *) rec.data;
+  simdb_bitmap_print(r->bitmap);
 
   return 0;
 }
@@ -139,27 +142,32 @@ int rec_bitmap(simdb_t *db, uint64_t number)
 int rec_diff(simdb_t *db, uint64_t a, uint64_t b, unsigned short int showmap)
 {
   simdb_rec_t rec;
+  simdb_urec_t *r;
   float diff = 0.0;
   unsigned char one[SIMDB_BITMAP_SIZE];
   unsigned char two[SIMDB_BITMAP_SIZE];
   unsigned char map[SIMDB_BITMAP_SIZE];
 
   assert(db != NULL);
-  memset(&rec, 0x0, sizeof(simdb_rec_t));
+  memset(&rec, 0x0, sizeof(rec));
+  memset(one,  0x0, sizeof(one));
+  memset(two,  0x0, sizeof(two));
 
   rec.num = a;
   if (simdb_record_read(db, &rec) < 1) {
     fprintf(stderr, "record diff: first sample not exists\n");
     return 1;
   }
-  memcpy(one, &rec.data[REC_OFF_BM], SIMDB_BITMAP_SIZE);
+  r = (simdb_urec_t *) rec.data;
+  memcpy(one, r->bitmap, sizeof(one));
 
   rec.num = b;
   if (simdb_record_read(db, &rec) < 1) {
     fprintf(stderr, "record diff: second sample not exists\n");
     return 1;
   }
-  memcpy(two, &rec.data[REC_OFF_BM], SIMDB_BITMAP_SIZE);
+  r = (simdb_urec_t *) rec.data;
+  memcpy(two, r->bitmap, sizeof(two));
 
   if (showmap) {
     simdb_bitmap_diffmap(one, two, map);
