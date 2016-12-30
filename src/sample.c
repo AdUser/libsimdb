@@ -2,23 +2,18 @@
 #include "bitmap.h"
 #include "simdb.h"
 #include "record.h"
-#include "sample.h"
 
 #include <wand/magick_wand.h>
 
-int
-simdb_sample(simdb_rec_t * const rec,
-              const char * const source)
-{
+bool
+simdb_record_create(simdb_rec_t * const rec, const char * const source) {
   MagickWand *wand = NULL;
   MagickPassFail status = MagickPass;
-  ExceptionType severity = 0;
   uint16_t w = 0, h = 0;
-  char *description = NULL;
   size_t buf_size = 64 * sizeof(char);
   unsigned char *buf = NULL;
 
-  InitializeMagick("/"); /* FIXME */
+  InitializeMagick("/");
   wand = NewMagickWand();
   if (status == MagickPass)
     status = MagickReadImage(wand, source);
@@ -34,7 +29,7 @@ simdb_sample(simdb_rec_t * const rec,
   if (status == MagickPass)
     status = MagickSampleImage(wand, 160, 160);
 
-  /* TODO: color maps */
+  /** TODO: color maps */
 
   /* 2 -> 256 : number of colors */
   /* 4 ->   0 : treedepth     -> auto */
@@ -91,13 +86,16 @@ simdb_sample(simdb_rec_t * const rec,
     urec.image_h = h;
     memcpy(urec.bitmap, buf, SIMDB_BITMAP_SIZE);
     memcpy(rec->data, &urec, sizeof(rec->data));
+#ifdef DEBUG
   } else {
-    description = MagickGetException(wand, &severity);
+    ExceptionType severity = 0;
+    char *description = MagickGetException(wand, &severity);
     fprintf(stderr, "%03d %.1024s\n", severity, description);
+#endif
   }
 
   DestroyMagickWand(wand);
   DestroyMagick();
 
-  return (status == MagickPass) ? 0 : -1;
+  return (status == MagickPass) ? true : false;
 }

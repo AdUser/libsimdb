@@ -1,7 +1,6 @@
 #include "common.h"
 #include "bitmap.h"
 #include "simdb.h"
-#include "sample.h"
 
 #include <getopt.h>
 
@@ -82,7 +81,7 @@ int main(int argc, char **argv)
     case add :
       if (rec.num == 0 || sample == NULL)
         usage(EXIT_FAILURE);
-      if (simdb_sample(&rec, sample) != 0) {
+      if (simdb_record_create(&rec, sample) != 0) {
         fprintf(stderr, "sampler failure\n");
         exit(EXIT_FAILURE);
       }

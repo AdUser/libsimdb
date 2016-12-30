@@ -143,6 +143,13 @@ int simdb_record_read(simdb_t *db, simdb_rec_t *rec);
 int simdb_record_write(simdb_t *db, simdb_rec_t *rec);
 
 /**
+ * @brief Create record from image file
+ * @param path Path to source image
+ * @returns Pointer to newly created record or NULL on error
+ */
+bool simdb_record_create(simdb_rec_t * const rec, const char *path);
+
+/**
  * @brief Read continious records block from database
  * @param db  Database handle
  * @param blk Block struct
