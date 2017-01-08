@@ -11,7 +11,6 @@ option(WITH_HARDENING "Enable hardening options" ON)
 option(WITH_TOOLS     "Build library management tools" ON)
 set(SAMPLER "magick" CACHE STRING "Library for sampling")
 
-set(CMAKE_INSTALL_PREFIX "/usr/local")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -std=c99")
 add_definitions("-D_XOPEN_SOURCE=500")
 
