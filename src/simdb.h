@@ -106,6 +106,14 @@ int simdb_search(simdb_t * const db, int num,
                  simdb_match_t  ** matches);
 
 /**
+ * @brief Checks is record with given number is used
+ * @param db  Database handle
+ * @param num Record number
+ * @returns true if used, false if no record exists or not used
+ */
+bool simdb_record_used(simdb_t *db, int num);
+
+/**
  * @brief Create record from image file
  * @param path Path to source image
  * @returns Pointer to newly created record or NULL on error

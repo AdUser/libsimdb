@@ -231,6 +231,25 @@ simdb_write(simdb_t *db, int start, int records, simdb_urec_t *data) {
   return records;
 }
 
+bool
+simdb_record_used(simdb_t *db, int num) {
+  simdb_urec_t *rec = NULL;
+  bool ret = false;
+
+  assert(db != NULL);
+
+  if (num > db->records)
+    return false;
+
+  if (simdb_read(db, num, 1, &rec) < 1)
+    return false;
+
+  ret = rec->used ? true : false;
+
+  FREE(rec);
+  return ret;
+}
+
 int
 simdb_record_del(simdb_t *db, int num) {
   simdb_urec_t *rec;
