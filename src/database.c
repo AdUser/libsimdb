@@ -237,24 +237,6 @@ simdb_write(simdb_t *db, int start, int records, simdb_urec_t *data) {
   return records;
 }
 
-int simdb_record_read(simdb_t *db, simdb_rec_t *rec) {
-  ssize_t bytes = 0;
-
-  assert(db  != NULL);
-  assert(rec != NULL);
-  assert(rec->num > 0);
-
-  DB_READ(db, rec->data, SIMDB_REC_LEN, rec->num * SIMDB_REC_LEN);
-
-  if (bytes != SIMDB_REC_LEN)
-    return errno ? SIMDB_ERR_SYSTEM : SIMDB_ERR_NXRECORD;
-
-  if (rec->data[0] != 0xFF)
-    return 0;
-
-  return 1;
-}
-
 int simdb_record_write(simdb_t *db, simdb_rec_t *rec) {
   ssize_t bytes = 0;
 
@@ -271,22 +253,6 @@ int simdb_record_write(simdb_t *db, simdb_rec_t *rec) {
     return SIMDB_ERR_SYSTEM;
 
   return 1;
-}
-
-int simdb_block_read(simdb_t *db, simdb_block_t *blk) {
-  ssize_t bytes = 0;
-
-  assert(db  != NULL);
-  assert(blk != NULL);
-  assert(blk->start > 0);
-  assert(blk->records > 0);
-
-  FREE(blk->data);
-  CALLOC(blk->data, blk->records, SIMDB_REC_LEN);
-  DB_READ(db, blk->data, blk->records * SIMDB_REC_LEN, blk->start * SIMDB_REC_LEN);
-  blk->records = bytes / SIMDB_REC_LEN;
-
-  return blk->records;
 }
 
 int

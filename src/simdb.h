@@ -122,16 +122,6 @@ int simdb_search(simdb_t * const db, int num,
                  simdb_match_t  ** matches);
 
 /**
- * @brief Read single record from database
- * @param db  Database handle
- * @param rec Record struct
- * @note @a num member of @a rec struct should be set
- * @retval  1 on success
- * @retval  0 if record exists but not used,
- * @retval <0 on error (system error or record missing)
- */
-int simdb_record_read(simdb_t *db, simdb_rec_t *rec);
-/**
  * @brief Write single record to database
  * @param db  Database handle
  * @param rec Record struct to write
@@ -147,16 +137,6 @@ int simdb_record_write(simdb_t *db, simdb_rec_t *rec);
  * @returns Pointer to newly created record or NULL on error
  */
 bool simdb_record_create(simdb_rec_t * const rec, const char *path);
-
-/**
- * @brief Read continious records block from database
- * @param db  Database handle
- * @param blk Block struct
- * @note @a start and @a records members of @a blk struct should be set
- * @retval >=0 As number of records actually read
- * @retval  <0 on error
- */
-int simdb_block_read(simdb_t *db, simdb_block_t *blk);
 
 /**
  * @brief Get database capacity

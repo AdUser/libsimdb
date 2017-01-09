@@ -6,6 +6,3 @@ add_test("test/record"   "test-record")
 
 add_executable("test-io" "io.c" "../src/database.c" "../src/bitmap.c")
 add_test("test/io" "test-io")
-
-add_executable("test-database" "database.c" "../src/database.c" "../src/bitmap.c")
-add_test("test/database" "test-database")
