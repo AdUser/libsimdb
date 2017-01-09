@@ -35,6 +35,7 @@
 #define SIMDB_ERR_NXRECORD    -5 /**< no such record in database */
 #define SIMDB_ERR_READONLY    -6 /**< database opened in read-only mode */
 #define SIMDB_ERR_USAGE       -7 /**< wrong arguments passed */
+#define SIMDB_ERR_SAMPLER     -8 /**< given file not an image, damaged or has unsupported format */
 /** @} */
 
 /** opaque database handler */

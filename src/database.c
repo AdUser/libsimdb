@@ -162,6 +162,8 @@ simdb_error(int error) {
     return "no such record in database";
   } else if (error == SIMDB_ERR_USAGE) {
     return "wrong parameters passed to finction";
+  } else if (error == SIMDB_ERR_SAMPLER) {
+    return "given file not an image, damaged or has unsupported format";
   }
   return "unknown error";
 }
