@@ -4,6 +4,11 @@
 #include "bitmap.h"
 #include "simdb.h"
 
+/**
+ * @file
+ * @brief Routines for work with record
+ */
+
 /** struct for packed record usage */
 typedef struct __attribute__((__packed__)) {
   uint8_t used;      /**< record is used */
@@ -16,6 +21,7 @@ typedef struct __attribute__((__packed__)) {
   unsigned char bitmap[SIMDB_BITMAP_SIZE]; /**< image luma bitmap */
 } simdb_urec_t;
 
+/** compile-time check for packed struct length */
 typedef char size_mismatch_for__simdb_urec_t[(sizeof(simdb_urec_t) == SIMDB_REC_LEN) * 2 - 1];
 
 /**

@@ -79,7 +79,7 @@ bool simdb_create(const char *path);
 /**
  * @brief Open database at given path
  * @param path Path to database
- * @param mode Database open modes. See SIMDB_FLAG_* defines above
+ * @param mode Database open modes. See @ref SIMDBFlags defines above
  * @param error Pointer to error code storage
  * @returns Pointer to database handle on success, NULL on error
  * @note use @a simdb_error() to get error description
@@ -94,7 +94,7 @@ void simdb_close(simdb_t *db);
 
 /**
  * @brief Get error desctiption by error code
- * @param code Error code, see SIMDB_ERR_* defines above
+ * @param code Error code, see @ref SIMDBErrors defines above
  */
 const char * simdb_error(int code);
 
@@ -103,7 +103,7 @@ const char * simdb_error(int code);
  * @param db Database handle
  * @param num Record sample number
  * @param search Search parameters
- * @param matches Pointer to storage for found matches
+ * @param matches Pointer to storage for found matches (allocated)
  * @retval >0 if found some matches
  * @retval  0 if nothing found
  * @retval <0 on error
@@ -125,7 +125,7 @@ bool simdb_record_used(simdb_t *db, int num);
  * @param db  Database handle
  * @param num Number of record to add / replace
  * @param path Path to source image
- * @param flags Modifier flags. See @a SIMDBAddModifiers group for possible values.
+ * @param flags Modifier flags. See a @ref SIMDBAddModifiers group for possible values.
  * @retval <0 on error
  * @retval  0 if @a num > 0, SIMDB_ADD_NOEXPAND flag set, but record not exists
  *         or if @a num > 0, SIMDB_ADD_NOREPLACE flag set, and record already used
@@ -150,15 +150,17 @@ int simdb_record_del(simdb_t *db, int num);
 int simdb_records_count(simdb_t * const db);
 
 /**
-  @brief   Fills buffer 'map' according to records existense in database
-  @returns records processed (and also buffer size)
+  * @brief Fills buffer 'map' according to records existense in database
+  * @param db  Database handle
+  * @param map Pointer to storage for generated usage map (allocated)
+  * @returns records processed (and also buffer size)
 */
 int simdb_usage_map(simdb_t * const db, char ** const map);
 
 /**
  * @brief   Fills buffer 'map' according to records existense in given range
  * @param   db      Database handler
- * @param   map     Pointer for storing allocated usage map
+ * @param   map     Pointer to storage for generated usage map (allocated)
  * @param   offset  Start of slice position
  * @param   limit   Slice size
  * @returns Records processed (and also buffer size)
