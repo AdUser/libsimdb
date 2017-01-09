@@ -1,17 +1,18 @@
 #include "../common.h"
 #include "../bitmap.h"
-#include "../simdb.h"
 #include "../record.h"
+#include "../simdb.h"
 
 #include <wand/magick_wand.h>
 
 bool
-simdb_record_create(simdb_rec_t * const rec, const char * const source) {
+simdb_record_create(void * r, const char * const source) {
   MagickWand *wand = NULL;
   MagickPassFail status = MagickPass;
   uint16_t w = 0, h = 0;
   size_t buf_size = 64 * sizeof(char);
   unsigned char *buf = NULL;
+  simdb_urec_t *rec = r;
 
   assert(rec != NULL);
   assert(source != NULL);
@@ -81,14 +82,12 @@ simdb_record_create(simdb_rec_t * const rec, const char * const source) {
 #endif
 
   if (status == MagickPass) {
-    simdb_urec_t urec;
     assert(buf_size == SIMDB_BITMAP_SIZE);
-    memset(&urec, 0x0, sizeof(urec));
-    urec.used = 0xFF;
-    urec.image_w = w;
-    urec.image_h = h;
-    memcpy(urec.bitmap, buf, SIMDB_BITMAP_SIZE);
-    memcpy(rec->data, &urec, sizeof(rec->data));
+    memset(rec, 0x0, sizeof(simdb_urec_t));
+    rec->used = 0xFF;
+    rec->image_w = w;
+    rec->image_h = h;
+    memcpy(rec->bitmap, buf, SIMDB_BITMAP_SIZE);
 #ifdef DEBUG
   } else {
     ExceptionType severity = 0;

@@ -1,5 +1,7 @@
 #include "common.h"
 #include "bitmap.h"
+#include "record.h"
+#include "io.h"
 #include "simdb.h"
 
 #include <getopt.h>
@@ -25,10 +27,10 @@ int main(int argc, char **argv)
   const char *sample = NULL;
   const char *c = NULL;
   simdb_t  *db = NULL;
-  simdb_rec_t rec;
-  int err;
+  simdb_urec_t rec;
+  int num = 0, err = 0;
 
-  memset(&rec, 0x0, sizeof(simdb_rec_t));
+  memset(&rec, 0x0, sizeof(simdb_urec_t));
 
   if (argc < 3)
     usage(EXIT_FAILURE);
@@ -45,12 +47,12 @@ int main(int argc, char **argv)
         mode = add;
         if ((c = strchr(optarg, ',')) == NULL)
           usage(EXIT_FAILURE);
-        rec.num = atoll(optarg);
+        num = atoll(optarg);
         sample  = c + 1;
         break;
       case 'D' :
         mode = del;
-        rec.num = atoll(optarg);
+        num = atoll(optarg);
         break;
       case 'I' :
         mode = init;
@@ -79,19 +81,19 @@ int main(int argc, char **argv)
 
   switch (mode) {
     case add :
-      if (rec.num == 0 || sample == NULL)
+      if (num == 0 || sample == NULL)
         usage(EXIT_FAILURE);
       if (!simdb_record_create(&rec, sample)) {
         fprintf(stderr, "sampler failure\n");
         exit(EXIT_FAILURE);
       }
-      if ((err = simdb_record_write(db, &rec)) < 1) {
+      if ((err = simdb_write(db, num, 1, (void *) &rec)) < 1) {
         fprintf(stderr, "%s\n", simdb_error(err));
         exit(EXIT_FAILURE);
       }
       break;
     case del :
-      if ((err = simdb_record_write(db, &rec)) < 1) {
+      if ((err = simdb_write(db, num, 1, (void *) &rec)) < 1) {
         fprintf(stderr, "%s\n", simdb_error(err));
         exit(EXIT_FAILURE);
       }

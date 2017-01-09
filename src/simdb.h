@@ -136,7 +136,7 @@ int simdb_record_write(simdb_t *db, simdb_rec_t *rec);
  * @param path Path to source image
  * @returns Pointer to newly created record or NULL on error
  */
-bool simdb_record_create(simdb_rec_t * const rec, const char *path);
+bool simdb_record_create(void * rec, const char *path);
 
 /**
  * @brief Get database capacity
