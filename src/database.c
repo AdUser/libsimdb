@@ -31,19 +31,6 @@ struct _simdb_t {
   char path[PATH_MAX];  /**< path to database file */
 };
 
-/** read some records from database file and checks for errors */
-#define DB_READ(db, buf, len, off) \
-  errno = 0; \
-  memset((buf), 0x0, (len)); \
-  bytes = pread((db)->fd, (buf), (len), (off)); \
-  if (errno) { return SIMDB_ERR_SYSTEM; }
-
-/** write some records from database file and checks for errors */
-#define DB_WRITE(db, buf, len, off) \
-  errno = 0; \
-  bytes = pwrite((db)->fd, (buf), (len), (off)); \
-  if (errno) { return SIMDB_ERR_SYSTEM; }
-
 /** database header format line */
 const char *simdb_hdr_fmt = "IMDB v%02u, CAPS: %s;";
 
@@ -235,24 +222,6 @@ simdb_write(simdb_t *db, int start, int records, simdb_urec_t *data) {
     return 0;
 
   return records;
-}
-
-int simdb_record_write(simdb_t *db, simdb_rec_t *rec) {
-  ssize_t bytes = 0;
-
-  assert(db  != NULL);
-  assert(rec != NULL);
-  assert(rec->num > 0);
-
-  if (!(db->flags & SIMDB_FLAG_WRITE))
-    return SIMDB_ERR_READONLY;
-
-  DB_WRITE(db, rec->data, SIMDB_REC_LEN, rec->num * SIMDB_REC_LEN);
-
-  if (bytes != SIMDB_REC_LEN)
-    return SIMDB_ERR_SYSTEM;
-
-  return 1;
 }
 
 int

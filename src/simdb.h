@@ -41,23 +41,6 @@
 typedef struct _simdb_t simdb_t;
 
 /**
- * database record
- */
-typedef struct {
-  uint64_t num;                      /**< record number in database */
-  unsigned char data[SIMDB_REC_LEN]; /**< record raw data */
-} simdb_rec_t;
-
-/**
- * block of sequental records of database
- */
-typedef struct {
-  uint64_t start;      /**< first record number of block */
-  size_t records;      /**< records count */
-  unsigned char *data; /**< raw records data */
-} simdb_block_t;
-
-/**
  * search parameters
  * maxdiff_* fields should have value from 0.0 to 1.0 (0% - 100%)
  */
@@ -120,16 +103,6 @@ const char * simdb_error(int code);
 int simdb_search(simdb_t * const db, int num,
                  simdb_search_t  * const search,
                  simdb_match_t  ** matches);
-
-/**
- * @brief Write single record to database
- * @param db  Database handle
- * @param rec Record struct to write
- * @note @a num member of @a rec struct should be set
- * @retval  1 on success
- * @retval <0 on error (system error or record missing)
- */
-int simdb_record_write(simdb_t *db, simdb_rec_t *rec);
 
 /**
  * @brief Create record from image file
