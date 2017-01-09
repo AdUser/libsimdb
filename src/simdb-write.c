@@ -1,7 +1,4 @@
 #include "common.h"
-#include "bitmap.h"
-#include "record.h"
-#include "io.h"
 #include "simdb.h"
 
 #include <getopt.h>
@@ -27,10 +24,7 @@ int main(int argc, char **argv)
   const char *sample = NULL;
   const char *c = NULL;
   simdb_t  *db = NULL;
-  simdb_urec_t rec;
   int num = 0, err = 0;
-
-  memset(&rec, 0x0, sizeof(simdb_urec_t));
 
   if (argc < 3)
     usage(EXIT_FAILURE);
