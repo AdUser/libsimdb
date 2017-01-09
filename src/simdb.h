@@ -125,7 +125,7 @@ bool simdb_record_create(void * rec, const char *path);
  * @param db  Database handle
  * @param num Number of record to delete
  * @retval <0 on error
- * @retval  0 no record not exists
+ * @retval  0 if record not exists
  * @retval >0 as on success
  */
 int simdb_record_del(simdb_t *db, int num);
