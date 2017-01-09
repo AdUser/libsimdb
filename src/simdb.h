@@ -112,6 +112,16 @@ int simdb_search(simdb_t * const db, int num,
 bool simdb_record_create(void * rec, const char *path);
 
 /**
+ * @brief Delete a record from database by num
+ * @param db  Database handle
+ * @param num Number of record to delete
+ * @retval <0 on error
+ * @retval  0 no record not exists
+ * @retval >0 as on success
+ */
+int simdb_record_del(simdb_t *db, int num);
+
+/**
  * @brief Get database capacity
  */
 int simdb_records_count(simdb_t * const db);

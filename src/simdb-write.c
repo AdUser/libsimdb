@@ -93,7 +93,7 @@ int main(int argc, char **argv)
       }
       break;
     case del :
-      if ((err = simdb_write(db, num, 1, (void *) &rec)) < 1) {
+      if ((err = simdb_record_del(db, num)) < 0) {
         fprintf(stderr, "%s\n", simdb_error(err));
         exit(EXIT_FAILURE);
       }

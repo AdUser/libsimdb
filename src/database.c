@@ -225,6 +225,32 @@ simdb_write(simdb_t *db, int start, int records, simdb_urec_t *data) {
 }
 
 int
+simdb_record_del(simdb_t *db, int num) {
+  simdb_urec_t *rec;
+  int ret = 0;
+
+  assert(db != NULL);
+
+  if (num < 1)
+    return SIMDB_ERR_USAGE;
+
+  if (!(db->flags & SIMDB_FLAG_WRITE))
+    return SIMDB_ERR_READONLY;
+
+  if ((ret = simdb_read(db, num, 1, &rec)) < 1)
+    return ret;
+
+  rec->used = 0x0;
+
+  if ((ret = simdb_write(db, num, 1, rec)) < 1)
+    num = ret;
+
+  FREE(rec);
+
+  return num;
+}
+
+int
 simdb_records_count(simdb_t * const db) {
   struct stat st;
   off_t size = 0;
