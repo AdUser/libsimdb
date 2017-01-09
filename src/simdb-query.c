@@ -16,8 +16,9 @@
 
 #include "common.h"
 #include "bitmap.h"
-#include "simdb.h"
 #include "record.h"
+#include "io.h"
+#include "simdb.h"
 
 #include <unistd.h>
 #include <getopt.h>
@@ -41,20 +42,16 @@ void usage(int exitcode) {
   exit(exitcode);
 }
 
-int search_similar(simdb_t *db, uint64_t number, float maxdiff)
-{
+int search_similar(simdb_t *db, int num, float maxdiff) {
   int ret = 0, i = 0;
-  simdb_rec_t sample;
   simdb_match_t *matches = NULL;
   simdb_search_t search;
 
-  memset(&sample, 0x0, sizeof(simdb_rec_t));
   memset(&search, 0x0, sizeof(simdb_search_t));
   search.maxdiff_ratio  = 0.2; /* 20% */
   search.maxdiff_bitmap = maxdiff;
 
-  sample.num = number;
-  if ((ret = simdb_search(db, &sample, &search, &matches)) < 0) {
+  if ((ret = simdb_search(db, num, &search, &matches)) < 0) {
     fprintf(stderr, "%s\n", simdb_error(ret));
     return 1;
   }
@@ -119,64 +116,62 @@ int db_usage_slice(simdb_t *db, uint64_t offset, uint16_t limit)
   return 0;
 }
 
-int rec_bitmap(simdb_t *db, uint64_t number)
-{
-  simdb_rec_t rec;
+int rec_bitmap(simdb_t *db, int num) {
   simdb_urec_t *r;
+  int ret;
 
   assert(db != NULL);
-  memset(&rec, 0x0, sizeof(simdb_rec_t));
 
-  rec.num = number;
-  if (simdb_record_read(db, &rec) < 1) {
+  if ((ret = simdb_read(db, num, 1, &r)) < 0) {
+    fprintf(stderr, "read failed: %s\n", simdb_error(ret));
+    return 1;
+  } else if (ret == 0) {
     fprintf(stderr, "bitmap: %s\n", "sample not found");
     return 1;
   }
 
-  r = (simdb_urec_t *) rec.data;
   simdb_bitmap_print(r->bitmap);
+  free(r);
 
   return 0;
 }
 
-int rec_diff(simdb_t *db, uint64_t a, uint64_t b, unsigned short int showmap)
-{
-  simdb_rec_t rec;
-  simdb_urec_t *r;
-  float diff = 0.0;
-  unsigned char one[SIMDB_BITMAP_SIZE];
-  unsigned char two[SIMDB_BITMAP_SIZE];
+int rec_diff(simdb_t *db, int a, int b, unsigned short int showmap) {
   unsigned char map[SIMDB_BITMAP_SIZE];
+  simdb_urec_t *one, *two;
+  float diff = 0.0;
+  int ret;
 
   assert(db != NULL);
-  memset(&rec, 0x0, sizeof(rec));
-  memset(one,  0x0, sizeof(one));
-  memset(two,  0x0, sizeof(two));
 
-  rec.num = a;
-  if (simdb_record_read(db, &rec) < 1) {
+  if ((ret = simdb_read(db, a, 1, &one)) < 0) {
+    fprintf(stderr, "read error: %s\n", simdb_error(ret));
+    return 1;
+  } else if (ret == 0 || (ret > 0 && !one->used)) {
     fprintf(stderr, "record diff: first sample not exists\n");
+    if (ret > 0) free(one);
     return 1;
   }
-  r = (simdb_urec_t *) rec.data;
-  memcpy(one, r->bitmap, sizeof(one));
 
-  rec.num = b;
-  if (simdb_record_read(db, &rec) < 1) {
-    fprintf(stderr, "record diff: second sample not exists\n");
+  if ((ret = simdb_read(db, b, 1, &two)) < 0) {
+    fprintf(stderr, "read error: %s\n", simdb_error(ret));
+    return 1;
+  } else if (ret == 0 || (ret > 0 && !two->used)) {
+    fprintf(stderr, "record diff: first sample not exists\n");
+    if (ret > 0) free(two);
     return 1;
   }
-  r = (simdb_urec_t *) rec.data;
-  memcpy(two, r->bitmap, sizeof(two));
 
   if (showmap) {
-    simdb_bitmap_diffmap(one, two, map);
+    simdb_bitmap_diffmap(one->bitmap, two->bitmap, map);
     simdb_bitmap_print(map);
     return 0;
   }
 
-  diff = (float) simdb_bitmap_compare(one, two);
+  diff = (float) simdb_bitmap_compare(one->bitmap, two->bitmap);
   printf("%.2f%%\n", (diff / SIMDB_BITMAP_BITS) * 100);
+  free(one);
+  free(two);
 
   return 0;
 }

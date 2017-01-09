@@ -289,7 +289,7 @@ int simdb_block_read(simdb_t *db, simdb_block_t *blk) {
   return blk->records;
 }
 
-uint64_t
+int
 simdb_records_count(simdb_t * const db) {
   struct stat st;
   off_t size = 0;
@@ -313,54 +313,55 @@ simdb_record_ratio(simdb_urec_t *r) {
 }
 
 int
-simdb_search(simdb_t        * const db,
-             simdb_rec_t    * const sample,
+simdb_search(simdb_t * const db, int num,
              simdb_search_t * const search,
              simdb_match_t  **matches)
 {
-  simdb_block_t blk;
   simdb_match_t match;
-  simdb_urec_t *rec;
-  const int blk_size = 4096;
+  simdb_urec_t *data = NULL;
+  simdb_urec_t *rec, sample;
+  const int blksize = 4096;
   uint64_t found = 0;
-  unsigned int i = 0;
   float ratio_s = 0.0; /* source */
   float ratio_t = 0.0; /* tested */
   int ret = 0;
 
   assert(db      != NULL);
-  assert(sample  != NULL);
   assert(search  != NULL);
   assert(matches != NULL);
   assert(search->maxdiff_ratio  >= 0.0 && search->maxdiff_ratio  <= 1.0);
   assert(search->maxdiff_bitmap >= 0.0 && search->maxdiff_bitmap <= 1.0);
 
-  memset(&blk,   0x0, sizeof(simdb_block_t));
   memset(&match, 0x0, sizeof(simdb_match_t));
-  blk.start = 1;
-  blk.records = blk_size;
 
-  if ((ret = simdb_record_read(db, sample)) < 1)
+  if ((ret = simdb_read(db, num, 1, &rec)) < 1)
     return ret;
+
+  memcpy(&sample, rec, sizeof(sample));
+  FREE(rec);
 
   if (search->limit == 0)
     search->limit = -1; /* unsigned -> max */
 
   if (search->maxdiff_ratio > 0.0)
-    ratio_s = simdb_record_ratio((simdb_urec_t *) sample->data);
+    ratio_s = simdb_record_ratio(&sample);
 
   CALLOC(*matches, search->limit, sizeof(simdb_match_t));
 
-  while (simdb_block_read(db, &blk) > 0) {
-    rec = (simdb_urec_t *) blk.data;
-    for (i = 0; i < blk.records; i++, rec++) {
-      if (rec->used == 0x0)
+  for (num = 1; ; num += blksize) {
+    ret = simdb_read(db, num, blksize, &data);
+    if (ret < 0)
+      return ret;
+    rec = data;
+    for (int i = 0; i < ret; i++, rec++) {
+      if (!rec->used)
         continue; /* record missing */
 
       match.diff_ratio  = 0.0;
       match.diff_bitmap = 0.0;
 
       /* - compare ratio - cheap */
+      /* TODO: check caps */
       if (ratio_s > 0.0 && (ratio_t = simdb_record_ratio(rec)) > 0.0) {
         match.diff_ratio  =  ratio_s - ratio_t;
         match.diff_ratio *= (ratio_s > ratio_t) ? 1.0 : -1.0;
@@ -371,77 +372,83 @@ simdb_search(simdb_t        * const db,
       }
 
       /* - compare bitmap - more expensive */
-      match.diff_bitmap = simdb_bitmap_compare(rec->bitmap, ((simdb_urec_t *) sample)->bitmap) / SIMDB_BITMAP_BITS;
+      match.diff_bitmap = simdb_bitmap_compare(rec->bitmap, sample.bitmap) / SIMDB_BITMAP_BITS;
       if (match.diff_bitmap > search->maxdiff_bitmap)
         continue;
 
       /* create match record */
-      match.num = blk.start + i;
+      match.num = num + i;
       memcpy(&(*matches)[found], &match, sizeof(simdb_match_t));
       found++;
       if (found >= search->limit)
         break;
     }
-    FREE(blk.data);
+    FREE(data);
     if (found >= search->limit)
       break;
-    blk.start += blk_size;
   }
 
   return found;
 }
 
-uint64_t
-simdb_usage_map(simdb_t * const db,
-               char    ** const map) {
-  const int blk_size = 4096;
-  simdb_block_t blk;
-  uint64_t records;
-  simdb_urec_t *r; /* mnemonics : block, record */
-  char *m = NULL;   /* mnemonics : map */
+int
+simdb_usage_map(simdb_t * const db, char ** const map) {
+  const int blksize = 4096;
+  simdb_urec_t *data = NULL;
+  simdb_urec_t *r;  /* mnemonics : record pointer */
+  char *m = NULL;   /* mnemonics : map pointer */
+  int ret = 0, records = 0;
 
-  memset(&blk, 0x0, sizeof(simdb_block_t));
+  assert(db  != NULL);
+  assert(map != NULL);
 
   records = simdb_records_count(db);
-  CALLOC(*map, records + 1, sizeof(char));
+  CALLOC(m, records + 1, sizeof(char));
+  *map = m;
 
-  m = *map;
-  blk.start = 1;
-  blk.records = blk_size;
-
-  while (simdb_block_read(db, &blk) > 0) {
-    r = (simdb_urec_t *) blk.data;
-    for (unsigned int i = 0; i < blk.records; i++, m++, r++) {
+  for (int num = 1; ; num += blksize) {
+    ret = simdb_read(db, num, blksize, &data);
+    if (ret < 0) {
+      FREE(*map);
+      return ret;
+    }
+    if (ret == 0)
+      break;
+    r = data;
+    for (int i = 0; i < ret; i++, m++, r++) {
       *m = (r->used == 0xFF) ? CHAR_USED : CHAR_NONE;
     }
-    blk.start += blk_size;
+    FREE(data);
   }
-  FREE(blk.data);
 
   return records;
 }
 
-uint16_t
-simdb_usage_slice(simdb_t   * const db,
-                  char     ** const map,
-                  uint64_t  offset,
-                  uint16_t  limit) {
-  simdb_block_t blk;
-  simdb_urec_t *r;  /* mnemonics : block, record */
-  char *m = NULL;   /* mnemonics : map */
+int
+simdb_usage_slice(simdb_t * const db, char ** const map, int offset, int limit) {
+  simdb_urec_t *data = NULL;
+  simdb_urec_t *r;  /* mnemonics : record pointer */
+  char *m = NULL;   /* mnemonics : map pointer */
+  int ret = 0;
 
-  memset(&blk, 0x0, sizeof(simdb_block_t));
-  CALLOC(*map, limit + 1, sizeof(char));
+  assert(db  != NULL);
+  assert(map != NULL);
 
+  if (offset < 1 || limit < 1)
+    return SIMDB_ERR_USAGE;
+
+  ret = simdb_read(db, offset, limit, &data);
+  if (ret <= 0)
+    return ret;
+
+  CALLOC(m, limit + 1, sizeof(char));
   m = *map;
-  blk.start = offset;
-  blk.records = limit;
 
-  limit = simdb_block_read(db, &blk);
-  r = (simdb_urec_t *) blk.data;
-  for (uint16_t i = 0;  i < blk.records;  i++, m++, r++) {
+  r = data;
+  for (int i = 0; i < limit; i++, m++, r++) {
     *m = (r->used == 0xFF) ? CHAR_USED : CHAR_NONE;
   }
+  FREE(data);
 
-  return limit;
+  return ret;
 }

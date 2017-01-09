@@ -110,15 +110,14 @@ const char * simdb_error(int code);
 /**
  * @brief Search compare given record in database to other images
  * @param db Database handle
- * @param sample Record sample
+ * @param num Record sample number
  * @param search Search parameters
  * @param matches Pointer to storage for found matches
  * @retval >0 if found some matches
  * @retval  0 if nothing found
  * @retval <0 on error
  */
-int simdb_search(simdb_t         * const db,
-                 simdb_rec_t     * const sample,
+int simdb_search(simdb_t * const db, int num,
                  simdb_search_t  * const search,
                  simdb_match_t  ** matches);
 
@@ -162,16 +161,13 @@ int simdb_block_read(simdb_t *db, simdb_block_t *blk);
 /**
  * @brief Get database capacity
  */
-uint64_t
-simdb_records_count(simdb_t * const db);
+int simdb_records_count(simdb_t * const db);
 
 /**
   @brief   Fills buffer 'map' according to records existense in database
   @returns records processed (and also buffer size)
 */
-uint64_t
-simdb_usage_map(simdb_t * const db,
-               char     ** const map);
+int simdb_usage_map(simdb_t * const db, char ** const map);
 
 /**
  * @brief   Fills buffer 'map' according to records existense in given range
@@ -181,10 +177,6 @@ simdb_usage_map(simdb_t * const db,
  * @param   limit   Slice size
  * @returns Records processed (and also buffer size)
 */
-uint16_t
-simdb_usage_slice(simdb_t  * const db,
-                 char     ** const map,
-                 uint64_t  offset,
-                 uint16_t  limit);
+int simdb_usage_slice(simdb_t * const db, char ** const map, int offset, int limit);
 
 #endif
