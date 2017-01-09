@@ -156,22 +156,22 @@ simdb_close(simdb_t *db) {
 
 const char *
 simdb_error(int error) {
-   if (error == SIMDB_SUCCESS) {
-     return "success";
-   } else if (error == SIMDB_ERR_SYSTEM) {
-     return strerror(errno);
-   } else if (error == SIMDB_ERR_OOM) {
-     return "can't allocate memory";
-   } else if (error == SIMDB_ERR_CORRUPTDB) {
-     return "database corrupted";
-   } else if (error == SIMDB_ERR_WRONGVERS) {
-     return "database version differs from library version";
-   } else if (error == SIMDB_ERR_READONLY) {
-     return "database opened in read-only mode";
-   } else if (error == SIMDB_ERR_NXRECORD) {
-     return "no such record in database";
-   }
-   return "unknown error";
+  if (error == SIMDB_SUCCESS) {
+    return "success";
+  } else if (error == SIMDB_ERR_SYSTEM) {
+    return strerror(errno);
+  } else if (error == SIMDB_ERR_OOM) {
+    return "can't allocate memory";
+  } else if (error == SIMDB_ERR_CORRUPTDB) {
+    return "database corrupted";
+  } else if (error == SIMDB_ERR_WRONGVERS) {
+    return "database version differs from library version";
+  } else if (error == SIMDB_ERR_READONLY) {
+    return "database opened in read-only mode";
+  } else if (error == SIMDB_ERR_NXRECORD) {
+    return "no such record in database";
+  }
+  return "unknown error";
 }
 
 int simdb_record_read(simdb_t *db, simdb_rec_t *rec) {
