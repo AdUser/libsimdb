@@ -22,6 +22,7 @@
 #include "common.h"
 #include "bitmap.h"
 #include "record.h"
+#include "io.h"
 #include "simdb.h"
 
 struct _simdb_t {
@@ -174,6 +175,66 @@ simdb_error(int error) {
     return "wrong parameters passed to finction";
   }
   return "unknown error";
+}
+
+int
+simdb_read(simdb_t *db, int start, int records, simdb_urec_t **data) {
+  simdb_urec_t *tmp;
+  off_t offset = 0;
+  ssize_t bytes = 0;
+
+  assert(db != NULL);
+  assert(data != NULL);
+
+  if (start < 1 || records < 1)
+    return SIMDB_ERR_USAGE;
+
+  offset = SIMDB_REC_LEN * start;
+  bytes  = SIMDB_REC_LEN * records;
+
+  if ((tmp = calloc(1, bytes)) == NULL)
+    return SIMDB_ERR_OOM;
+
+  if ((bytes = pread(db->fd, tmp, bytes, offset)) < 0) {
+    free(tmp);
+    return SIMDB_ERR_SYSTEM;
+  }
+
+  records = bytes / SIMDB_REC_LEN;
+  if (records <= 0) {
+    free(tmp);
+    return 0;
+  }
+
+  *data = tmp;
+  return records;
+}
+
+int
+simdb_write(simdb_t *db, int start, int records, simdb_urec_t *data) {
+  off_t offset = 0;
+  ssize_t bytes = 0;
+
+  assert(db != NULL);
+  assert(data != NULL);
+
+  if (start < 1 || records < 1)
+    return SIMDB_ERR_USAGE;
+
+  if (!(db->flags & SIMDB_FLAG_WRITE))
+    return SIMDB_ERR_READONLY;
+
+  offset = SIMDB_REC_LEN * start;
+  bytes  = SIMDB_REC_LEN * records;
+
+  if ((bytes = pwrite(db->fd, data, bytes, offset)) < 0)
+    return SIMDB_ERR_SYSTEM;
+
+  records = bytes / SIMDB_REC_LEN;
+  if (records <= 0)
+    return 0;
+
+  return records;
 }
 
 int simdb_record_read(simdb_t *db, simdb_rec_t *rec) {
