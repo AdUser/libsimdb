@@ -2,13 +2,11 @@
 #include "../record.h"
 #include "../simdb.h"
 
-bool
-simdb_record_create(void *rec, const char * const source) {
-  assert(rec != NULL);
-  assert(source != NULL);
+simdb_urec_t *
+simdb_record_create(const char * const path) {
+  assert(path != NULL);
 
-  (void)(rec);
-  (void)(source);
+  (void)(path);
 
-  return false;
+  return NULL;
 }

@@ -5,22 +5,21 @@
 
 #include <wand/magick_wand.h>
 
-bool
-simdb_record_create(void * r, const char * const source) {
+simdb_urec_t *
+simdb_record_create(const char * const path) {
   MagickWand *wand = NULL;
   MagickPassFail status = MagickPass;
   uint16_t w = 0, h = 0;
   size_t buf_size = 64 * sizeof(char);
   unsigned char *buf = NULL;
-  simdb_urec_t *rec = r;
+  simdb_urec_t *rec = NULL;
 
-  assert(rec != NULL);
-  assert(source != NULL);
+  assert(path != NULL);
 
   InitializeMagick("/");
   wand = NewMagickWand();
   if (status == MagickPass)
-    status = MagickReadImage(wand, source);
+    status = MagickReadImage(wand, path);
 
   if (status == MagickPass)
     w = MagickGetImageWidth(wand);
@@ -83,11 +82,12 @@ simdb_record_create(void * r, const char * const source) {
 
   if (status == MagickPass) {
     assert(buf_size == SIMDB_BITMAP_SIZE);
-    memset(rec, 0x0, sizeof(simdb_urec_t));
-    rec->used = 0xFF;
-    rec->image_w = w;
-    rec->image_h = h;
-    memcpy(rec->bitmap, buf, SIMDB_BITMAP_SIZE);
+    if ((rec = calloc(1, sizeof(simdb_urec_t))) != NULL) {
+      rec->used = 0xFF;
+      rec->image_w = w;
+      rec->image_h = h;
+      memcpy(rec->bitmap, buf, SIMDB_BITMAP_SIZE);
+    }
 #ifdef DEBUG
   } else {
     ExceptionType severity = 0;
@@ -99,5 +99,5 @@ simdb_record_create(void * r, const char * const source) {
   DestroyMagickWand(wand);
   DestroyMagick();
 
-  return (status == MagickPass) ? true : false;
+  return rec;
 }

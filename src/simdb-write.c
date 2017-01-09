@@ -83,13 +83,11 @@ int main(int argc, char **argv)
     case add :
       if (num == 0 || sample == NULL)
         usage(EXIT_FAILURE);
-      if (!simdb_record_create(&rec, sample)) {
-        fprintf(stderr, "sampler failure\n");
-        exit(EXIT_FAILURE);
-      }
-      if ((err = simdb_write(db, num, 1, (void *) &rec)) < 1) {
+      if ((err = simdb_record_add(db, num, sample, 0)) < 0) {
         fprintf(stderr, "%s\n", simdb_error(err));
         exit(EXIT_FAILURE);
+      } else {
+        fprintf(stderr, "added as record #%d", err);
       }
       break;
     case del :

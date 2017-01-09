@@ -251,6 +251,36 @@ simdb_record_used(simdb_t *db, int num) {
 }
 
 int
+simdb_record_add(simdb_t *db, int num, const char *path, int flags) {
+  simdb_urec_t *rec = NULL;
+
+  assert(db != NULL);
+
+  if (num < 0 || path == NULL)
+    return SIMDB_ERR_USAGE;
+
+  if (flags & SIMDB_ADD_NOEXTEND && num > db->records)
+    return 0;
+
+  if (access(path, R_OK) < 0)
+    return SIMDB_ERR_SYSTEM;
+
+  if (num > 0 && flags & SIMDB_ADD_NOREPLACE && simdb_record_used(db, num))
+    return 0;
+
+  if ((rec = simdb_record_create(path)) == NULL)
+    return SIMDB_ERR_SAMPLER;
+
+  if (num == 0)
+    num = db->records + 1;
+
+  num = simdb_write(db, num, 1, rec);
+
+  FREE(rec);
+  return num;
+}
+
+int
 simdb_record_del(simdb_t *db, int num) {
   simdb_urec_t *rec;
   int ret = 0;

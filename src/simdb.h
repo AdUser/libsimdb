@@ -25,6 +25,13 @@
 /** @} */
 
 /**
+ * @defgroup SIMDBAddModifiers Flags for simdb_record_add() call
+ * @{ */
+#define SIMDB_ADD_NOREPLACE 1 << (0 + 0)  /**< don't replace existing record */
+#define SIMDB_ADD_NOEXTEND  1 << (0 + 1)  /**< don't extend database if @a num greater than existing records count */
+/** @} */
+
+/**
  * @defgroup SIMDBErrors Database error codes
  * @{ */
 #define SIMDB_SUCCESS          0 /**< success */
@@ -114,11 +121,18 @@ int simdb_search(simdb_t * const db, int num,
 bool simdb_record_used(simdb_t *db, int num);
 
 /**
- * @brief Create record from image file
+ * @brief Create an record from image file
+ * @param db  Database handle
+ * @param num Number of record to add / replace
  * @param path Path to source image
- * @returns Pointer to newly created record or NULL on error
+ * @param flags Modifier flags. See @a SIMDBAddModifiers group for possible values.
+ * @retval <0 on error
+ * @retval  0 if @a num > 0, SIMDB_ADD_NOEXPAND flag set, but record not exists
+ *         or if @a num > 0, SIMDB_ADD_NOREPLACE flag set, and record already used
+ * @retval >0 if record added successfully
+ * @note setting @a num to zero means "append to end"
  */
-bool simdb_record_create(void * rec, const char *path);
+int simdb_record_add(simdb_t *db, int num, const char *path, int flags);
 
 /**
  * @brief Delete a record from database by num
