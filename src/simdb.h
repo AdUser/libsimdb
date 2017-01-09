@@ -1,5 +1,5 @@
-#ifndef HAS_DATABASE_H
-#define HAS_DATABASE_H 1
+#ifndef HAS_SIMDB_H
+#define HAS_SIMDB_H 1
 
 /**
  * @file
@@ -142,4 +142,4 @@ int simdb_usage_map(simdb_t * const db, char ** const map);
 */
 int simdb_usage_slice(simdb_t * const db, char ** const map, int offset, int limit);
 
-#endif
+#endif /* HAS_SIMDB_H */
