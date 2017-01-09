@@ -28,6 +28,7 @@
 struct _simdb_t {
   int fd;               /**< database file descriptor */
   int flags;            /**< database flags and capabilities, see SIMDB_FLAGS_* and SIMDB_CAP_* defines */
+  int records;          /**< database records count */
   char path[PATH_MAX];  /**< path to database file */
 };
 
@@ -128,6 +129,7 @@ simdb_open(const char *path, int mode, int *error) {
 
   db->fd    = fd;
   db->flags = flags;
+  db->records = (st.st_size / SIMDB_REC_LEN) - 1;
 
   strncpy(db->path, path, sizeof(db->path));
 
@@ -221,6 +223,9 @@ simdb_write(simdb_t *db, int start, int records, simdb_urec_t *data) {
   if (records <= 0)
     return 0;
 
+  if ((start + records - 1) > db->records)
+    db->records = (start + records - 1);
+
   return records;
 }
 
@@ -252,15 +257,8 @@ simdb_record_del(simdb_t *db, int num) {
 
 int
 simdb_records_count(simdb_t * const db) {
-  struct stat st;
-  off_t size = 0;
-
-  memset(&st, 0x0, sizeof(struct stat));
-
-  fstat(db->fd, &st);
-  size = st.st_size;
-
-  return size / SIMDB_REC_LEN;
+  assert(db != NULL);
+  return db->records;
 }
 
 inline static float

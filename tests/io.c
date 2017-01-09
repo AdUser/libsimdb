@@ -39,8 +39,14 @@ int main() {
   db = simdb_open(path, mode, &ret);
   assert(db != NULL);
 
+  ret = simdb_records_count(db);
+  assert(ret == 0);
+
   ret = simdb_write(db, 1, 2, rec);
   assert(ret == 2); /* success */
+
+  ret = simdb_records_count(db);
+  assert(ret == 2);
 
   ret = simdb_read(db, 1, 0, &data);
   assert(ret == SIMDB_ERR_USAGE);
