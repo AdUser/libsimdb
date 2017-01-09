@@ -170,6 +170,8 @@ simdb_error(int error) {
     return "database opened in read-only mode";
   } else if (error == SIMDB_ERR_NXRECORD) {
     return "no such record in database";
+  } else if (error == SIMDB_ERR_USAGE) {
+    return "wrong parameters passed to finction";
   }
   return "unknown error";
 }

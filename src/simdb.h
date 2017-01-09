@@ -34,6 +34,7 @@
 #define SIMDB_ERR_WRONGVERS   -4 /**< database version mismatch */
 #define SIMDB_ERR_NXRECORD    -5 /**< no such record in database */
 #define SIMDB_ERR_READONLY    -6 /**< database opened in read-only mode */
+#define SIMDB_ERR_USAGE       -7 /**< wrong arguments passed */
 /** @} */
 
 /** opaque database handler */
