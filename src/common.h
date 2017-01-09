@@ -19,13 +19,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-/** @defgroup MemoryMgmt Memory management macro
- * @{*/
 /** frees memory and sets pointer to zero */
 #define FREE(ptr) \
   free((ptr)); (ptr) = NULL;
-
-/** allocates memory, and checks is it really allocated */
-#define CALLOC(ptr, nmemb, size) \
-  assert(((ptr) = calloc((nmemb), (size))) != NULL);
-/** @} */

@@ -356,7 +356,8 @@ simdb_search(simdb_t * const db, int num,
   if (search->maxdiff_ratio > 0.0)
     ratio_s = simdb_record_ratio(&sample);
 
-  CALLOC(*matches, search->limit, sizeof(simdb_match_t));
+  if ((*matches = calloc(search->limit, sizeof(simdb_match_t))) == NULL)
+    return SIMDB_ERR_OOM;
 
   for (num = 1; ; num += blksize) {
     ret = simdb_read(db, num, blksize, &data);
@@ -413,7 +414,8 @@ simdb_usage_map(simdb_t * const db, char ** const map) {
   assert(map != NULL);
 
   records = simdb_records_count(db);
-  CALLOC(m, records + 1, sizeof(char));
+  if ((m = calloc(records + 1, sizeof(char))) == NULL)
+    return SIMDB_ERR_OOM;
   *map = m;
 
   for (int num = 1; ; num += blksize) {
@@ -451,7 +453,8 @@ simdb_usage_slice(simdb_t * const db, char ** const map, int offset, int limit) 
   if (ret <= 0)
     return ret;
 
-  CALLOC(m, limit + 1, sizeof(char));
+  if ((m = calloc(limit + 1, sizeof(char))) == NULL)
+    return SIMDB_ERR_OOM;
   m = *map;
 
   r = data;

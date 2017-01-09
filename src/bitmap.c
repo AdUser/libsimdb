@@ -81,7 +81,11 @@ simdb_bitmap_unpack(const unsigned char *map,
   uint16_t *p, row, mask;
   unsigned char *q = NULL;
 
-  CALLOC(*buf, buf_size, sizeof(char));
+  assert(map != NULL);
+  assert(buf != NULL);
+
+  if ((*buf = calloc(buf_size, sizeof(char))) == NULL)
+    return 0;
 
   p = (uint16_t *) map;
   q = *buf;
