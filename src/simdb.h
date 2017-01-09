@@ -117,11 +117,10 @@ const char * simdb_error(int code);
  * @retval  0 if nothing found
  * @retval <0 on error
  */
-int
-simdb_search(simdb_t         * const db,
-             simdb_rec_t     * const sample,
-             simdb_search_t  * const search,
-             simdb_match_t  ** matches);
+int simdb_search(simdb_t         * const db,
+                 simdb_rec_t     * const sample,
+                 simdb_search_t  * const search,
+                 simdb_match_t  ** matches);
 
 /**
  * @brief Read single record from database
