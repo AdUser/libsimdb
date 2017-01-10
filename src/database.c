@@ -240,7 +240,7 @@ simdb_record_used(simdb_t *db, int num) {
 
   assert(db != NULL);
 
-  if (num > db->records)
+  if (num <= 0 || num > db->records)
     return false;
 
   if (simdb_read(db, num, 1, &rec) < 1)
