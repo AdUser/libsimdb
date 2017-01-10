@@ -142,6 +142,8 @@ simdb_close(simdb_t *db) {
 
   if (db->fd >= 0)
     close(db->fd);
+
+  FREE(db);
 }
 
 const char *
