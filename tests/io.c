@@ -35,15 +35,24 @@ int main() {
 
   simdb_close(db);
 
-  mode |= SIMDB_FLAG_WRITE;
+  mode = SIMDB_FLAG_WRITE | SIMDB_FLAG_LOCKNB;
   db = simdb_open(path, mode, &ret);
   assert(db != NULL);
+
+  /* also test locks */
+  assert(simdb_open(path, mode, &ret) == NULL);
+  assert(ret == SIMDB_ERR_LOCK);
 
   ret = simdb_records_count(db);
   assert(ret == 0);
 
   ret = simdb_write(db, 1, 2, rec);
   assert(ret == 2); /* success */
+
+  assert(simdb_record_used(db, 0) == false);
+  assert(simdb_record_used(db, 1) == true);
+  assert(simdb_record_used(db, 2) == true);
+  assert(simdb_record_used(db, 3) == false);
 
   ret = simdb_records_count(db);
   assert(ret == 2);
