@@ -323,46 +323,42 @@ simdb_record_ratio(simdb_urec_t *r) {
 }
 
 int
-simdb_search(simdb_t * const db, int num,
-             simdb_search_t * const search,
-             simdb_match_t  **matches)
-{
+simdb_search(simdb_t *db, simdb_search_t *search, simdb_urec_t *sample) {
+  simdb_match_t *matches;
   simdb_match_t match;
-  simdb_urec_t *data = NULL;
-  simdb_urec_t *rec, sample;
+  simdb_urec_t *rec, *data = NULL;
   const int blksize = 4096;
-  uint64_t found = 0;
   float ratio_s = 0.0; /* source */
   float ratio_t = 0.0; /* tested */
-  int ret = 0;
+  int ret = 0, found = 0, capacity = 16;
 
   assert(db      != NULL);
   assert(search  != NULL);
-  assert(matches != NULL);
-  assert(search->maxdiff_ratio  >= 0.0 && search->maxdiff_ratio  <= 1.0);
-  assert(search->maxdiff_bitmap >= 0.0 && search->maxdiff_bitmap <= 1.0);
+
+  if (search->maxdiff_ratio  < 0.0 && search->maxdiff_ratio  > 1.0)
+    return SIMDB_ERR_USAGE;
+  if (search->maxdiff_bitmap < 0.0 && search->maxdiff_bitmap > 1.0)
+    return SIMDB_ERR_USAGE;
 
   memset(&match, 0x0, sizeof(simdb_match_t));
 
-  if ((ret = simdb_read(db, num, 1, &rec)) < 1)
-    return ret;
-
-  memcpy(&sample, rec, sizeof(sample));
-  FREE(rec);
-
   if (search->limit == 0)
-    search->limit = -1; /* unsigned -> max */
+    search->limit = INT_MAX;
 
   if (search->maxdiff_ratio > 0.0)
-    ratio_s = simdb_record_ratio(&sample);
+    ratio_s = simdb_record_ratio(sample);
 
-  if ((*matches = calloc(search->limit, sizeof(simdb_match_t))) == NULL)
+  if ((matches = calloc(capacity, sizeof(simdb_match_t))) == NULL)
     return SIMDB_ERR_OOM;
 
-  for (num = 1; ; num += blksize) {
+  for (int num = 1; ; num += blksize) {
     ret = simdb_read(db, num, blksize, &data);
-    if (ret < 0)
-      return ret;
+    if (ret == 0)
+      break; /* end of records */
+    if (ret < 0) {
+      FREE(matches);
+      return ret; /* error */
+    }
     rec = data;
     for (int i = 0; i < ret; i++, rec++) {
       if (!rec->used)
@@ -381,15 +377,26 @@ simdb_search(simdb_t * const db, int num,
       } else {
         /* either source or target ratio not set, can't compare, skip test */
       }
-
       /* - compare bitmap - more expensive */
-      match.diff_bitmap = simdb_bitmap_compare(rec->bitmap, sample.bitmap) / SIMDB_BITMAP_BITS;
+      match.diff_bitmap = simdb_bitmap_compare(rec->bitmap, sample->bitmap) / SIMDB_BITMAP_BITS;
       if (match.diff_bitmap > search->maxdiff_bitmap)
         continue;
-
-      /* create match record */
+      /* whoa! a match found */
+      /* allocate more memory for results array if needed */
+      if (found == capacity) {
+        simdb_match_t *tmp = NULL;
+        capacity *= 2;
+        if ((tmp = realloc(matches, capacity)) == NULL) {
+          /* fuck! */
+          FREE(matches);
+          FREE(data);
+          return SIMDB_ERR_OOM;
+        }
+        matches = tmp; /* successfully relocated */
+      }
+      /* copy match to results array */
       match.num = num + i;
-      memcpy(&(*matches)[found], &match, sizeof(simdb_match_t));
+      memcpy(&matches[found], &match, sizeof(simdb_match_t));
       found++;
       if (found >= search->limit)
         break;
@@ -399,7 +406,54 @@ simdb_search(simdb_t * const db, int num,
       break;
   }
 
+  if (found) {
+    search->found   = found;
+    search->matches = matches;
+  } else {
+    FREE(matches);
+  }
+
   return found;
+}
+
+int
+simdb_search_byid(simdb_t *db, simdb_search_t *search, int num) {
+  simdb_urec_t *sample;
+  int ret = 0;
+
+  assert(db     != NULL);
+  assert(search != NULL);
+
+  if (num <= 0)
+    return SIMDB_ERR_USAGE;
+
+  if ((ret = simdb_read(db, num, 1, &sample)) < 1)
+    return ret;
+
+  ret = simdb_search(db, search, sample);
+  FREE(sample);
+
+  return ret;
+}
+
+int
+simdb_search_file(simdb_t *db, simdb_search_t *search, const char *path) {
+  simdb_urec_t *sample = NULL;
+  int ret = 0;
+
+  assert(db     != NULL);
+  assert(search != NULL);
+
+  if (path == NULL)
+    return SIMDB_ERR_USAGE;
+
+  if ((sample = simdb_record_create(path)) == NULL)
+    return SIMDB_ERR_SAMPLER;
+
+  ret = simdb_search(db, search, sample);
+  FREE(sample);
+
+  return ret;
 }
 
 int

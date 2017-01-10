@@ -49,16 +49,6 @@
 typedef struct _simdb_t simdb_t;
 
 /**
- * search parameters
- * maxdiff_* fields should have value from 0.0 to 1.0 (0% - 100%)
- */
-typedef struct {
-  uint8_t limit;        /**< max results */
-  float maxdiff_bitmap; /**< max difference of luma bitmaps */
-  float maxdiff_ratio;  /**< max difference of ratios, default - 7% */
-} simdb_search_t;
-
-/**
  * search matches
  */
 typedef struct {
@@ -66,6 +56,18 @@ typedef struct {
   float diff_ratio;   /**< difference of ratio */
   float diff_bitmap;  /**< difference of bitmap */
 } simdb_match_t;
+
+/**
+ * search parameters
+ * maxdiff_* fields should have value from 0.0 to 1.0 (0% - 100%)
+ */
+typedef struct {
+  float maxdiff_bitmap; /**< max difference of luma bitmaps */
+  float maxdiff_ratio;  /**< max difference of ratios, default - 7% */
+  int limit;            /**< max results */
+  int found;            /**< count of found results */
+  simdb_match_t *matches;
+} simdb_search_t;
 
 /**
  * @brief Creates empty database at given path
@@ -99,7 +101,7 @@ void simdb_close(simdb_t *db);
 const char * simdb_error(int code);
 
 /**
- * @brief Search compare given record in database to other images
+ * @brief Compare given record in database to other records
  * @param db Database handle
  * @param num Record sample number
  * @param search Search parameters
@@ -108,9 +110,19 @@ const char * simdb_error(int code);
  * @retval  0 if nothing found
  * @retval <0 on error
  */
-int simdb_search(simdb_t * const db, int num,
-                 simdb_search_t  * const search,
-                 simdb_match_t  ** matches);
+int simdb_search_byid(simdb_t *db, simdb_search_t *search, int num);
+
+/**
+ * @brief Compare given file against other records in database
+ * @param db Database handle
+ * @param file Path to file to compare against database
+ * @param search Search parameters
+ * @param matches Pointer to storage for found matches (allocated)
+ * @retval >0 if found some matches
+ * @retval  0 if nothing found
+ * @retval <0 on error
+ */
+int simdb_search_file(simdb_t *db, simdb_search_t *search, const char *file);
 
 /**
  * @brief Checks is record with given number is used

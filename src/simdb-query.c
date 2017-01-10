@@ -44,26 +44,27 @@ void usage(int exitcode) {
 
 int search_similar(simdb_t *db, int num, float maxdiff) {
   int ret = 0, i = 0;
-  simdb_match_t *matches = NULL;
   simdb_search_t search;
 
   memset(&search, 0x0, sizeof(simdb_search_t));
+
   search.maxdiff_ratio  = 0.2; /* 20% */
   search.maxdiff_bitmap = maxdiff;
 
-  if ((ret = simdb_search(db, num, &search, &matches)) < 0) {
+  if ((ret = simdb_search_byid(db, &search, num)) < 0) {
     fprintf(stderr, "%s\n", simdb_error(ret));
     return 1;
   }
 
-  for (i = 0; i < ret; i++) {
+  for (i = 0; i < search.found; i++) {
     printf("%llu -- %.1f (bitmap), %.1f (ratio)\n",
-      matches[i].num,
-      matches[i].diff_bitmap * 100,
-      matches[i].diff_ratio  * 100);
+      search.matches[i].num,
+      search.matches[i].diff_bitmap * 100,
+      search.matches[i].diff_ratio  * 100);
   }
 
-  FREE(matches);
+  if (search.found > 0)
+    FREE(search.matches);
 
   return 0;
 }
