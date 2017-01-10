@@ -12,7 +12,10 @@
 /**
  * @defgroup SIMDBFlags Database runtime flags
  *  @{ */
+#define SIMDB_FLAGS_MASK    0xFF
 #define SIMDB_FLAG_WRITE    1 << (0 + 0)  /**< database has write access */
+#define SIMDB_FLAG_LOCK     1 << (0 + 1)  /**< use locks for file with write access (only with @ref SIMDB_FLAG_WRITE) */
+#define SIMDB_FLAG_LOCKNB   1 << (0 + 2)  /**< same as above, but not wait for lock (only with @ref SIMDB_FLAG_WRITE) */
 /** @} */
 
 /**
@@ -43,6 +46,7 @@
 #define SIMDB_ERR_READONLY    -6 /**< database opened in read-only mode */
 #define SIMDB_ERR_USAGE       -7 /**< wrong arguments passed */
 #define SIMDB_ERR_SAMPLER     -8 /**< given file not an image, damaged or has unsupported format */
+#define SIMDB_ERR_LOCK        -9 /**< can't add lock on database file */
 /** @} */
 
 /** opaque database handler */

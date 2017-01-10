@@ -81,6 +81,14 @@ simdb_open(const char *path, int mode, int *error) {
     return NULL;
   }
 
+  if ((mode & SIMDB_FLAG_WRITE) && (mode & (SIMDB_FLAG_LOCK|SIMDB_FLAG_LOCKNB))) {
+    int locktype = (mode & SIMDB_FLAG_LOCKNB) ? F_TLOCK : F_LOCK;
+    if (lockf(fd, locktype, 0) < 0) {
+      *error = SIMDB_ERR_LOCK;
+      return NULL;
+    }
+  }
+
   errno = 0;
   bytes = pread(fd, buf, SIMDB_REC_LEN, 0);
   if (bytes < SIMDB_REC_LEN) {
@@ -106,8 +114,7 @@ simdb_open(const char *path, int mode, int *error) {
     return NULL;
   }
 
-  if (mode & SIMDB_FLAG_WRITE)
-    flags |= SIMDB_FLAG_WRITE;
+  flags = mode & SIMDB_FLAGS_MASK;
 
   /* all seems to be ok */
 
@@ -166,6 +173,8 @@ simdb_error(int error) {
     return "wrong parameters passed to finction";
   } else if (error == SIMDB_ERR_SAMPLER) {
     return "given file not an image, damaged or has unsupported format";
+  } else if (error == SIMDB_ERR_LOCK) {
+    return "can't add lock on database file";
   }
   return "unknown error";
 }
