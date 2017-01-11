@@ -75,11 +75,10 @@ simdb_bitmap_diffmap(const unsigned char *a,
 }
 
 size_t
-simdb_bitmap_unpack(const unsigned char *map,
-                    unsigned char ** const buf) {
+simdb_bitmap_unpack(const unsigned char *map, char **buf) {
   size_t buf_size = SIMDB_BITMAP_BITS;
   uint16_t *p, row, mask;
-  unsigned char *q = NULL;
+  char *q = NULL;
 
   assert(map != NULL);
   assert(buf != NULL);
@@ -92,7 +91,7 @@ simdb_bitmap_unpack(const unsigned char *map,
   for (size_t i = 0; i < SIMDB_BITMAP_SIDE; i++, p++) {
     row = *p; mask = 0x1;
     for (size_t j = 0; j < SIMDB_BITMAP_SIDE; j++, q++) {
-      *q = (row & mask) ? 0xFF : 0x00;
+      *q = (row & mask) ? 0x1 : 0x0;
       mask <<= 1;
     }
   }
@@ -102,7 +101,7 @@ simdb_bitmap_unpack(const unsigned char *map,
 
 void
 simdb_bitmap_print(const unsigned char *map) {
-  unsigned char *buf = NULL, *p = NULL;
+  char *buf = NULL, *p = NULL;
   char line[SIMDB_BITMAP_SIDE * 2 + 1];
 
   simdb_bitmap_unpack(map, &buf);
