@@ -39,10 +39,6 @@ int main() {
   db = simdb_open(path, mode, &ret);
   assert(db != NULL);
 
-  /* also test locks */
-  assert(simdb_open(path, mode, &ret) == NULL);
-  assert(ret == SIMDB_ERR_LOCK);
-
   ret = simdb_records_count(db);
   assert(ret == 0);
 
