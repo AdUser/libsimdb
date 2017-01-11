@@ -15,9 +15,6 @@
  */
 
 #include "common.h"
-#include "bitmap.h"
-#include "record.h"
-#include "io.h"
 #include "simdb.h"
 
 #include <unistd.h>

@@ -33,7 +33,7 @@ struct _simdb_t {
 };
 
 /** database header format line */
-const char *simdb_hdr_fmt = "IMDB v%02u, CAPS: %s;";
+static const char *simdb_hdr_fmt = "IMDB v%02u, CAPS: %s;";
 
 bool
 simdb_create(const char *path) {
