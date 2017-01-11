@@ -318,6 +318,26 @@ simdb_record_del(simdb_t *db, int num) {
 }
 
 int
+simdb_record_bitmap(simdb_t *db, int num, char **map, size_t *side) {
+  simdb_urec_t *rec;
+  int ret = 0;
+
+  assert(db != NULL);
+
+  if (num < 0 || map == NULL || side == NULL)
+    return SIMDB_ERR_USAGE;
+
+  if ((ret = simdb_read(db, num, 1, &rec)) <= 0)
+    return ret;
+
+  ret = simdb_bitmap_unpack(rec->bitmap, map);
+  *side = SIMDB_BITMAP_SIDE;
+
+  FREE(rec);
+  return ret;
+}
+
+int
 simdb_records_count(simdb_t * const db) {
   assert(db != NULL);
   return db->records;

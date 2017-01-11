@@ -161,6 +161,19 @@ int simdb_record_add(simdb_t *db, int num, const char *path, int flags);
 int simdb_record_del(simdb_t *db, int num);
 
 /**
+ * @brief Get record bitmap
+ * @param db  Database handle
+ * @param num Number of record to get bitmap
+ * @param bitmap Pointer to storage for bitmap (allocated)
+ * @param side   Pointer to storage for bitmap side length
+ * @retval <0 on error
+ * @retval  0 if record not exists
+ * @retval >0 on success (this is size of allocated bitmap in bytes)
+ * @note Don't forget to free() bitmap on success
+ */
+int simdb_record_bitmap(simdb_t *db, int num, char **map, size_t *side);
+
+/**
  * @brief Get database capacity
  */
 int simdb_records_count(simdb_t * const db);
