@@ -13,10 +13,6 @@
 /** Bitmap size in bytes (currently - 32) */
 #define SIMDB_BITMAP_SIZE (SIMDB_BITMAP_BITS / 8)
 
-/** placeholders for various bit states */
-#define CHAR_USED '@' /**< bit is 1 */
-#define CHAR_NONE '-' /**< bit is 0 */
-
 /**
  * @brief Compare two bitmaps
  * @param a First bitmap to compare
@@ -48,13 +44,4 @@ simdb_bitmap_diffmap(const unsigned char *a,
  */
 size_t
 simdb_bitmap_unpack(const unsigned char *map, char **buf);
-
-/**
- * @brief Print bitmap to stdout as ascii-square
- * @param map Source bitmap
- * @note Height of "square" is equals to BITMAP_SIDE,
- *   but width is BITMAP_SIDE x 2, for ease of reading
- */
-void
-simdb_bitmap_print(const unsigned char *map);
 #endif

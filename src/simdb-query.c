@@ -45,6 +45,30 @@ void usage(int exitcode) {
   exit(exitcode);
 }
 
+/**
+ * @brief Print bitmap to stdout as ascii-square
+ * @param map Source bitmap
+ * @note Height of "square" is equals to BITMAP_SIDE,
+ *   but width is BITMAP_SIDE x 2, for ease of reading
+ */
+void
+bitmap_print(const char *map, size_t side) {
+  const char *p = NULL;
+  char line[side * 2 + 1];
+
+  assert(map != NULL);
+
+  p = map;
+  for (size_t i = 0; i < side; i++) {
+    line[side * 2] = '\0';
+    for (size_t j = 0; j < side; j++, p++) {
+      line[(j * 2) + 0] = *p ? CHAR_USED : CHAR_FREE;
+      line[(j * 2) + 1] = *p ? CHAR_USED : CHAR_FREE;
+    }
+    puts(line);
+  }
+}
+
 int search_similar(simdb_t *db, int num, float maxdiff) {
   int ret = 0, i = 0;
   simdb_search_t search;
@@ -126,21 +150,22 @@ int db_usage_slice(simdb_t *db, uint64_t offset, uint16_t limit)
 }
 
 int rec_bitmap(simdb_t *db, int num) {
-  simdb_urec_t *r;
+  char *bitmap;
+  size_t side;
   int ret;
 
   assert(db != NULL);
 
-  if ((ret = simdb_read(db, num, 1, &r)) < 0) {
-    fprintf(stderr, "read failed: %s\n", simdb_error(ret));
+  if ((ret = simdb_record_bitmap(db, num, &bitmap, &side)) < 0) {
+    fprintf(stderr, "can't get record's bitmap: %s\n", simdb_error(ret));
     return 1;
   } else if (ret == 0) {
     fprintf(stderr, "bitmap: %s\n", "sample not found");
     return 1;
   }
 
-  simdb_bitmap_print(r->bitmap);
-  free(r);
+  bitmap_print(bitmap, side);
+  free(bitmap);
 
   return 0;
 }
@@ -173,7 +198,7 @@ int rec_diff(simdb_t *db, int a, int b, unsigned short int showmap) {
 
   if (showmap) {
     simdb_bitmap_diffmap(one->bitmap, two->bitmap, map);
-    simdb_bitmap_print(map);
+    bitmap_print(map, SIMDB_BITMAP_SIDE);
     return 0;
   }
 

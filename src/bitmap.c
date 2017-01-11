@@ -98,23 +98,3 @@ simdb_bitmap_unpack(const unsigned char *map, char **buf) {
 
   return buf_size;
 }
-
-void
-simdb_bitmap_print(const unsigned char *map) {
-  char *buf = NULL, *p = NULL;
-  char line[SIMDB_BITMAP_SIDE * 2 + 1];
-
-  simdb_bitmap_unpack(map, &buf);
-  p = buf;
-
-  line[SIMDB_BITMAP_SIDE * 2] = '\0';
-  for (size_t i = 0; i < SIMDB_BITMAP_SIDE; i++) {
-    for (size_t j = 0; j < SIMDB_BITMAP_SIDE; j++, p++) {
-      line[(j * 2) + 0] = (*p == 0x00) ? CHAR_NONE : CHAR_USED;
-      line[(j * 2) + 1] = (*p == 0x00) ? CHAR_NONE : CHAR_USED;
-    }
-    puts(line);
-  }
-
-  FREE(buf);
-}
