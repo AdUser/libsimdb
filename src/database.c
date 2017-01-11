@@ -513,7 +513,7 @@ simdb_usage_map(simdb_t * const db, char ** const map) {
       break;
     r = data;
     for (int i = 0; i < ret; i++, m++, r++) {
-      *m = (r->used == 0xFF) ? CHAR_USED : CHAR_NONE;
+      *m = (r->used == 0xFF) ? 0x1 : 0x0;
     }
     FREE(data);
   }
@@ -544,7 +544,7 @@ simdb_usage_slice(simdb_t * const db, char ** const map, int offset, int limit) 
 
   r = data;
   for (int i = 0; i < limit; i++, m++, r++) {
-    *m = (r->used == 0xFF) ? CHAR_USED : CHAR_NONE;
+    *m = (r->used == 0xFF) ? 0x1 : 0x0;
   }
   FREE(data);
 

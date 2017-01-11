@@ -23,6 +23,9 @@
 #include <unistd.h>
 #include <getopt.h>
 
+#define CHAR_USED '@'
+#define CHAR_FREE '-'
+
 void usage(int exitcode) {
   fprintf(stderr,
 "Usage: simdb-query <opts>\n"
@@ -85,8 +88,11 @@ int db_usage_map(simdb_t *db, unsigned short int cols)
     return 1;
   }
 
+  for (uint16_t i = 0; i < records; i++)
+    map[i] = map[i] ? CHAR_USED : CHAR_FREE;
+
   if (cols == 0) {
-    putchar(CHAR_NONE); /* zero */
+    putchar(CHAR_FREE); /* zero */
     puts(map);
     FREE(map);
     return 0;
@@ -111,6 +117,8 @@ int db_usage_slice(simdb_t *db, uint64_t offset, uint16_t limit)
   char *map = NULL;
 
   limit = simdb_usage_slice(db, &map, offset, limit);
+  for (uint16_t i = 0; i < limit; i++)
+    map[i] = map[i] ? CHAR_USED : CHAR_FREE;
   puts(map);
   FREE(map);
 
