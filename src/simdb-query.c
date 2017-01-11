@@ -171,43 +171,55 @@ int rec_bitmap(simdb_t *db, int num) {
 }
 
 int rec_diff(simdb_t *db, int a, int b, unsigned short int showmap) {
-  unsigned char map[SIMDB_BITMAP_SIZE];
-  simdb_urec_t *one, *two;
-  float diff = 0.0;
+  char *map1 = NULL, *map2 = NULL, *dmap = NULL;
+  size_t size = 0, diff = 0;
   int ret;
 
   assert(db != NULL);
 
-  if ((ret = simdb_read(db, a, 1, &one)) < 0) {
-    fprintf(stderr, "read error: %s\n", simdb_error(ret));
-    return 1;
-  } else if (ret == 0 || (ret > 0 && !one->used)) {
-    fprintf(stderr, "record diff: first sample not exists\n");
-    if (ret > 0) free(one);
-    return 1;
-  }
+  do {
+    if ((ret = simdb_record_bitmap(db, a, &map1, &size)) < 0) {
+      if (ret < 0) {
+        fprintf(stderr, "can't get bitmap for record #%d: %s\n", a, simdb_error(ret));
+      } else {
+        fprintf(stderr, "record diff: record #%d not exists\n", a);
+      }
+      ret = 1;
+      break;
+    }
 
-  if ((ret = simdb_read(db, b, 1, &two)) < 0) {
-    fprintf(stderr, "read error: %s\n", simdb_error(ret));
-    return 1;
-  } else if (ret == 0 || (ret > 0 && !two->used)) {
-    fprintf(stderr, "record diff: first sample not exists\n");
-    if (ret > 0) free(two);
-    return 1;
-  }
+    if ((ret = simdb_record_bitmap(db, b, &map2, &size)) <= 0) {
+      if (ret < 0) {
+        fprintf(stderr, "can't get bitmap for record #%d: %s\n", b, simdb_error(ret));
+      } else {
+        fprintf(stderr, "record diff: record #%d not exists\n", b);
+      }
+      ret = 1;
+      break;
+    }
 
-  if (showmap) {
-    simdb_bitmap_diffmap(one->bitmap, two->bitmap, map);
-    bitmap_print(map, SIMDB_BITMAP_SIDE);
-    return 0;
-  }
+    if ((dmap = calloc(size, sizeof(char))) == NULL) {
+      ret = 1;
+      break;
+    }
+    char *m1 = map1, *m2 = map2, *dm = dmap;
+    for (size_t i = 0; i < size; i++, m1++, m2++, dm++) {
+      *dm = *m1 ^ *m2;
+      diff += *dm ? 0 : 1;
+    }
+    if (showmap) {
+      bitmap_print(dmap, size);
+    } else {
+      printf("%.2f%%\n", ((float) diff / size) * 100);
+    }
+    ret = 0;
+  } while (0);
 
-  diff = (float) simdb_bitmap_compare(one->bitmap, two->bitmap);
-  printf("%.2f%%\n", (diff / SIMDB_BITMAP_BITS) * 100);
-  free(one);
-  free(two);
+  free(map1);
+  free(map2);
+  free(dmap);
 
-  return 0;
+  return ret;
 }
 
 int main(int argc, char **argv)

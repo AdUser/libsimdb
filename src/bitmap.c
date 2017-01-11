@@ -45,9 +45,7 @@ static unsigned char dict[256] = {
 };
 
 int
-simdb_bitmap_compare(const unsigned char *a,
-                     const unsigned char *b)
-{
+simdb_bitmap_compare(const unsigned char *a, const unsigned char *b) {
   unsigned char diff = 0;
   size_t i = 0;
   size_t cnt = 0;
@@ -58,20 +56,6 @@ simdb_bitmap_compare(const unsigned char *a,
   }
 
   return cnt;
-}
-
-size_t
-simdb_bitmap_diffmap(const unsigned char *a,
-                     const unsigned char *b,
-                     unsigned char *diff)
-{
-  size_t i = 0;
-
-  for (i = 0; i < SIMDB_BITMAP_SIZE; i++, a++, b++, diff++) {
-    *diff = *a ^ *b;
-  }
-
-  return i;
 }
 
 size_t
