@@ -32,7 +32,7 @@ void usage(int exitcode) {
   fprintf(stderr,
 "  -B <num>    Show bitmap for this sample\n"
 "  -C <a>,<b>  Show difference percent for this samples\n"
-"  -D <a>,<b>  Show difference bitmap for this samples\n"
+"  -F <a>,<b>  Show difference bitmap for this samples\n"
 "  -S <num>    Search for images similar ot this sample\n"
 "  -U <num>    Show db usage map, <num> entries per column\n"
 "              Special case - 0, output will be single line\n"
@@ -234,7 +234,7 @@ int main(int argc, char **argv)
   if (argc < 3)
     usage(EXIT_FAILURE);
 
-  while ((opt = getopt(argc, argv, "b:t:B:C:D:S:U:W:")) != -1) {
+  while ((opt = getopt(argc, argv, "b:t:B:C:F:S:U:W:")) != -1) {
     switch (opt) {
       case 'b' :
         db_path = optarg;
@@ -251,7 +251,7 @@ int main(int argc, char **argv)
         mode = bitmap;
         a = atoll(optarg);
         break;
-      case 'D' :
+      case 'F' :
         map = 1;
       case 'C' :
         mode = diff;
