@@ -97,7 +97,7 @@ int search_similar(simdb_t *db, int num, float maxdiff) {
   return 0;
 }
 
-int db_usage_map(simdb_t *db, unsigned short int cols) {
+int db_usage_map(simdb_t *db, int cols) {
   char *map = NULL;
   char *m   = NULL;
   char row[256];
@@ -169,7 +169,7 @@ int rec_bitmap(simdb_t *db, int num) {
   return 0;
 }
 
-int rec_diff(simdb_t *db, int a, int b, unsigned short int showmap) {
+int rec_diff(simdb_t *db, int a, int b, bool show_map) {
   char *map1 = NULL, *map2 = NULL, *dmap = NULL;
   size_t size = 0, diff = 0;
   int ret;
@@ -206,7 +206,7 @@ int rec_diff(simdb_t *db, int a, int b, unsigned short int showmap) {
       *dm = *m1 ^ *m2;
       diff += *dm ? 0 : 1;
     }
-    if (showmap) {
+    if (show_map) {
       bitmap_print(dmap, size);
     } else {
       printf("%.2f%%\n", ((float) diff / size) * 100);
@@ -222,16 +222,12 @@ int rec_diff(simdb_t *db, int a, int b, unsigned short int showmap) {
 }
 
 int main(int argc, char **argv) {
-  enum { undef, add, del, init, search, bitmap, usage_map, usage_slice, diff } mode = undef;
-  const char *db_path = NULL;
-  float maxdiff = 0.10;
-  unsigned short int cols = 64, map = 0, ret = 0;
-  char *sample = NULL;
   simdb_t *db = NULL;
-  int a = 0, b = 0;
-  char *c = NULL;
-  int err;
-  char opt = '\0';
+  enum { undef = 0, add, del, init, search, bitmap, usage_map, usage_slice, diff } mode = undef;
+  char *db_path = NULL, *sample = NULL, *c = NULL, opt = '\0';
+  int cols = 64, a = 0, b = 0, ret = 0, db_flags = 0;
+  bool show_map = false, need_write = false;
+  float maxdiff = 0.10;
 
   if (argc < 3)
     usage(EXIT_FAILURE);
@@ -251,6 +247,7 @@ int main(int argc, char **argv) {
         break;
       case 'A' :
         mode = add;
+        need_write = true;
         if ((c = strchr(optarg, ',')) == NULL)
           usage(EXIT_FAILURE);
         a = atoll(optarg);
@@ -262,13 +259,14 @@ int main(int argc, char **argv) {
         break;
       case 'D' :
         mode = del;
+        need_write = true;
         a = atoll(optarg);
         break;
       case 'I' :
         mode = init;
         break;
       case 'F' :
-        map = 1;
+        show_map = true;
       case 'C' :
         mode = diff;
         if ((c = strchr(optarg, ',')) == NULL)
@@ -310,8 +308,12 @@ int main(int argc, char **argv) {
       exit(EXIT_FAILURE);
     }
   }
-  if ((db = simdb_open(db_path, 0, &err)) == NULL) {
-    fprintf(stderr, "database open: %d\n", err);
+
+  if (need_write)
+    db_flags = SIMDB_FLAG_WRITE|SIMDB_FLAG_LOCK;
+
+  if ((db = simdb_open(db_path, db_flags, &ret)) == NULL) {
+    fprintf(stderr, "database open: %s\n", simdb_error(ret));
     exit(EXIT_FAILURE);
   }
 
@@ -319,16 +321,16 @@ int main(int argc, char **argv) {
     case add :
       if (a == 0 || sample == NULL)
         usage(EXIT_FAILURE);
-      if ((err = simdb_record_add(db, a, sample, 0)) < 0) {
-        fprintf(stderr, "%s\n", simdb_error(err));
+      if ((ret = simdb_record_add(db, a, sample, 0)) < 0) {
+        fprintf(stderr, "%s\n", simdb_error(ret));
         exit(EXIT_FAILURE);
       } else {
-        fprintf(stderr, "added as record #%d", err);
+        fprintf(stderr, "added as record #%d", ret);
       }
       break;
     case del :
-      if ((err = simdb_record_del(db, a)) < 0) {
-        fprintf(stderr, "%s\n", simdb_error(err));
+      if ((ret = simdb_record_del(db, a)) < 0) {
+        fprintf(stderr, "%s\n", simdb_error(ret));
         exit(EXIT_FAILURE);
       }
       break;
@@ -360,7 +362,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "both numbers must be set\n");
         exit(EXIT_FAILURE);
       }
-      ret = rec_diff(db, a, b, map);
+      ret = rec_diff(db, a, b, show_map);
       break;
     default :
       usage(EXIT_SUCCESS);
