@@ -16,6 +16,7 @@ if (WITH_TOOLS)
   install(TARGETS "simdb-1to2" RUNTIME DESTINATION "bin")
 
   add_executable("simdb-tool" "simdb-tool.c")
-  target_link_libraries("simdb-tool" "simdb")
+  set_property(TARGET "simdb-tool" PROPERTY LINK_FLAGS "-Wl,--as-needed")
+  target_link_libraries("simdb-tool" LINK_PUBLIC "simdb")
   install(TARGETS "simdb-tool" RUNTIME DESTINATION "bin")
 endif ()
