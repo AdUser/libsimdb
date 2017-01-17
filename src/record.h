@@ -17,7 +17,7 @@ typedef struct __attribute__((__packed__)) {
   uint8_t clevel_b;  /**< color level: blue  */
   uint16_t image_w;  /**< image width  */
   uint16_t image_h;  /**< image height */
-  unsigned char __unused[8]; /**< padding */
+  unsigned char _unused[8]; /**< padding */
   unsigned char bitmap[SIMDB_BITMAP_SIZE]; /**< image luma bitmap */
 } simdb_urec_t;
 
