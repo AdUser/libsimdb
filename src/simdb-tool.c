@@ -30,9 +30,12 @@ void usage(int exitcode) {
 "  -t <int>    Maximum difference pct (0 - 50, default: 10%%)\n"
 );
   fprintf(stderr,
+"  -A <num>,<path>  Add sample from 'path' as record 'num'\n"
 "  -B <num>    Show bitmap for this sample\n"
 "  -C <a>,<b>  Show difference percent for this samples\n"
+"  -D <num>    Delete record <num>\n"
 "  -F <a>,<b>  Show difference bitmap for this samples\n"
+"  -I          Create database (init)\n"
 "  -S <num>    Search for images similar ot this sample\n"
 "  -U <num>    Show db usage map, <num> entries per column\n"
 "              Special case - 0, output will be single line\n"
@@ -45,8 +48,9 @@ void usage(int exitcode) {
 /**
  * @brief Print bitmap to stdout as ascii-square
  * @param map Source bitmap
- * @note Height of "square" is equals to BITMAP_SIDE,
- *   but width is BITMAP_SIDE x 2, for ease of reading
+ * @parma side Side of the bitmap side
+ * @note Height of "square" is equals to @a side,
+ *   but width is side x 2, for ease of reading
  */
 void
 bitmap_print(const char *map, size_t side) {
@@ -93,8 +97,7 @@ int search_similar(simdb_t *db, int num, float maxdiff) {
   return 0;
 }
 
-int db_usage_map(simdb_t *db, unsigned short int cols)
-{
+int db_usage_map(simdb_t *db, unsigned short int cols) {
   char *map = NULL;
   char *m   = NULL;
   char row[256];
@@ -133,8 +136,7 @@ int db_usage_map(simdb_t *db, unsigned short int cols)
   return 0;
 }
 
-int db_usage_slice(simdb_t *db, int offset, uint16_t limit)
-{
+int db_usage_slice(simdb_t *db, int offset, uint16_t limit) {
   char *map = NULL;
 
   limit = simdb_usage_slice(db, &map, offset, limit);
@@ -219,12 +221,12 @@ int rec_diff(simdb_t *db, int a, int b, unsigned short int showmap) {
   return ret;
 }
 
-int main(int argc, char **argv)
-{
-  enum { undef, search, bitmap, usage_map, usage_slice, diff } mode = undef;
+int main(int argc, char **argv) {
+  enum { undef, add, del, init, search, bitmap, usage_map, usage_slice, diff } mode = undef;
   const char *db_path = NULL;
   float maxdiff = 0.10;
   unsigned short int cols = 64, map = 0, ret = 0;
+  char *sample = NULL;
   simdb_t *db = NULL;
   int a = 0, b = 0;
   char *c = NULL;
@@ -234,7 +236,7 @@ int main(int argc, char **argv)
   if (argc < 3)
     usage(EXIT_FAILURE);
 
-  while ((opt = getopt(argc, argv, "b:t:B:C:F:S:U:W:")) != -1) {
+  while ((opt = getopt(argc, argv, "b:t:A:B:C:D:F:IS:U:W:")) != -1) {
     switch (opt) {
       case 'b' :
         db_path = optarg;
@@ -247,9 +249,23 @@ int main(int argc, char **argv)
         }
         maxdiff /= 100;
         break;
+      case 'A' :
+        mode = add;
+        if ((c = strchr(optarg, ',')) == NULL)
+          usage(EXIT_FAILURE);
+        a = atoll(optarg);
+        sample  = c + 1;
+        break;
       case 'B' :
         mode = bitmap;
         a = atoll(optarg);
+        break;
+      case 'D' :
+        mode = del;
+        a = atoll(optarg);
+        break;
+      case 'I' :
+        mode = init;
         break;
       case 'F' :
         map = 1;
@@ -288,12 +304,37 @@ int main(int argc, char **argv)
     exit(EXIT_FAILURE);
   }
 
+  if (mode == init) {
+    if (!simdb_create(db_path)) {
+      fprintf(stderr, "database init: %s\n", strerror(errno));
+      exit(EXIT_FAILURE);
+    }
+  }
   if ((db = simdb_open(db_path, 0, &err)) == NULL) {
     fprintf(stderr, "database open: %d\n", err);
     exit(EXIT_FAILURE);
   }
 
   switch (mode) {
+    case add :
+      if (a == 0 || sample == NULL)
+        usage(EXIT_FAILURE);
+      if ((err = simdb_record_add(db, a, sample, 0)) < 0) {
+        fprintf(stderr, "%s\n", simdb_error(err));
+        exit(EXIT_FAILURE);
+      } else {
+        fprintf(stderr, "added as record #%d", err);
+      }
+      break;
+    case del :
+      if ((err = simdb_record_del(db, a)) < 0) {
+        fprintf(stderr, "%s\n", simdb_error(err));
+        exit(EXIT_FAILURE);
+      }
+      break;
+    case init :
+      /* this case already handled above */
+      break;
     case search :
       if (a <= 0) {
         fprintf(stderr, "can't parse number\n");
