@@ -1,7 +1,7 @@
 set(LIB_SOURCES "database.c" "bitmap.c" "samplers/${SAMPLER}.c")
 
 add_library("simdb" SHARED ${LIB_SOURCES})
-set_property(TARGET "simdb" PROPERTY SONAME ${VERSION})
+set_property(TARGET "simdb" PROPERTY SOVERSION ${SOVERSION})
 
 if (${SAMPLER} STREQUAL "magick")
   find_package(ImageMagick COMPONENTS MagickCore MagickWand)

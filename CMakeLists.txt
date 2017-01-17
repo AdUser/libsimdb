@@ -1,5 +1,6 @@
 set(CNAME "libsimdb")
-set(VERSION 0.3)
+set(VERSION 0.4)
+set(SOVERSION 1)
 
 project($CNAME C)
 cmake_minimum_required(VERSION 2.6)
