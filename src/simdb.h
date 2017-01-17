@@ -56,7 +56,7 @@ typedef struct _simdb_t simdb_t;
  * search matches
  */
 typedef struct {
-  uint64_t num;       /**< record id */
+  int num;            /**< record id */
   float diff_ratio;   /**< difference of ratio */
   float diff_bitmap;  /**< difference of bitmap */
 } simdb_match_t;

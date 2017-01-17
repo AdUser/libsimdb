@@ -81,7 +81,7 @@ int search_similar(simdb_t *db, int num, float maxdiff) {
   }
 
   for (i = 0; i < search.found; i++) {
-    printf("%llu -- %.1f (bitmap), %.1f (ratio)\n",
+    printf("%d -- %.1f (bitmap), %.1f (ratio)\n",
       search.matches[i].num,
       search.matches[i].diff_bitmap * 100,
       search.matches[i].diff_ratio  * 100);
@@ -98,7 +98,7 @@ int db_usage_map(simdb_t *db, unsigned short int cols)
   char *map = NULL;
   char *m   = NULL;
   char row[256];
-  uint64_t records, pos;
+  int records, pos;
   uint8_t rest = 0;
 
   memset(row, 0x0, sizeof(char) * 256);
@@ -124,7 +124,7 @@ int db_usage_map(simdb_t *db, unsigned short int cols)
     rest = (records > cols) ? cols : records;
     memcpy(row, m, rest);
     pos = m - map + 1;
-    printf("%7llu : %s\n", pos, row);
+    printf("%7d : %s\n", pos, row);
     m       += rest;
     records -= rest;
   }
@@ -133,7 +133,7 @@ int db_usage_map(simdb_t *db, unsigned short int cols)
   return 0;
 }
 
-int db_usage_slice(simdb_t *db, uint64_t offset, uint16_t limit)
+int db_usage_slice(simdb_t *db, int offset, uint16_t limit)
 {
   char *map = NULL;
 
@@ -226,7 +226,7 @@ int main(int argc, char **argv)
   float maxdiff = 0.10;
   unsigned short int cols = 64, map = 0, ret = 0;
   simdb_t *db = NULL;
-  uint64_t a = 0, b = 0;
+  int a = 0, b = 0;
   char *c = NULL;
   int err;
   char opt = '\0';
