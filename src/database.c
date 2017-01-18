@@ -366,9 +366,9 @@ simdb_search(simdb_t *db, simdb_search_t *search, simdb_urec_t *sample) {
   assert(db      != NULL);
   assert(search  != NULL);
 
-  if (search->maxdiff_ratio  < 0.0 && search->maxdiff_ratio  > 1.0)
+  if (search->d_ratio  < 0.0 && search->d_ratio  > 1.0)
     return SIMDB_ERR_USAGE;
-  if (search->maxdiff_bitmap < 0.0 && search->maxdiff_bitmap > 1.0)
+  if (search->d_bitmap < 0.0 && search->d_bitmap > 1.0)
     return SIMDB_ERR_USAGE;
 
   memset(&match, 0x0, sizeof(simdb_match_t));
@@ -376,7 +376,7 @@ simdb_search(simdb_t *db, simdb_search_t *search, simdb_urec_t *sample) {
   if (search->limit == 0)
     search->limit = INT_MAX;
 
-  if (search->maxdiff_ratio > 0.0)
+  if (search->d_ratio > 0.0)
     ratio_s = simdb_record_ratio(sample);
 
   if ((matches = calloc(capacity, sizeof(simdb_match_t))) == NULL)
@@ -395,22 +395,22 @@ simdb_search(simdb_t *db, simdb_search_t *search, simdb_urec_t *sample) {
       if (!rec->used)
         continue; /* record missing */
 
-      match.diff_ratio  = 0.0;
-      match.diff_bitmap = 0.0;
+      match.d_ratio  = 0.0;
+      match.d_bitmap = 0.0;
 
       /* - compare ratio - cheap */
       /* TODO: check caps */
       if (ratio_s > 0.0 && (ratio_t = simdb_record_ratio(rec)) > 0.0) {
-        match.diff_ratio  =  ratio_s - ratio_t;
-        match.diff_ratio *= (ratio_s > ratio_t) ? 1.0 : -1.0;
-        if (match.diff_ratio > search->maxdiff_ratio)
+        match.d_ratio  =  ratio_s - ratio_t;
+        match.d_ratio *= (ratio_s > ratio_t) ? 1.0 : -1.0;
+        if (match.d_ratio > search->d_ratio)
           continue;
       } else {
         /* either source or target ratio not set, can't compare, skip test */
       }
       /* - compare bitmap - more expensive */
-      match.diff_bitmap = simdb_bitmap_compare(rec->bitmap, sample->bitmap) / SIMDB_BITMAP_BITS;
-      if (match.diff_bitmap > search->maxdiff_bitmap)
+      match.d_bitmap = simdb_bitmap_compare(rec->bitmap, sample->bitmap) / SIMDB_BITMAP_BITS;
+      if (match.d_bitmap > search->d_bitmap)
         continue;
       /* whoa! a match found */
       /* allocate more memory for results array if needed */

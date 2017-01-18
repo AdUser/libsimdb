@@ -56,20 +56,20 @@ typedef struct _simdb_t simdb_t;
  * search matches
  */
 typedef struct {
-  int num;            /**< record id */
-  float diff_ratio;   /**< difference of ratio */
-  float diff_bitmap;  /**< difference of bitmap */
+  int num;         /**< record id */
+  float d_ratio;   /**< difference of ratio */
+  float d_bitmap;  /**< difference of bitmap */
 } simdb_match_t;
 
 /**
  * search parameters
- * maxdiff_* fields should have value from 0.0 to 1.0 (0% - 100%)
+ * d_* fields should have value from 0.0 to 1.0 (0% - 100%)
  */
 typedef struct {
-  float maxdiff_bitmap; /**< max difference of luma bitmaps */
-  float maxdiff_ratio;  /**< max difference of ratios, default - 7% */
-  int limit;            /**< max results */
-  int found;            /**< count of found results */
+  float d_bitmap; /**< max difference of luma bitmaps, default - 7% */
+  float d_ratio;  /**< max difference of ratios, default - 7% */
+  int limit;      /**< max results */
+  int found;      /**< count of found results */
   simdb_match_t *matches;
 } simdb_search_t;
 
