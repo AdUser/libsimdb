@@ -126,11 +126,9 @@ int search_similar_byid(simdb_t *db, float maxdiff, int num) {
 int db_usage_map(simdb_t *db, int cols) {
   char *map = NULL;
   char *m   = NULL;
-  char row[256];
+  char row[256] = { 0x0 };
   int records, pos;
   uint8_t rest = 0;
-
-  memset(row, 0x0, sizeof(char) * 256);
 
   if ((records = simdb_usage_map(db, &map)) == 0) {
     fprintf(stderr, "database usage: can't get database map\n");
