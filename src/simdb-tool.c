@@ -25,7 +25,7 @@
 
 void usage(int exitcode) {
   fprintf(stderr,
-"Usage: simdb-query <opts>\n"
+"Usage: simdb-tool <opts>\n"
 "  -b <path>   Path to database\n"
 "  -t <int>    Maximum difference pct (0 - 50, default: 10%%)\n"
 );
