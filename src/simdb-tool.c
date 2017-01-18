@@ -87,9 +87,7 @@ int search_similar_file(simdb_t *db, float maxdiff, char *path) {
   int ret = 0;
   simdb_search_t search;
 
-  memset(&search, 0x0, sizeof(simdb_search_t));
-
-  search.d_ratio  = 0.2; /* 20% */
+  simdb_search_init(&search);
   search.d_bitmap = maxdiff;
 
   if ((ret = simdb_search_file(db, &search, path)) < 0) {
@@ -109,9 +107,7 @@ int search_similar_byid(simdb_t *db, float maxdiff, int num) {
   int ret = 0;
   simdb_search_t search;
 
-  memset(&search, 0x0, sizeof(simdb_search_t));
-
-  search.d_ratio  = 0.2; /* 20% */
+  simdb_search_init(&search);
   search.d_bitmap = maxdiff;
 
   if ((ret = simdb_search_byid(db, &search, num)) < 0) {
