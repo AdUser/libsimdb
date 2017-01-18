@@ -105,6 +105,12 @@ void simdb_close(simdb_t *db);
 const char * simdb_error(int code);
 
 /**
+ * @brief Initializes search struct
+ * @param search Pointer to search struct
+ */
+void simdb_search_init(simdb_search_t *search);
+
+/**
  * @brief Compare given record in database to other records
  * @param db Database handle
  * @param num Record sample number

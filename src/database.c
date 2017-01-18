@@ -353,6 +353,18 @@ simdb_record_ratio(simdb_urec_t *r) {
   return 0.0;
 }
 
+void
+simdb_search_init(simdb_search_t *search) {
+  assert(search != NULL);
+
+  memset(search, 0x0, sizeof(simdb_search_t));
+
+  search->d_ratio  = 0.07; /* 7% */
+  search->d_bitmap = 0.07; /* 7% */
+
+  return;
+}
+
 int
 simdb_search(simdb_t *db, simdb_search_t *search, simdb_urec_t *sample) {
   simdb_match_t *matches;
