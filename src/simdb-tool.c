@@ -36,7 +36,8 @@ void usage(int exitcode) {
 "  -D <num>    Delete record <num>\n"
 "  -F <a>,<b>  Show difference bitmap for this samples\n"
 "  -I          Create database (init)\n"
-"  -S <num>    Search for images similar ot this sample\n"
+"  -N <num>    Compare this sample to other images in database\n"
+"  -S <path>   Search for images similar to this image\n"
 "  -U <num>    Show db usage map, <num> entries per column\n"
 "              Special case - 0, output will be single line\n"
 "  -W <a>,<b>  Show usage map starting from <a>, but no more\n"
@@ -70,8 +71,42 @@ bitmap_print(const char *map, size_t side) {
   }
 }
 
-int search_similar(simdb_t *db, int num, float maxdiff) {
-  int ret = 0, i = 0;
+static void
+print_search_results(simdb_search_t *search) {
+  assert(search != NULL);
+
+  for (int i = 0; i < search->found; i++) {
+    printf("%d -- %.1f (bitmap), %.1f (ratio)\n",
+      search->matches[i].num,
+      search->matches[i].diff_bitmap * 100,
+      search->matches[i].diff_ratio  * 100);
+  }
+}
+
+int search_similar_file(simdb_t *db, float maxdiff, char *path) {
+  int ret = 0;
+  simdb_search_t search;
+
+  memset(&search, 0x0, sizeof(simdb_search_t));
+
+  search.maxdiff_ratio  = 0.2; /* 20% */
+  search.maxdiff_bitmap = maxdiff;
+
+  if ((ret = simdb_search_file(db, &search, path)) < 0) {
+    fprintf(stderr, "%s\n", simdb_error(ret));
+    return 1;
+  }
+
+  print_search_results(&search);
+
+  if (search.found > 0)
+    FREE(search.matches);
+
+  return 0;
+}
+
+int search_similar_byid(simdb_t *db, float maxdiff, int num) {
+  int ret = 0;
   simdb_search_t search;
 
   memset(&search, 0x0, sizeof(simdb_search_t));
@@ -84,12 +119,7 @@ int search_similar(simdb_t *db, int num, float maxdiff) {
     return 1;
   }
 
-  for (i = 0; i < search.found; i++) {
-    printf("%d -- %.1f (bitmap), %.1f (ratio)\n",
-      search.matches[i].num,
-      search.matches[i].diff_bitmap * 100,
-      search.matches[i].diff_ratio  * 100);
-  }
+  print_search_results(&search);
 
   if (search.found > 0)
     FREE(search.matches);
@@ -223,7 +253,8 @@ int rec_diff(simdb_t *db, int a, int b, bool show_map) {
 
 int main(int argc, char **argv) {
   simdb_t *db = NULL;
-  enum { undef = 0, add, del, init, search, bitmap, usage_map, usage_slice, diff } mode = undef;
+  enum { undef = 0, add, del, init, search_byid, search_file,
+    bitmap, usage_map, usage_slice, diff } mode = undef;
   char *db_path = NULL, *sample = NULL, *c = NULL, opt = '\0';
   int cols = 64, a = 0, b = 0, ret = 0, db_flags = 0;
   bool show_map = false, need_write = false;
@@ -232,7 +263,7 @@ int main(int argc, char **argv) {
   if (argc < 3)
     usage(EXIT_FAILURE);
 
-  while ((opt = getopt(argc, argv, "b:t:A:B:C:D:F:IS:U:W:")) != -1) {
+  while ((opt = getopt(argc, argv, "b:t:A:B:C:D:F:IN:S:U:W:")) != -1) {
     switch (opt) {
       case 'b' :
         db_path = optarg;
@@ -274,9 +305,13 @@ int main(int argc, char **argv) {
         a = atoll(optarg);
         b = atoll(c + 1);
         break;
-      case 'S' :
-        mode = search;
+      case 'N' :
+        mode = search_byid;
         a = atoll(optarg);
+        break;
+      case 'S' :
+        mode = search_file;
+        sample = optarg;
         break;
       case 'U' :
         mode = usage_map;
@@ -337,12 +372,15 @@ int main(int argc, char **argv) {
     case init :
       /* this case already handled above */
       break;
-    case search :
+    case search_byid :
       if (a <= 0) {
         fprintf(stderr, "can't parse number\n");
         usage(EXIT_FAILURE);
       }
-      ret = search_similar(db, a, maxdiff);
+      ret = search_similar_byid(db, maxdiff, a);
+      break;
+    case search_file :
+      ret = search_similar_file(db, maxdiff, sample);
       break;
     case bitmap :
       if (a <= 0) {
