@@ -1,7 +1,10 @@
 set(LIB_SOURCES "database.c" "bitmap.c" "samplers/${SAMPLER}.c")
 
 add_library("simdb" SHARED ${LIB_SOURCES})
-set_property(TARGET "simdb" PROPERTY SOVERSION ${SOVERSION})
+set_target_properties("simdb" PROPERTIES
+  SOVERSION ${SOVERSION}
+  PUBLIC_HEADER "simdb.h"
+)
 
 if (${SAMPLER} STREQUAL "magick")
   find_package(ImageMagick COMPONENTS MagickCore MagickWand)
@@ -9,7 +12,7 @@ if (${SAMPLER} STREQUAL "magick")
   target_link_libraries("simdb" ${ImageMagick_MagickWand_LIBRARY})
 endif ()
 
-install(TARGETS "simdb" LIBRARY DESTINATION "lib")
+install(TARGETS "simdb" LIBRARY DESTINATION "lib" PUBLIC_HEADER DESTINATION "include")
 
 if (WITH_TOOLS)
   add_executable("simdb-1to2" "simdb-1to2.c")
