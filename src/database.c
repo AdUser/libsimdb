@@ -401,6 +401,9 @@ simdb_search(simdb_t *db, simdb_search_t *search, simdb_urec_t *sample) {
   if (search->d_ratio > 0.0)
     ratio_s = simdb_record_ratio(sample);
 
+  if (search->found)
+    simdb_search_free(search);
+
   if ((matches = calloc(capacity, sizeof(simdb_match_t))) == NULL)
     return SIMDB_ERR_OOM;
 
