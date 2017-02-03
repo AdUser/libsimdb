@@ -23,6 +23,8 @@ endif ()
 
 if (${SAMPLER} STREQUAL "dummy")
   set(SAMPLER "dummy")
+elseif (${SAMPLER} STREQUAL "random")
+  set(SAMPLER "random")
 else ()
   set(SAMPLER "magick")
 endif ()
