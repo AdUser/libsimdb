@@ -111,11 +111,17 @@ const char * simdb_error(int code);
 void simdb_search_init(simdb_search_t *search);
 
 /**
+ * @brief Free search results
+ * @param search Pointer to search struct
+ */
+void simdb_search_free(simdb_search_t *search);
+
+/**
  * @brief Compare given record in database to other records
  * @param db Database handle
  * @param num Record sample number
  * @param search Search parameters
- * @param matches Pointer to storage for found matches (allocated)
+ * @note If called with non-empty search struct, results will be free()ed automatically
  * @retval >0 if found some matches
  * @retval  0 if nothing found
  * @retval <0 on error
@@ -127,7 +133,7 @@ int simdb_search_byid(simdb_t *db, simdb_search_t *search, int num);
  * @param db Database handle
  * @param file Path to file to compare against database
  * @param search Search parameters
- * @param matches Pointer to storage for found matches (allocated)
+ * @note If called with non-empty search struct, results will be free()ed automatically
  * @retval >0 if found some matches
  * @retval  0 if nothing found
  * @retval <0 on error

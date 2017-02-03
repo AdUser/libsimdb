@@ -365,6 +365,16 @@ simdb_search_init(simdb_search_t *search) {
   return;
 }
 
+void
+simdb_search_free(simdb_search_t *search) {
+  assert(search != NULL);
+
+  if (search->found == 0)
+    return;
+  FREE(search->matches);
+  search->found = 0;
+}
+
 int
 simdb_search(simdb_t *db, simdb_search_t *search, simdb_urec_t *sample) {
   simdb_match_t *matches;
