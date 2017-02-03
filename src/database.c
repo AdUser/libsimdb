@@ -434,7 +434,7 @@ simdb_search(simdb_t *db, simdb_search_t *search, simdb_urec_t *sample) {
         /* either source or target ratio not set, can't compare, skip test */
       }
       /* - compare bitmap - more expensive */
-      match.d_bitmap = simdb_bitmap_compare(rec->bitmap, sample->bitmap) / SIMDB_BITMAP_BITS;
+      match.d_bitmap = simdb_bitmap_compare(rec->bitmap, sample->bitmap) / (float) SIMDB_BITMAP_BITS;
       if (match.d_bitmap > search->d_bitmap)
         continue;
       /* whoa! a match found */
