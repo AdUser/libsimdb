@@ -12,7 +12,7 @@
 /**
  * @defgroup SIMDBFlags Database runtime flags
  *  @{ */
-#define SIMDB_FLAGS_MASK    0xFF
+#define SIMDB_FLAGS_MASK    0xFF          /**< get all flags */
 #define SIMDB_FLAG_WRITE    1 << (0 + 0)  /**< database has write access */
 #define SIMDB_FLAG_LOCK     1 << (0 + 1)  /**< use locks for file with write access (only with @ref SIMDB_FLAG_WRITE) */
 #define SIMDB_FLAG_LOCKNB   1 << (0 + 2)  /**< same as above, but not wait for lock (only with @ref SIMDB_FLAG_WRITE) */
@@ -55,7 +55,7 @@ typedef struct _simdb_t simdb_t;
 /**
  * search matches
  */
-typedef struct {
+typedef struct simdb_match_t {
   int num;         /**< record id */
   float d_ratio;   /**< difference of ratio */
   float d_bitmap;  /**< difference of bitmap */
@@ -70,7 +70,7 @@ typedef struct {
   float d_ratio;  /**< max difference of ratios, default - 7% */
   int limit;      /**< max results */
   int found;      /**< count of found results */
-  simdb_match_t *matches;
+  simdb_match_t *matches; /**< search results */
 } simdb_search_t;
 
 /**
@@ -176,7 +176,7 @@ int simdb_record_del(simdb_t *db, int num);
  * @brief Get record bitmap
  * @param db  Database handle
  * @param num Number of record to get bitmap
- * @param bitmap Pointer to storage for bitmap (allocated)
+ * @param map Pointer to storage for bitmap (allocated)
  * @param side   Pointer to storage for bitmap side length
  * @retval <0 on error
  * @retval  0 if record not exists

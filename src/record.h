@@ -10,7 +10,7 @@
  */
 
 /** struct for packed record usage */
-typedef struct __attribute__((__packed__)) {
+typedef struct simdb_urec_t {
   uint8_t used;      /**< record is used */
   uint8_t clevel_r;  /**< color level: red   */
   uint8_t clevel_g;  /**< color level: green */
@@ -19,7 +19,7 @@ typedef struct __attribute__((__packed__)) {
   uint16_t image_h;  /**< image height */
   unsigned char _unused[8]; /**< padding */
   unsigned char bitmap[SIMDB_BITMAP_SIZE]; /**< image luma bitmap */
-} simdb_urec_t;
+} __attribute__((__packed__)) simdb_urec_t;
 
 /** compile-time check for packed struct length */
 typedef char size_mismatch_for__simdb_urec_t[(sizeof(simdb_urec_t) == SIMDB_REC_LEN) * 2 - 1];

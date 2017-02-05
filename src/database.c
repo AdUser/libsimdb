@@ -375,7 +375,17 @@ simdb_search_free(simdb_search_t *search) {
   search->found = 0;
 }
 
-int
+/**
+ * @brief Generic search routine
+ * @param db  Database handle
+ * @param search Search struct, initialized with @ref simdb_search_init
+ * @param sample Source sample
+ * @param skip   Skep this record number from search (if ge take source from same database)
+ * @retval <0 error
+ * @retval  0 nothing found
+ * @retval >0 matches count
+ */
+static int
 simdb_search(simdb_t *db, simdb_search_t *search, simdb_urec_t *sample, int skip) {
   simdb_match_t *matches;
   simdb_match_t match;
