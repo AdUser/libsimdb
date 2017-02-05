@@ -376,7 +376,7 @@ simdb_search_free(simdb_search_t *search) {
 }
 
 int
-simdb_search(simdb_t *db, simdb_search_t *search, simdb_urec_t *sample) {
+simdb_search(simdb_t *db, simdb_search_t *search, simdb_urec_t *sample, int skip) {
   simdb_match_t *matches;
   simdb_match_t match;
   simdb_urec_t *rec, *data = NULL;
@@ -419,6 +419,8 @@ simdb_search(simdb_t *db, simdb_search_t *search, simdb_urec_t *sample) {
     for (int i = 0; i < ret; i++, rec++) {
       if (!rec->used)
         continue; /* record missing */
+      if (num + i == skip)
+        continue; /* source sample */
 
       match.d_ratio  = 0.0;
       match.d_bitmap = 0.0;
@@ -486,7 +488,7 @@ simdb_search_byid(simdb_t *db, simdb_search_t *search, int num) {
   if ((ret = simdb_read(db, num, 1, &sample)) < 1)
     return ret;
 
-  ret = simdb_search(db, search, sample);
+  ret = simdb_search(db, search, sample, num);
   FREE(sample);
 
   return ret;
@@ -506,7 +508,7 @@ simdb_search_file(simdb_t *db, simdb_search_t *search, const char *path) {
   if ((sample = simdb_record_create(path)) == NULL)
     return SIMDB_ERR_SAMPLER;
 
-  ret = simdb_search(db, search, sample);
+  ret = simdb_search(db, search, sample, 0);
   FREE(sample);
 
   return ret;
