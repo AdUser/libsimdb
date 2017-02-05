@@ -488,6 +488,9 @@ simdb_search_byid(simdb_t *db, simdb_search_t *search, int num) {
   if ((ret = simdb_read(db, num, 1, &sample)) < 1)
     return ret;
 
+  if (!sample->used)
+    return SIMDB_ERR_NXRECORD;
+
   ret = simdb_search(db, search, sample, num);
   FREE(sample);
 
