@@ -74,7 +74,7 @@ typedef struct simdb_match_t {
  * search parameters
  * d_* fields should have value from 0.0 to 1.0 (0% - 100%)
  */
-typedef struct {
+typedef struct simdb_search_t {
   float d_bitmap; /**< max difference of luma bitmaps, default - 7% */
   float d_ratio;  /**< max difference of ratios, default - 7% */
   int limit;      /**< max results */
