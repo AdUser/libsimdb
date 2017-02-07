@@ -5,6 +5,7 @@ General build flow as simple as this three commands:
 
     cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release .
     make
+    make test
     sudo checkinstall -- make install
 
 Now, cmake options explained:
