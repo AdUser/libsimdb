@@ -1,0 +1,22 @@
+Source: libsimdb
+Priority: optional
+Maintainer: Alex 'AdUser' Z <ad_user@runbox.com>
+Build-Depends: debhelper (>= 9), cmake, libgraphicsmagick1-dev,
+ graphicsmagick-libmagick-dev-compat
+Standards-Version: 3.9.5
+Section: libs
+Homepage: https://github.com/AdUser/libsimdb
+Vcs-Git: https://github.com/AdUser/libsimdb.git
+Vcs-Browser: https://github.com/AdUser/libsimdb
+
+Package: libsimdb-dev
+Section: libdevel
+Architecture: all
+Depends: libsimdb1 (= ${binary:Version}), ${misc:Depends}
+Description: library for searching visually similar images
+ Headers and development files
+
+Package: libsimdb1
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: library for searching visually similar images

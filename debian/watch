@@ -1,0 +1,3 @@
+version=3
+opts=filenamemangle=s/.+\/v?(\d\S*)\.tar\.gz/libsimdb-$1\.tar\.gz/ \
+  https://github.com/AdUser/libsimdb/releases .*/v?(\d\S*)\.tar\.gz
