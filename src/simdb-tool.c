@@ -123,8 +123,8 @@ int db_usage_map(simdb_t *db, int cols) {
   int records, pos;
   uint8_t rest = 0;
 
-  if ((records = simdb_usage_map(db, &map)) == 0) {
-    fprintf(stderr, "database usage: can't get database map\n");
+  if ((records = simdb_usage_map(db, &map)) <= 0) {
+    fprintf(stderr, "database usage: can't get database map -- %s\n", simdb_error(records));
     FREE(map);
     return 1;
   }
@@ -156,7 +156,10 @@ int db_usage_map(simdb_t *db, int cols) {
 int db_usage_slice(simdb_t *db, int offset, uint16_t limit) {
   char *map = NULL;
 
-  limit = simdb_usage_slice(db, &map, offset, limit);
+  if ((limit = simdb_usage_slice(db, &map, offset, limit)) <= 0) {
+    fprintf(stderr, "database usage: can't get database slice -- %s\n", simdb_error(limit));
+    return 1;
+  }
   for (uint16_t i = 0; i < limit; i++)
     map[i] = map[i] ? CHAR_USED : CHAR_FREE;
   puts(map);
