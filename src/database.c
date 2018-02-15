@@ -574,7 +574,7 @@ simdb_usage_slice(simdb_t * const db, char ** const map, int offset, int limit) 
 
   if ((m = calloc(limit + 1, sizeof(char))) == NULL)
     return SIMDB_ERR_OOM;
-  m = *map;
+  *map = m;
 
   r = data;
   for (int i = 0; i < limit; i++, m++, r++) {
