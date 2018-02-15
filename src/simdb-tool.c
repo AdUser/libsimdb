@@ -119,9 +119,9 @@ int search_similar_byid(simdb_t *db, float maxdiff, int num) {
 int db_usage_map(simdb_t *db, int cols) {
   char *map = NULL;
   char *m   = NULL;
-  char row[256] = { 0x0 };
+  char row[cols + 1];
   int records, pos;
-  uint8_t rest = 0;
+  int rest = 0;
 
   if ((records = simdb_usage_map(db, &map)) <= 0) {
     fprintf(stderr, "database usage: can't get database map -- %s\n", simdb_error(records));
@@ -306,8 +306,10 @@ int main(int argc, char **argv) {
       case 'U' :
         mode = usage_map;
         cols = atoi(optarg);
-        if (cols >= 256)
+        if (cols <= 0) {
+          fprintf(stderr, "columns number is negative, using default - 100\n");
           cols = 100;
+        }
         break;
       case 'W' :
         mode = usage_slice;
