@@ -258,6 +258,7 @@ simdb_record_used(simdb_t *db, int num) {
 int
 simdb_record_add(simdb_t *db, int num, const char *path, int flags) {
   simdb_urec_t *rec = NULL;
+  int ret = 0;
 
   assert(db != NULL);
 
@@ -279,7 +280,8 @@ simdb_record_add(simdb_t *db, int num, const char *path, int flags) {
   if (num == 0)
     num = db->records + 1;
 
-  num = simdb_write(db, num, 1, rec);
+  if ((ret = simdb_write(db, num, 1, rec)) <= 0)
+    num = ret;
 
   FREE(rec);
   return num;
