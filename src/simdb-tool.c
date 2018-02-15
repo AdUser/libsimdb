@@ -140,9 +140,10 @@ int db_usage_map(simdb_t *db, int cols) {
   }
 
   m = map;
-  while (records) {
+  while (records > 0) {
     rest = (records > cols) ? cols : records;
     memcpy(row, m, rest);
+    row[rest] = '\0';
     pos = m - map + 1;
     printf("%7d : %s\n", pos, row);
     m       += rest;
