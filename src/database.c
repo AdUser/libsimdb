@@ -449,7 +449,7 @@ simdb_search(simdb_t *db, simdb_search_t *search, simdb_urec_t *sample, int skip
       if (found == capacity) {
         simdb_match_t *tmp = NULL;
         capacity *= 2;
-        if ((tmp = realloc(matches, capacity)) == NULL) {
+        if ((tmp = realloc(matches, capacity * sizeof(simdb_match_t))) == NULL) {
           /* fuck! */
           FREE(matches);
           FREE(data);
