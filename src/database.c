@@ -428,8 +428,7 @@ simdb_search(simdb_t *db, simdb_search_t *search, simdb_urec_t *sample, int skip
       if (num + i == skip)
         continue; /* source sample */
 
-      match.d_ratio  = 0.0;
-      match.d_bitmap = 0.0;
+      memset(&match, 0x0, sizeof(simdb_match_t));
 
       /* - compare ratio - cheap */
       /* TODO: check caps */
